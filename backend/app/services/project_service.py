@@ -1,0 +1,85 @@
+from datetime import datetime, UTC
+
+from sqlalchemy.orm import Session
+
+from app.models import Project, Client, Stage
+from app.models.project import project_clients
+from app.schemas.project import ProjectCreate
+from app.schemas.stage import StageType, StageStatus
+
+
+class ProjectService:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def create_project(self, project_data: ProjectCreate, user_id: str) -> Project:
+        # Validação de datas
+        if project_data.estimated_end_date <= project_data.start_date:
+            raise ValueError("Data de término deve ser posterior à data de início.")
+        # Criação do projeto
+        project = Project(
+            name=project_data.name,
+            description=project_data.description,
+            total_value=project_data.total_value,
+            currency=project_data.currency,
+            start_date=project_data.start_date,
+            estimated_end_date=project_data.estimated_end_date,
+            status=project_data.status,
+            work_address=project_data.work_address,
+            scope=project_data.scope,
+            notes=project_data.notes,
+            created_by_id=user_id,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC)
+        )
+        self.db.add(project)
+        self.db.flush()
+        # Vincular clientes
+        for client_id in project_data.clients:
+            client = self.db.get(Client, client_id)
+            if client:
+                self.db.execute(project_clients.insert().values(project_id=project.id, client_id=client.id))
+        # Criação automática de etapas padrão
+        etapas_padrao = [
+            StageType.LEVANTAMENTO,
+            StageType.BRIEFING,
+            StageType.ESTUDO_PRELIMINAR,
+            StageType.PROJETO_EXECUTIVO,
+            StageType.ASSESSORIA_POS_PROJETO
+        ]
+        for idx, tipo in enumerate(etapas_padrao, start=1):
+            etapa = Stage(
+                name=tipo.value.capitalize(),
+                type=tipo,
+                order=idx,
+                status=StageStatus.pending,
+                planned_start_date=project.start_date,
+                planned_end_date=project.estimated_end_date,
+                value=0,
+                payment_status="pending",
+                project_id=project.id,
+                created_by_id=user_id,
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC)
+            )
+            self.db.add(etapa)
+        self.db.commit()
+        return project
+
+    def calculate_progress(self, project_id: str) -> float:
+        # Cálculo automático de progresso
+        project = self.db.get(Project, project_id)
+        if not project or not project.stages:
+            return 0.0
+        total = len(project.stages)
+        concluido = sum(1 for s in project.stages if s.status == StageStatus.completed)
+        return round((concluido / total) * 100, 2) if total else 0.0
+
+    def validate_dates(self, start: datetime, end: datetime) -> bool:
+        return end > start
+
+    def get_project(self, project_id: str) -> Project:
+        project = self.db.get(Project, project_id)
+        if not project:
+            raise ValueError("Projeto não encontrado")
+        return project
