@@ -10,22 +10,22 @@ export class ProjectService {
   private readonly apiUrl = `${environment.apiUrl}/projects`;
 
   getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(this.apiUrl);
+    return this.http.get<Project[]>(this.apiUrl, { withCredentials: true });
   }
 
   getProjectById(id: string): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/${id}`);
+    return this.http.get<Project>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   createProject(project: Partial<Project>): Observable<Project> {
-    return this.http.post<Project>(this.apiUrl, project);
+    return this.http.post<Project>(this.apiUrl, project, { withCredentials: true });
   }
 
   updateProject(id: string, project: Partial<Project>): Observable<Project> {
-    return this.http.put<Project>(`${this.apiUrl}/${id}`, project);
+    return this.http.put<Project>(`${this.apiUrl}/${id}`, project, { withCredentials: true });
   }
 
   deleteProject(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 }

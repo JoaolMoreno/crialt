@@ -24,13 +24,14 @@ export class AuthService {
     }
     form.append('password', params.password);
     return this.http.post<any>(`${this.apiUrl}/login`, form.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      withCredentials: true
     });
   }
 
   fetchCurrentUser(): Observable<User | null> {
     return new Observable<User | null>(observer => {
-      this.http.get<User>(`${environment.apiUrl}/users/me`).subscribe({
+      this.http.get<User>(`${environment.apiUrl}/users/me`, { withCredentials: true }).subscribe({
         next: (user) => {
           this.userSubject.next(user);
           observer.next(user);

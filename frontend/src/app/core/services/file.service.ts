@@ -10,18 +10,18 @@ export class FileService {
   private readonly apiUrl = `${environment.apiUrl}/files`;
 
   getFiles(): Observable<File[]> {
-    return this.http.get<File[]>(this.apiUrl);
+    return this.http.get<File[]>(this.apiUrl, { withCredentials: true });
   }
 
   getFileById(id: string): Observable<File> {
-    return this.http.get<File>(`${this.apiUrl}/${id}`);
+    return this.http.get<File>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   uploadFile(formData: FormData): Observable<File> {
-    return this.http.post<File>(this.apiUrl, formData);
+    return this.http.post<File>(this.apiUrl, formData, { withCredentials: true });
   }
 
   deleteFile(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 }

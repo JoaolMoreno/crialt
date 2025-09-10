@@ -10,26 +10,26 @@ export class ClientService {
   private readonly apiUrl = `${environment.apiUrl}/clients`;
 
   getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>(this.apiUrl);
+    return this.http.get<Client[]>(this.apiUrl, { withCredentials: true });
   }
 
   getClientById(id: string): Observable<Client> {
-    return this.http.get<Client>(`${this.apiUrl}/${id}`);
+    return this.http.get<Client>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   createClient(client: Partial<Client>): Observable<Client> {
-    return this.http.post<Client>(this.apiUrl, client);
+    return this.http.post<Client>(this.apiUrl, client, { withCredentials: true });
   }
 
   updateClient(id: string, client: Partial<Client>): Observable<Client> {
-    return this.http.put<Client>(`${this.apiUrl}/${id}`, client);
+    return this.http.put<Client>(`${this.apiUrl}/${id}`, client, { withCredentials: true });
   }
 
   deleteClient(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   resetPassword(id: string, newPassword?: string): Observable<{ new_password?: string }> {
-    return this.http.post<{ new_password?: string }>(`${this.apiUrl}/${id}/reset-password`, newPassword ? { new_password: newPassword } : {});
+    return this.http.post<{ new_password?: string }>(`${this.apiUrl}/${id}/reset-password`, newPassword ? { new_password: newPassword } : {}, { withCredentials: true });
   }
 }

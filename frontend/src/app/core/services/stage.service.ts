@@ -10,22 +10,22 @@ export class StageService {
   private readonly apiUrl = `${environment.apiUrl}/stages`;
 
   getStages(): Observable<Stage[]> {
-    return this.http.get<Stage[]>(this.apiUrl);
+    return this.http.get<Stage[]>(this.apiUrl, { withCredentials: true });
   }
 
   getStageById(id: string): Observable<Stage> {
-    return this.http.get<Stage>(`${this.apiUrl}/${id}`);
+    return this.http.get<Stage>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   createStage(stage: Partial<Stage>): Observable<Stage> {
-    return this.http.post<Stage>(this.apiUrl, stage);
+    return this.http.post<Stage>(this.apiUrl, stage, { withCredentials: true });
   }
 
   updateStage(id: string, stage: Partial<Stage>): Observable<Stage> {
-    return this.http.put<Stage>(`${this.apiUrl}/${id}`, stage);
+    return this.http.put<Stage>(`${this.apiUrl}/${id}`, stage, { withCredentials: true });
   }
 
   deleteStage(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 }
