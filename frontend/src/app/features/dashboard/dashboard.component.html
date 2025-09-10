@@ -1,0 +1,64 @@
+<section class="dashboard-section">
+  <h1>Dashboard</h1>
+  <div class="dashboard-cards">
+    <div class="stats-card">
+      <span class="stats-title">Clientes Ativos</span>
+      <span class="stats-value">{{ totalClients }}</span>
+    </div>
+    <div class="stats-card">
+      <span class="stats-title">Projetos em Andamento</span>
+      <span class="stats-value">{{ activeProjects }}</span>
+    </div>
+    <div class="stats-card">
+      <span class="stats-title">Projetos Concluídos no Mês</span>
+      <span class="stats-value">{{ completedProjectsThisMonth }}</span>
+    </div>
+    <div class="stats-card">
+      <span class="stats-title">Receita do Mês</span>
+      <span class="stats-value">R$ {{ monthRevenue | number:'1.2-2' }}</span>
+    </div>
+    <div class="stats-card">
+      <span class="stats-title">Etapas Próximas do Vencimento</span>
+      <span class="stats-value">{{ stagesNearDeadline }}</span>
+    </div>
+  </div>
+
+  <div class="dashboard-recent-projects">
+    <h2>Projetos Recentes</h2>
+    <ul class="recent-projects-list">
+      <li *ngFor="let project of recentProjects">
+        <div class="project-name">{{ project.name }}</div>
+        <div class="project-client">Cliente: {{ project.clients[0]?.name || '-' }}</div>
+        <div class="project-status">Status: {{ project.status }}</div>
+        <div class="project-date">Criado em: {{ project.created_at | date:'shortDate' }}</div>
+      </li>
+    </ul>
+    <div *ngIf="!recentProjects.length" class="empty-state">Nenhum projeto recente.</div>
+  </div>
+
+  <div class="dashboard-graphs">
+    <div class="graph-card">
+      <div class="graph-title">Projetos por Status</div>
+      <canvas baseChart
+        [data]="projectsStatusChartData.data"
+        [type]="projectsStatusChartData.type"
+        [options]="projectsStatusChartData.options">
+      </canvas>
+    </div>
+    <div class="graph-card">
+      <div class="graph-title">Receita Mensal (últimos 6 meses)</div>
+      <canvas baseChart
+        [data]="revenueChartData.data"
+        [type]="revenueChartData.type"
+        [options]="revenueChartData.options">
+      </canvas>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="dashboard-loading">
+    <app-loading-spinner size="large" [overlay]="true"></app-loading-spinner>
+  </div>
+  <div *ngIf="error" class="dashboard-error">{{ error }}</div>
+
+  <!-- Áreas para gráficos e timeline podem ser implementadas aqui -->
+</section>

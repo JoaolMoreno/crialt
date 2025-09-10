@@ -1,0 +1,104 @@
+@import '../../../../styles.scss';
+
+.user-list-section {
+  padding: 32px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(33,33,33,0.08);
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 400;
+  color: #212121;
+  letter-spacing: 1.5px;
+  margin-bottom: 32px;
+}
+
+.user-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.search-input {
+  font-size: 16px;
+  padding: 8px 16px;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  background: #F5F5F5;
+  color: #212121;
+}
+
+.filter-select {
+  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  background: #F5F5F5;
+  color: #212121;
+}
+
+.new-user-btn {
+  background: #212121;
+  color: #FFFFFF;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.user-table th, .user-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #DDDDDD;
+  text-align: left;
+}
+
+.user-table th {
+  background: #F5F5F5;
+  font-weight: 600;
+  color: #212121;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: #708090;
+  cursor: pointer;
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+.active {
+  color: #212121;
+  font-weight: 600;
+}
+
+.inactive {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  color: #666666;
+  font-size: 18px;
+  margin-top: 32px;
+}

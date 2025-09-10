@@ -1,0 +1,29 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <nav class="sidebar-nav">
+    <div class="sidebar-header">
+      <button class="collapse-btn" (click)="toggleCollapse()" title="Expandir/recolher menu">
+        <span class="material-icons">{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</span>
+      </button>
+      <span class="sidebar-title" *ngIf="!isCollapsed">MENU</span>
+    </div>
+    <ul class="sidebar-menu">
+      <li *ngFor="let item of menuItems" [class.favorite]="item.favorite">
+        <a [routerLink]="item.route" class="menu-link">
+          <span class="material-icons menu-icon">{{ item.icon }}</span>
+          <span class="menu-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+          <span class="notification-badge" *ngIf="item.notificationCount && !isCollapsed">{{ item.notificationCount }}</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer" *ngIf="!isCollapsed">
+      <span class="caption">Favoritos: </span>
+      <ng-container *ngFor="let item of menuItems">
+        <span class="favorite-link" *ngIf="item.favorite">
+          <a [routerLink]="item.route" title="{{ item.label }}">
+            <span class="material-icons">{{ item.icon }}</span>
+          </a>
+        </span>
+      </ng-container>
+    </div>
+  </nav>
+</aside>

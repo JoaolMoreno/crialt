@@ -1,0 +1,58 @@
+<section class="client-list-section">
+  <h1>Clientes</h1>
+  <div class="client-list-actions">
+    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="applyFilters()" />
+    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="applyFilters()">
+      <option value="">Todos os status</option>
+      <option value="active">Ativo</option>
+      <option value="inactive">Inativo</option>
+    </select>
+    <select [(ngModel)]="selectedDocumentType" class="filter-select" (change)="applyFilters()">
+      <option value="">Todos os tipos</option>
+      <option value="cpf">CPF</option>
+      <option value="cnpj">CNPJ</option>
+    </select>
+    <input type="date" [(ngModel)]="selectedDate" class="filter-select" (change)="applyFilters()" />
+    <button class="export-btn" (click)="onExport()">
+      <span class="material-icons">download</span> Exportar
+    </button>
+  </div>
+
+  <table class="client-table" *ngIf="!loading && filteredClients.length">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>CPF/CNPJ</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Data de Cadastro</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let client of filteredClients">
+        <td>{{ client.name }}</td>
+        <td>{{ client.document }}</td>
+        <td>{{ client.email }}</td>
+        <td>
+          <span [class.active]="client.is_active" [class.inactive]="!client.is_active">
+            {{ client.is_active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+        <td>{{ client.created_at | date:'shortDate' }}</td>
+        <td>
+          <button class="action-btn" (click)="onEditClient(client)" [disabled]="!isAdmin"><span class="material-icons">edit</span></button>
+          <button class="action-btn" (click)="onViewClient(client)"><span class="material-icons">visibility</span></button>
+          <button class="action-btn" (click)="onNewProject(client)"><span class="material-icons">add_circle</span></button>
+          <button class="action-btn" (click)="onToggleStatus(client)" [disabled]="!isAdmin">
+            <span class="material-icons">{{ client.is_active ? 'block' : 'check_circle' }}</span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!loading && !filteredClients.length" class="empty-state">Nenhum cliente encontrado.</div>
+  <app-loading-spinner *ngIf="loading" size="large" overlay="true"></app-loading-spinner>
+  <div *ngIf="error" class="client-list-error">{{ error }}</div>
+</section>
+

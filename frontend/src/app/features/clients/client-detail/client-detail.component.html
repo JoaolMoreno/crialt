@@ -1,0 +1,102 @@
+<section class="client-detail-section">
+  <h1>Detalhes do Cliente</h1>
+  <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
+  <div *ngIf="error" class="client-detail-error">{{ error }}</div>
+  <div *ngIf="client">
+    <div class="client-info-card">
+      <div class="info-row">
+        <span class="info-label">Nome:</span>
+        <span class="info-value">{{ client?.name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">CPF/CNPJ:</span>
+        <span class="info-value">{{ client?.document }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ client?.email }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Telefone:</span>
+        <span class="info-value">{{ client?.phone }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Endereço:</span>
+        <span class="info-value">
+          {{ client?.address?.street }}, {{ client?.address?.number }}
+          <span *ngIf="client?.address?.complement">- {{ client?.address?.complement }}</span>,
+          {{ client?.address?.neighborhood }}, {{ client?.address?.city }} - {{ client?.address?.state }}
+          (CEP: {{ client?.address?.zip_code }})
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status:</span>
+        <span class="info-value" [class.active]="client?.is_active" [class.inactive]="!client?.is_active">
+          {{ client?.is_active ? 'Ativo' : 'Inativo' }}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Observações:</span>
+        <span class="info-value">{{ client?.notes || '-' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Data de Cadastro:</span>
+        <span class="info-value">{{ client?.created_at | date:'shortDate' }}</span>
+      </div>
+      <div class="info-actions">
+        <button class="edit-btn" *ngIf="canEdit && !editMode" (click)="enableEdit()">
+          <span class="material-icons">edit</span> Editar
+        </button>
+        <button class="save-btn" *ngIf="editMode" (click)="saveEdit()" [disabled]="loading">
+          <span class="material-icons">save</span> Salvar
+        </button>
+        <button class="cancel-btn" *ngIf="editMode" (click)="cancelEdit()">
+          <span class="material-icons">close</span> Cancelar
+        </button>
+      </div>
+      <div *ngIf="editMode" class="edit-fields">
+        <input [(ngModel)]="editData.name" placeholder="Nome" />
+        <input [(ngModel)]="editData.email" placeholder="Email" />
+        <input [(ngModel)]="editData.phone" placeholder="Telefone" />
+        <input [(ngModel)]="editData.notes" placeholder="Observações" />
+      </div>
+    </div>
+    <div class="client-projects-card">
+      <h2>Projetos do Cliente</h2>
+      <ul class="projects-list">
+        <li *ngFor="let project of projects">
+          <span class="project-name">{{ project.name }}</span>
+          <span class="project-status">Status: {{ project.status }}</span>
+          <span class="project-date">Criado em: {{ project.created_at | date:'shortDate' }}</span>
+          <button class="view-btn" (click)="navigateToProject(project.id)">
+            <span class="material-icons">visibility</span> Ver Projeto
+          </button>
+        </li>
+      </ul>
+      <div *ngIf="!projects.length" class="empty-state">Nenhum projeto encontrado.</div>
+    </div>
+    <div class="client-documents-card">
+      <h2>Documentos do Cliente</h2>
+      <ul class="documents-list">
+        <li *ngFor="let doc of documents">
+          <span class="doc-name">{{ doc.original_name }}</span>
+          <span class="doc-category">({{ doc.category }})</span>
+          <button class="download-btn" (click)="downloadFile(doc.id)">
+            <span class="material-icons">download</span> Baixar
+          </button>
+        </li>
+      </ul>
+      <div *ngIf="!documents.length" class="empty-state">Nenhum documento encontrado.</div>
+    </div>
+    <div class="client-password-card" *ngIf="canEdit">
+      <h2>Trocar Senha</h2>
+      <input type="password" #newPassword placeholder="Nova senha" />
+      <button class="change-password-btn" (click)="changePassword(newPassword.value)" [disabled]="passwordLoading">
+        <span class="material-icons">lock_reset</span> Redefinir Senha
+      </button>
+      <app-loading-spinner *ngIf="passwordLoading" size="small" [overlay]="false"></app-loading-spinner>
+      <div *ngIf="passwordError" class="error">{{ passwordError }}</div>
+      <div *ngIf="passwordSuccess" class="success">{{ passwordSuccess }}</div>
+    </div>
+  </div>
+</section>

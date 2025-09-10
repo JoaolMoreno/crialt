@@ -1,0 +1,125 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px 0 32px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #DDDDDD;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  position: relative;
+  flex-wrap: wrap;
+}
+.logo {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #212121;
+  letter-spacing: 2px;
+  margin-right: 32px;
+}
+.main-nav {
+  flex: 1;
+}
+.nav-menu {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  color: #212121;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+  border-radius: 4px;
+  padding: 8px 12px;
+  transition: background 0.2s;
+}
+.nav-link:hover {
+  background: #F5F5F5;
+}
+.nav-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-input {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  padding: 6px 32px 6px 12px;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  outline: none;
+  background: #F5F5F5;
+  color: #212121;
+}
+.search-icon {
+  position: absolute;
+  right: 8px;
+  color: #708090;
+  font-size: 20px;
+}
+.notifications {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #708090;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+.profile-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #DDDDDD;
+}
+.profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212121;
+}
+.breadcrumb {
+  position: absolute;
+  left: 32px;
+  bottom: -32px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #666666;
+  font-style: italic;
+  gap: 4px;
+}
+.breadcrumb-item {
+  font-size: 14px;
+  color: #666666;
+}
+.breadcrumb-separator {
+  color: #DDDDDD;
+}

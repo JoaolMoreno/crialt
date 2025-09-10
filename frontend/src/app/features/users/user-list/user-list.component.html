@@ -1,0 +1,54 @@
+<section class="user-list-section">
+  <h1>Usuários</h1>
+  <div class="user-list-actions">
+    <input type="text" placeholder="Buscar por nome ou email..." [(ngModel)]="searchQuery" class="search-input" />
+    <select [(ngModel)]="selectedRole" class="filter-select">
+      <option value="">Todos os papéis</option>
+      <option value="admin">Admin</option>
+      <option value="architect">Arquiteto</option>
+      <option value="assistant">Assistente</option>
+    </select>
+    <select [(ngModel)]="selectedStatus" class="filter-select">
+      <option value="">Todos os status</option>
+      <option value="active">Ativo</option>
+      <option value="inactive">Inativo</option>
+    </select>
+    <button class="new-user-btn" (click)="onNewUser()">
+      <span class="material-icons">person_add</span> Novo Usuário
+    </button>
+  </div>
+
+  <table class="user-table" *ngIf="!loading && filteredUsers.length">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Papel</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of filteredUsers">
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+          <span [class.active]="user.is_active" [class.inactive]="!user.is_active">
+            {{ user.is_active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+        <td>
+          <button class="action-btn" (click)="onEditUser(user)"><span class="material-icons">edit</span></button>
+          <button class="action-btn" (click)="onToggleStatus(user)">
+            <span class="material-icons">{{ user.is_active ? 'block' : 'check_circle' }}</span>
+          </button>
+          <button class="action-btn" (click)="onResetPassword(user)"><span class="material-icons">lock_reset</span></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!loading && !filteredUsers.length" class="empty-state">Nenhum usuário encontrado.</div>
+  <app-loading-spinner *ngIf="loading" size="large" overlay="true"></app-loading-spinner>
+</section>
+

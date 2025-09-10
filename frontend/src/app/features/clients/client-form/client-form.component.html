@@ -1,0 +1,83 @@
+<section class="client-form-section">
+  <h1>{{ isEdit ? 'Editar Cliente' : 'Cadastrar Cliente' }}</h1>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" [class.loading]="loading">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Nome/Razão Social</label>
+        <input id="name" formControlName="name" type="text" />
+        <div class="error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">Nome obrigatório</div>
+      </div>
+      <div class="form-group">
+        <label for="document">CPF/CNPJ</label>
+        <input id="document" formControlName="document" type="text" />
+        <select formControlName="document_type">
+          <option value="cpf">CPF</option>
+          <option value="cnpj">CNPJ</option>
+        </select>
+        <div class="error" *ngIf="form.get('document')?.invalid && form.get('document')?.touched">Documento obrigatório</div>
+        <div class="error" *ngIf="error && (form.get('document')?.touched || form.get('document_type')?.touched)">{{ error }}</div>
+      </div>
+      <div class="form-group">
+        <label for="rg_ie">RG/IE</label>
+        <input id="rg_ie" formControlName="rg_ie" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="birth_date">Data de Nascimento/Fundação</label>
+        <input id="birth_date" formControlName="birth_date" type="date" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" type="email" />
+        <div class="error" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Email obrigatório</div>
+      </div>
+      <div class="form-group">
+        <label for="secondary_email">Email Secundário</label>
+        <input id="secondary_email" formControlName="secondary_email" type="email" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Telefone</label>
+        <input id="phone" formControlName="phone" type="text" />
+        <div class="error" *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched">Telefone obrigatório</div>
+      </div>
+      <div class="form-group">
+        <label for="mobile">Celular</label>
+        <input id="mobile" formControlName="mobile" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="whatsapp">WhatsApp</label>
+        <input id="whatsapp" formControlName="whatsapp" type="text" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div formGroupName="address" class="address-group">
+        <label>Endereço</label>
+        <div class="form-group"><input formControlName="street" type="text" placeholder="Rua" /></div>
+        <div class="form-group"><input formControlName="number" type="text" placeholder="Número" /></div>
+        <div class="form-group"><input formControlName="complement" type="text" placeholder="Complemento" /></div>
+        <div class="form-group"><input formControlName="neighborhood" type="text" placeholder="Bairro" /></div>
+        <div class="form-group"><input formControlName="city" type="text" placeholder="Cidade" /></div>
+        <div class="form-group"><input formControlName="state" type="text" placeholder="Estado" /></div>
+        <div class="form-group"><input formControlName="zip_code" type="text" placeholder="CEP" /></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="notes">Observações</label>
+        <textarea id="notes" formControlName="notes"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="is_active">Status</label>
+        <select id="is_active" formControlName="is_active">
+          <option [value]="true">Ativo</option>
+          <option [value]="false">Inativo</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="save-btn" [disabled]="loading">{{ isEdit ? 'Salvar Alterações' : 'Cadastrar Cliente' }}</button>
+    <app-loading-spinner *ngIf="loading" size="small"></app-loading-spinner>
+    <div *ngIf="error && !form.get('document')?.touched" class="form-error">{{ error }}</div>
+  </form>
+</section>
+

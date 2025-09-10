@@ -1,0 +1,56 @@
+<section class="file-list-section">
+  <div class="file-list-header">
+    <h1>Gestão de Arquivos</h1>
+    <div class="file-list-actions">
+      <input type="text" placeholder="Buscar arquivos..." [(ngModel)]="searchQuery" class="search-input" />
+      <select [(ngModel)]="selectedCategory" class="filter-select">
+        <option value="">Todas as categorias</option>
+        <option value="document">Documentos</option>
+        <option value="image">Imagens</option>
+        <option value="plan">Plantas</option>
+        <option value="render">Renders</option>
+        <option value="contract">Contratos</option>
+      </select>
+      <button class="upload-btn" (click)="onOpenUploadModal()">
+        <span class="material-icons">upload_file</span> Upload
+      </button>
+    </div>
+  </div>
+
+  <div class="file-list-content">
+    <app-loading-spinner *ngIf="loading" overlay="true"></app-loading-spinner>
+    <table class="file-table" *ngIf="!loading && files.length">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Tamanho</th>
+          <th>Projeto</th>
+          <th>Etapa</th>
+          <th>Data de Upload</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of filteredFiles">
+          <td>{{ file.original_name }}</td>
+          <td>{{ file.category }}</td>
+          <td>{{ file.size | number }} bytes</td>
+          <td>{{ file.project_id || '-' }}</td>
+          <td>{{ file.stage_id || '-' }}</td>
+          <td>{{ file.created_at | date:'short' }}</td>
+          <td>
+            <button class="action-btn" (click)="onDownload(file)"><span class="material-icons">download</span></button>
+            <button class="action-btn" (click)="onDelete(file)"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && !files.length" class="empty-state">
+      Nenhum arquivo encontrado.
+    </div>
+  </div>
+
+  <!-- Modal de upload e confirmação podem ser implementados aqui -->
+</section>
+
