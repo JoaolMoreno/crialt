@@ -18,7 +18,7 @@
   </div>
 
   <div class="file-list-content">
-    <app-loading-spinner *ngIf="loading" overlay="true"></app-loading-spinner>
+    <app-loading-spinner *ngIf="loading" [overlay]="true"></app-loading-spinner>
     <table class="file-table" *ngIf="!loading && files.length">
       <thead>
         <tr>

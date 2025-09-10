@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 
 interface HeaderMenuItem {
   label: string;
@@ -13,7 +14,7 @@ interface HeaderMenuItem {
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [FormsModule]
+    imports: [FormsModule, RouterLink, NgForOf, NgIf, AsyncPipe]
 })
 export class HeaderComponent {
   menuItems: HeaderMenuItem[] = [

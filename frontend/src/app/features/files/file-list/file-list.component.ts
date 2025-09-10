@@ -2,13 +2,15 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FileService } from '../../../core/services/file.service';
 import { File } from '../../../core/models/file.model';
 import { FormsModule } from '@angular/forms';
+import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
+import {DatePipe, DecimalPipe, NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-file-list',
   standalone: true,
   templateUrl: './file-list.component.html',
   styleUrls: ['./file-list.component.scss'],
-  imports: [FormsModule]
+    imports: [FormsModule, LoadingSpinnerComponent, DecimalPipe, DatePipe, NgForOf, NgIf]
 })
 export class FileListComponent implements OnInit {
   private readonly fileService = inject(FileService);

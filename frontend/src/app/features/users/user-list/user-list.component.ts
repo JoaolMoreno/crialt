@@ -3,13 +3,15 @@ import { Router } from '@angular/router';
 import { User } from '../../../core/models/user.model';
 import { UserService } from '../../../core/services/user.service';
 import { FormsModule } from '@angular/forms';
+import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
+import {NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
-  imports: [FormsModule]
+    imports: [FormsModule, LoadingSpinnerComponent, NgIf, NgForOf]
 })
 export class UserListComponent implements OnInit {
   private readonly userService = inject(UserService);

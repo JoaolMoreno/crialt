@@ -6,13 +6,15 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { ViaCepService, ViaCepResponse } from '../../../shared/services/via-cep.service';
 import { cpfValidator, cnpjValidator } from '../../../shared/utils/validators';
+import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-client-form',
   standalone: true,
   templateUrl: './client-form.component.html',
   styleUrls: ['./client-form.component.scss'],
-  imports: [ReactiveFormsModule]
+    imports: [ReactiveFormsModule, LoadingSpinnerComponent, NgIf]
 })
 export class ClientFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

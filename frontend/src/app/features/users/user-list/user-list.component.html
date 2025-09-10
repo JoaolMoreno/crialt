@@ -49,6 +49,6 @@
     </tbody>
   </table>
   <div *ngIf="!loading && !filteredUsers.length" class="empty-state">Nenhum usuário encontrado.</div>
-  <app-loading-spinner *ngIf="loading" size="large" overlay="true"></app-loading-spinner>
+  <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
 </section>
 

@@ -4,13 +4,15 @@ import { Client } from '../../../core/models/client.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
 
 @Component({
   selector: 'app-client-list',
   standalone: true,
   templateUrl: './client-list.component.html',
   styleUrls: ['./client-list.component.scss'],
-  imports: [FormsModule]
+    imports: [FormsModule, DatePipe, LoadingSpinnerComponent, NgIf, NgForOf]
 })
 export class ClientListComponent implements OnInit {
   private readonly clientService = inject(ClientService);

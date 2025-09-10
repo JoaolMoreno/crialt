@@ -52,7 +52,7 @@
     </tbody>
   </table>
   <div *ngIf="!loading && !filteredClients.length" class="empty-state">Nenhum cliente encontrado.</div>
-  <app-loading-spinner *ngIf="loading" size="large" overlay="true"></app-loading-spinner>
+  <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
   <div *ngIf="error" class="client-list-error">{{ error }}</div>
 </section>
 
