@@ -1,5 +1,8 @@
 .sidebar {
   width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  box-sizing: border-box;
   background: #F5F5F5;
   height: 100vh;
   border-right: 1px solid #DDDDDD;
@@ -7,9 +10,15 @@
   flex-direction: column;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   transition: width 0.2s;
+  box-shadow: 2px 0 8px rgba(33,33,33,0.04);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
 }
 .sidebar.collapsed {
   width: 64px;
+  min-width: 64px;
+  max-width: 64px;
 }
 .sidebar-nav {
   flex: 1;
@@ -17,6 +26,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .sidebar-header {
   display: flex;
@@ -30,19 +41,26 @@
   cursor: pointer;
   padding: 0;
   margin-right: 8px;
-  color: #212121;
+  color: #708090;
   font-size: 24px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.collapse-btn:hover {
+  background: #E0E0E0;
 }
 .sidebar-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #212121;
   letter-spacing: 1px;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 .sidebar-menu {
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
 .menu-link {
   display: flex;
@@ -51,47 +69,62 @@
   color: #212121;
   text-decoration: none;
   font-size: 16px;
-  font-weight: 400;
-  border-radius: 4px;
-  transition: background 0.2s;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
-.menu-link:hover {
-  background: #e0e0e0;
+.menu-link:hover,
+.menu-link:focus {
+  background: #FFFFFF;
+  color: #708090;
 }
 .menu-icon {
-  font-size: 24px;
-  margin-right: 16px;
+  font-size: 20px;
+  margin-right: 12px;
+  color: #708090;
 }
 .menu-label {
-  flex: 1;
-}
-.notification-badge {
-  background: #708090;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 2px 8px;
-  margin-left: 8px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #212121;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .favorite {
-  background: #fffbe6;
+  background: #E3E6EA;
+}
+.notification-badge {
+  background: #212121;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 2px 6px;
+  margin-left: 8px;
 }
 .sidebar-footer {
-  margin-top: auto;
-  padding: 16px 24px;
   border-top: 1px solid #DDDDDD;
+  padding: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+  background: #F5F5F5;
 }
 .caption {
   font-size: 14px;
   font-style: italic;
   color: #666666;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+.favorite-link {
+  margin-right: 8px;
 }
 .favorite-link .material-icons {
   color: #708090;
   font-size: 20px;
-  margin-right: 4px;
 }

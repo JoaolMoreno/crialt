@@ -1,28 +1,32 @@
 .header {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px 0 32px;
   background: #FFFFFF;
   border-bottom: 1px solid #DDDDDD;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  padding: 0 32px;
   position: relative;
-  flex-wrap: wrap;
+  min-height: 64px;
 }
 .logo {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
   color: #212121;
-  letter-spacing: 2px;
-  margin-right: 32px;
+  margin: 0;
+  text-align: left;
+  flex-shrink: 0;
 }
 .main-nav {
   flex: 1;
+  margin-left: 32px;
 }
 .nav-menu {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -35,20 +39,25 @@
   font-size: 16px;
   font-weight: 400;
   border-radius: 4px;
-  padding: 8px 12px;
-  transition: background 0.2s;
+  padding: 8px 16px;
+  transition: background 0.2s, color 0.2s;
+  position: relative;
 }
-.nav-link:hover {
+.nav-link:hover,
+.nav-link:focus {
   background: #F5F5F5;
+  color: #708090;
 }
 .nav-icon {
   font-size: 20px;
   margin-right: 8px;
+  color: #708090;
 }
 .header-actions {
   display: flex;
   align-items: center;
   gap: 24px;
+  margin: 0;
 }
 .search-wrapper {
   position: relative;
@@ -58,12 +67,16 @@
 .search-input {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   font-size: 16px;
-  padding: 6px 32px 6px 12px;
+  padding: 8px 32px 8px 12px;
   border: 1px solid #DDDDDD;
-  border-radius: 4px;
-  outline: none;
+  border-radius: 6px;
   background: #F5F5F5;
   color: #212121;
+  outline: none;
+  transition: border 0.2s;
+}
+.search-input:focus {
+  border-color: #708090;
 }
 .search-icon {
   position: absolute;
@@ -73,25 +86,27 @@
 }
 .notifications {
   position: relative;
-  display: flex;
-  align-items: center;
+  margin-right: 8px;
+}
+.notifications .material-icons {
+  font-size: 24px;
+  color: #708090;
 }
 .notification-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #708090;
-  color: #fff;
+  top: -4px;
+  right: -8px;
+  background: #212121;
+  color: #FFFFFF;
   font-size: 12px;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 2px 8px;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 2px 6px;
 }
 .profile-menu {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
 }
 .avatar {
   width: 32px;
@@ -102,24 +117,38 @@
 }
 .profile-name {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   color: #212121;
+  margin-right: 8px;
+}
+.logout-btn {
+  background: none;
+  border: none;
+  color: #708090;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.logout-btn:hover {
+  background: #F5F5F5;
 }
 .breadcrumb {
-  position: absolute;
-  left: 32px;
-  bottom: -32px;
   display: flex;
   align-items: center;
+  gap: 4px;
   font-size: 14px;
   color: #666666;
-  font-style: italic;
-  gap: 4px;
+  margin: 8px 32px 8px 32px;
 }
 .breadcrumb-item {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   font-size: 14px;
+  font-style: italic;
   color: #666666;
 }
 .breadcrumb-separator {
   color: #DDDDDD;
+  font-size: 14px;
 }
