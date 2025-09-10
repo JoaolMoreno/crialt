@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/server",
+    "target": "es2020",
+    "types": ["node"],
+    "module": "esnext"
+  },
+  "files": [
+    "src/main.server.ts",
+    "src/server.ts"
+  ],
+  "angularCompilerOptions": {
+    "entryModule": "./src/app/app.config.server#AppServerConfig"
+  }
+}

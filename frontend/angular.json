@@ -58,7 +58,8 @@
             "production": {
               "outputHashing": "media",
               "sourceMap": false,
-              "optimization": true
+              "optimization": true,
+              "aot": true
             },
             "development": {
               "sourceMap": true,
@@ -68,32 +69,38 @@
           "defaultConfiguration": "development"
         },
         "serve-ssr": {
-          "builder": "@nguniversal/builders:ssr-dev-server",
+          "builder": "@angular-devkit/build-angular:ssr-dev-server",
+          "options": {
+            "browserTarget": "crialt-frontend:build",
+            "serverTarget": "crialt-frontend:server"
+          },
           "configurations": {
             "development": {
-              "buildTarget": "crialt-frontend:build:development",
+              "browserTarget": "crialt-frontend:build:development",
               "serverTarget": "crialt-frontend:server:development"
             },
             "production": {
-              "buildTarget": "crialt-frontend:build:production",
+              "browserTarget": "crialt-frontend:build:production",
               "serverTarget": "crialt-frontend:server:production"
             }
           },
           "defaultConfiguration": "development"
         },
         "prerender": {
-          "builder": "@nguniversal/builders:prerender",
+          "builder": "@angular-devkit/build-angular:prerender",
           "options": {
+            "browserTarget": "crialt-frontend:build",
+            "serverTarget": "crialt-frontend:server",
             "routes": ["/"]
           },
           "configurations": {
-            "production": {
-              "buildTarget": "crialt-frontend:build:production",
-              "serverTarget": "crialt-frontend:server:production"
-            },
             "development": {
-              "buildTarget": "crialt-frontend:build:development",
+              "browserTarget": "crialt-frontend:build:development",
               "serverTarget": "crialt-frontend:server:development"
+            },
+            "production": {
+              "browserTarget": "crialt-frontend:build:production",
+              "serverTarget": "crialt-frontend:server:production"
             }
           },
           "defaultConfiguration": "development"
