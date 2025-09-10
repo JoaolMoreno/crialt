@@ -48,7 +48,4 @@ class ClientRead(ClientBase):
     created_at: datetime
     updated_at: datetime
     projects: Optional[List[UUID]] = None
-    documents: Optional[List[UUID]] = None
-
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
