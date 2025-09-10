@@ -44,6 +44,7 @@ alembic_new/versions/__pycache__/
 # Node/Angular
 node_modules/
 dist/
+.angular/
 package-lock.json
 coverage/
 *.tsbuildinfo
