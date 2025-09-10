@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
+import logging
 
 from ..api.dependencies import get_db, get_current_user
 from ..core.security import create_access_token
@@ -10,6 +11,8 @@ from ..schemas.client import ClientRead
 from ..schemas.user import UserRead
 from ..services.auth_service import AuthService
 from ..core.config import settings
+
+logger = logging.getLogger("auth")
 
 router = APIRouter()
 
@@ -47,22 +50,25 @@ def login(
         user = auth.authenticate_user_by_email(email, password)
     if user:
         token = create_access_token(subject=str(user.id))
+        logger.info(f"Login bem-sucedido para usuário {user.id}. Token gerado: {token}")
         if response:
             response.set_cookie(
                 key="access_token",
                 value=token,
                 httponly=True,
-                secure= False,
+                secure=False,
                 samesite="lax",
                 max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                 path="/"
             )
+            logger.info(f"Cookie 'access_token' setado para usuário {user.id}")
         return {"access_token": token, "token_type": "bearer", "user": UserRead.model_validate(user, from_attributes=True)}
     client = None
     if email:
         client = auth.authenticate_client(email, password)
     if client:
         token = create_access_token(subject=str(client.id))
+        logger.info(f"Login bem-sucedido para cliente {client.id}. Token gerado: {token}")
         if response:
             response.set_cookie(
                 key="access_token",
@@ -73,6 +79,7 @@ def login(
                 max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                 path="/"
             )
+            logger.info(f"Cookie 'access_token' setado para cliente {client.id}")
         return {"access_token": token, "token_type": "bearer", "client": ClientRead.model_validate(client, from_attributes=True)}
     raise HTTPException(status_code=401, detail="Credenciais inválidas")
 

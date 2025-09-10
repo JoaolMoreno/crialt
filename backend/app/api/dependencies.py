@@ -1,10 +1,12 @@
 import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
 from typing import Generator
 
 from fastapi import Depends, HTTPException, status, Request
+from fastapi.security.utils import get_authorization_scheme_param
+
 from ..core.security import decode_jwt_token
 from ..models.user import User
 from ..models.client import Client
@@ -29,15 +31,26 @@ def get_db() -> Generator:
             db.close()
 
 
-def get_token_from_cookie(request: Request):
-    token = request.cookies.get("access_token")
+async def get_token(request: Request) -> str | None:
+    auth_header = request.headers.get("Authorization")
+    scheme, param = get_authorization_scheme_param(auth_header)
+    token = None
+    if scheme.lower() == "bearer" and param:
+        token = param
+        logger.info(f"Token lido do header Authorization: {token}")
+    else:
+        token = request.cookies.get("access_token")
+        logger.info(f"Token lido do cookie: {token}")
+    if not token:
+        logger.warning("Nenhum token encontrado no header ou cookie")
     return token
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), request: Request = None) -> User:
-    if not token and request:
-        token = get_token_from_cookie(request)
+def get_current_user(token: str = Depends(get_token), db: Session = Depends(get_db)) -> User:
     logger.debug(f'Entrando em get_current_user com token={token}')
+    if not token:
+        logger.warning('Token ausente na requisição')
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token ausente")
     try:
         payload = decode_jwt_token(token)
         logger.debug(f'Payload decodificado: {payload}')
