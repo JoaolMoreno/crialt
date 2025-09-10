@@ -44,6 +44,7 @@ alembic_new/versions/__pycache__/
 # Node/Angular
 node_modules/
 dist/
+package-lock.json
 coverage/
 *.tsbuildinfo
 npm-debug.log*
