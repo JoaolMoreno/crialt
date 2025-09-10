@@ -8,8 +8,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.schemas.stage import StageType, StageStatus, PaymentStatus
-from app.models.base import Base
+from ..schemas.stage import StageType, StageStatus, PaymentStatus
+from ..models.base import Base
 
 
 class Stage(Base):

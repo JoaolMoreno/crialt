@@ -1,9 +1,9 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from app.core.security import verify_password, get_password_hash
-from app.models import User, Client
-from app.schemas.user import UserRole
+from ..core.security import verify_password, get_password_hash
+from ..models import User, Client
+from ..schemas.user import UserRole
 
 
 class AuthService:

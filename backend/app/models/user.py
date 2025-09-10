@@ -7,8 +7,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.models.base import Base
-from app.schemas.user import UserRole
+from ..models.base import Base
+from ..schemas.user import UserRole
 
 
 class User(Base):

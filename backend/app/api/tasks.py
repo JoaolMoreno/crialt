@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db, get_current_actor, admin_required, client_resource_permission
-from app.models.task import Task
-from app.models.stage import Stage
-from app.models.project import Project
-from app.schemas.task import TaskRead, TaskCreate, TaskUpdate
+from ..api.dependencies import get_db, get_current_actor, admin_required, client_resource_permission
+from ..models.task import Task
+from ..models.stage import Stage
+from ..models.project import Project
+from ..schemas.task import TaskRead, TaskCreate, TaskUpdate
 
 router = APIRouter()
 

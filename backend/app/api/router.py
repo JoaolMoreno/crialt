@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from app.api import auth, users, clients, projects, stages, files, tasks
-from app.api.dependencies import admin_required, client_resource_permission
+from ..api import auth, users, clients, projects, stages, files, tasks
+from ..api.dependencies import admin_required, client_resource_permission
 
 api_router = APIRouter()
 

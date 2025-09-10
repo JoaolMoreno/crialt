@@ -8,8 +8,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.schemas.project import ProjectStatus
-from app.models.base import Base
+from ..schemas.project import ProjectStatus
+from ..models.base import Base
 
 project_clients = Table(
     'project_clients', Base.metadata,

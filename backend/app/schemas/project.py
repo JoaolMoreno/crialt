@@ -26,7 +26,6 @@ class ProjectBase(BaseModel):
 
 class ProjectCreate(ProjectBase):
     clients: List[UUID]
-    created_by_id: UUID
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None

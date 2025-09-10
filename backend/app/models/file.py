@@ -7,8 +7,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.schemas.file import FileCategory
-from app.models.base import Base
+from ..schemas.file import FileCategory
+from ..models.base import Base
 
 class File(Base):
     __tablename__ = "files"

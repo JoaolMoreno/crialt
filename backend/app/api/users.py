@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db, get_current_user, admin_required
-from app.models import User
-from app.schemas.user import UserRead, UserCreate, UserUpdate
-from app.core.security import get_password_hash
+from ..api.dependencies import get_db, get_current_user, admin_required
+from ..models import User
+from ..schemas.user import UserRead, UserCreate, UserUpdate
+from ..core.security import get_password_hash
 
 router = APIRouter()
 
@@ -34,7 +34,6 @@ def create_user(user_data: UserCreate,
                 db: Session = Depends(get_db),
                 admin_user: User = Depends(admin_required)
                 ):
-    print("Create user called")
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email já cadastrado")

@@ -7,8 +7,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.schemas.client import DocumentType
-from app.models.base import Base
+from ..schemas.client import DocumentType
+from ..models.base import Base
 
 class Client(Base):
     __tablename__ = "clients"

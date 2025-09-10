@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPExc
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db, get_current_user, get_current_actor, admin_required, client_resource_permission
-from app.models.user import User
-from app.models.file import File
-from app.models.project import Project
-from app.schemas.file import FileRead, FileCreate, FileUpdate
-from app.services.file_service import FileService
+from ..api.dependencies import get_db, get_current_user, get_current_actor, admin_required, client_resource_permission
+from ..models.user import User
+from ..models.file import File
+from ..models.project import Project
+from ..schemas.file import FileRead, FileCreate, FileUpdate
+from ..services.file_service import FileService
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ def get_files_by_client(client_id: str, db: Session = Depends(get_db), actor = D
 @router.get("/stage/{stage_id}", response_model=List[FileRead])
 def get_files_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
     # Buscar a etapa e verificar permissão através do projeto
-    from app.models.stage import Stage
+    from ..models.stage import Stage
     stage = db.get(Stage, stage_id)
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa não encontrada")

@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db, get_current_actor, client_resource_permission, admin_required
-from app.models.stage import Stage
-from app.models.project import Project
-from app.schemas.stage import StageRead, StageCreate, StageUpdate
+from ..api.dependencies import get_db, get_current_actor, client_resource_permission, admin_required
+from ..models.stage import Stage
+from ..models.project import Project
+from ..schemas.stage import StageRead, StageCreate, StageUpdate
 
 router = APIRouter()
 

@@ -8,8 +8,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.schemas.task import TaskStatus, TaskPriority
-from app.models.base import Base
+from ..schemas.task import TaskStatus, TaskPriority
+from ..models.base import Base
 
 
 class Task(Base):

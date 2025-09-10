@@ -5,6 +5,8 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from dotenv import load_dotenv
 
+from backend.app.models import base
+
 # Adiciona o diretório backend ao sys.path
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + "/.."))
 
@@ -20,8 +22,6 @@ if config.config_file_name is not None:
 
 # Define a URL do banco de dados a partir da variável de ambiente
 config.set_main_option('sqlalchemy.url', os.environ.get('DATABASE_URL'))
-
-from app.models import base  # importa o Base
 
 # Define o target_metadata para autogeração
 target_metadata = base.Base.metadata

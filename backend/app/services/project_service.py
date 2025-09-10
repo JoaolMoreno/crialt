@@ -2,10 +2,10 @@ from datetime import datetime, UTC
 
 from sqlalchemy.orm import Session
 
-from app.models import Project, Client, Stage
-from app.models.project import project_clients
-from app.schemas.project import ProjectCreate
-from app.schemas.stage import StageType, StageStatus
+from ..models import Project, Client, Stage
+from ..models.project import project_clients
+from ..schemas.project import ProjectCreate
+from ..schemas.stage import StageType, StageStatus
 
 
 class ProjectService:

@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import os
 
-from app.core.config import settings
-from app.models import File
-from app.schemas.file import FileCreate, FileCategory
+from ..core.config import settings
+from ..models import File
+from ..schemas.file import FileCreate, FileCategory
 
 
 class FileService:

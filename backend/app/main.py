@@ -4,8 +4,8 @@ import sys
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.api.router import api_router
-from app.core.config import settings
+from .api.router import api_router
+from .core.config import settings
 
 app = FastAPI(
     title="Crialt Arquitetura API",
