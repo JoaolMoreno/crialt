@@ -2,23 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db, get_current_actor, admin_required
-from app.models import Client
-from app.schemas.client import ClientRead, ClientCreate, ClientUpdate
-from app.services.auth_service import AuthService
-from app.core.security import get_password_hash
+from ..api.dependencies import get_db, get_current_actor, admin_required
+from ..schemas.client import ClientUpdate
+from ..services.auth_service import AuthService
+from ..core.security import get_password_hash
 from pydantic import BaseModel
 
 router = APIRouter()
 
-@router.get("/", response_model=List[ClientRead])
+@router.get("/", response_model=List[ClientUpdate])
 def get_clients(db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    clients = db.query(Client).all()
+    clients = db.query(ClientUpdate).all()
     return clients
 
-@router.get("/{client_id}", response_model=ClientRead)
+@router.get("/{client_id}", response_model=ClientUpdate)
 def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
-    client = db.get(Client, client_id)
+    client = db.get(ClientUpdate, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     # Só o próprio cliente ou admin pode acessar
@@ -28,17 +27,17 @@ def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(ge
         return client
     raise HTTPException(status_code=403, detail="Acesso negado")
 
-@router.post("/", response_model=ClientRead)
-def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    existing_email = db.query(Client).filter(Client.email == client_data.email).first()
+@router.post("/", response_model=ClientUpdate)
+def create_client(client_data: ClientUpdate, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+    existing_email = db.query(ClientUpdate).filter(ClientUpdate.email == client_data.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
 
-    existing_doc = db.query(Client).filter(Client.document == client_data.document).first()
+    existing_doc = db.query(ClientUpdate).filter(ClientUpdate.document == client_data.document).first()
     if existing_doc:
         raise HTTPException(status_code=400, detail="Documento já cadastrado")
 
-    client = Client(
+    client = ClientUpdate(
         name=client_data.name,
         document=client_data.document,
         document_type=client_data.document_type,
@@ -61,9 +60,9 @@ def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admi
     return client
 
 
-@router.put("/{client_id}", response_model=ClientRead)
+@router.put("/{client_id}", response_model=ClientUpdate)
 def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    client = db.get(Client, client_id)
+    client = db.get(ClientUpdate, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
 
@@ -80,7 +79,7 @@ def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depen
 
 @router.delete("/{client_id}")
 def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    client = db.get(Client, client_id)
+    client = db.get(ClientUpdate, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
 
@@ -90,7 +89,7 @@ def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = De
 
 @router.post("/{client_id}/reset-password")
 def reset_client_password(client_id: str, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    client = db.get(Client, client_id)
+    client = db.get(ClientUpdate, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     auth = AuthService(db)
@@ -102,7 +101,7 @@ class PasswordSetRequest(BaseModel):
 
 @router.post("/{client_id}/set-password")
 def set_client_password(client_id: str, payload: PasswordSetRequest, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
-    client = db.get(Client, client_id)
+    client = db.get(ClientUpdate, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     client.password_hash = get_password_hash(payload.password)
