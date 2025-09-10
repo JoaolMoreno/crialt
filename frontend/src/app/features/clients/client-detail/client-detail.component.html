@@ -1,5 +1,10 @@
 <section class="client-detail-section">
-  <h1>Detalhes do Cliente</h1>
+  <div class="detail-header">
+    <button type="button" class="back-btn" (click)="onBack()">
+      <span class="material-icons">arrow_back</span> Voltar
+    </button>
+    <h1>Detalhes do Cliente</h1>
+  </div>
   <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
   <div *ngIf="error" class="client-detail-error">{{ error }}</div>
   <div *ngIf="client">

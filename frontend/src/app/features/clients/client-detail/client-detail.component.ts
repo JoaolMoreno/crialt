@@ -132,4 +132,8 @@ export class ClientDetailComponent implements OnInit {
   public downloadFile(docId: string): void {
     window.open(`/api/files/${docId}/download`, '_blank');
   }
+
+  onBack(): void {
+    this.router.navigate(['/clients']);
+  }
 }

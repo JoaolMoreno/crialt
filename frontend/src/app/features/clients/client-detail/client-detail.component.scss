@@ -1,2 +1,319 @@
-/* SCSS vazio para ClientDetailComponent */
+@import '../../../../styles.scss';
 
+.client-detail-section {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: var(--color-bg);
+  padding: calc(var(--spacing-base) * 4) calc(var(--spacing-base) * 3);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(53,39,28,0.06);
+  color: var(--color-dark);
+
+  h1 {
+    font-family: 'Diore', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    margin-bottom: calc(var(--spacing-base) * 3);
+    color: var(--color-dark);
+    text-align: left;
+  }
+}
+
+.client-info-card {
+  background: var(--color-bg);
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(53,39,28,0.08);
+  padding: calc(var(--spacing-base) * 3) calc(var(--spacing-base) * 2.5);
+  margin-bottom: calc(var(--spacing-base) * 4);
+}
+
+.info-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: calc(var(--spacing-base) * 2);
+  gap: var(--spacing-base);
+  .info-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-dark);
+    min-width: 120px;
+  }
+  .info-value {
+    font-size: 16px;
+    color: var(--color-dark);
+    word-break: break-word;
+  }
+  .active {
+    color: var(--color-dark);
+    font-weight: 600;
+    background: var(--color-light);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .inactive {
+    color: var(--color-dark);
+    font-weight: 400;
+    background: var(--color-light);
+    border-radius: 4px;
+    padding: 2px 8px;
+    opacity: 0.6;
+  }
+}
+
+.info-actions {
+  display: flex;
+  gap: calc(var(--spacing-base) * 1.5);
+  margin-top: calc(var(--spacing-base) * 2);
+  .edit-btn, .save-btn, .cancel-btn {
+    background: var(--color-dark);
+    color: var(--color-bg);
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    padding: calc(var(--spacing-base) * 1) calc(var(--spacing-base) * 2.25);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-base);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(53,39,28,0.08);
+    transition: background 0.2s;
+    .material-icons {
+      font-size: 20px;
+    }
+    &:hover {
+      background: var(--color-accent);
+    }
+    &:disabled {
+      background: var(--color-light);
+      color: var(--color-dark);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+  .cancel-btn {
+    background: transparent;
+    color: var(--color-dark);
+    border: 1px solid var(--color-dark);
+    &:hover {
+      background: var(--color-light);
+    }
+  }
+}
+
+.edit-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  input {
+    font-family: inherit;
+    font-size: 16px;
+    padding: 8px 12px;
+    border: 1px solid #DDDDDD;
+    border-radius: 6px;
+    background: #F5F5F5;
+    color: #212121;
+    outline: none;
+    min-width: 180px;
+    transition: border-color 0.2s;
+    &:focus {
+      border-color: #708090;
+    }
+  }
+}
+
+.client-projects-card, .client-documents-card, .client-password-card {
+  background: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(112,128,144,0.08);
+  padding: 24px 20px;
+  margin-bottom: 32px;
+}
+
+.client-projects-card h2,
+.client-documents-card h2,
+.client-password-card h2 {
+  font-size: 24px;
+  font-weight: 400;
+  color: #212121;
+  margin-bottom: 18px;
+}
+
+.projects-list, .documents-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.projects-list li, .documents-list li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #DDDDDD;
+  font-size: 16px;
+  color: #212121;
+}
+.projects-list li:last-child, .documents-list li:last-child {
+  border-bottom: none;
+}
+.project-name, .doc-name {
+  font-weight: 600;
+  color: #212121;
+}
+.project-status, .doc-category {
+  color: #666666;
+  font-size: 14px;
+  font-style: italic;
+}
+.project-date {
+  color: #666666;
+  font-size: 14px;
+}
+.view-btn, .download-btn {
+  background: transparent;
+  border: none;
+  color: #708090;
+  font-family: inherit;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 4px 8px;
+  transition: background 0.2s, color 0.2s;
+  .material-icons {
+    font-size: 18px;
+  }
+  &:hover {
+    background: #F5F5F5;
+    color: #212121;
+  }
+}
+
+.client-password-card input[type="password"] {
+  font-family: inherit;
+  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid #DDDDDD;
+  border-radius: 6px;
+  background: #F5F5F5;
+  color: #212121;
+  outline: none;
+  min-width: 180px;
+  margin-right: 12px;
+  transition: border-color 0.2s;
+  &:focus {
+    border-color: #708090;
+  }
+}
+.change-password-btn {
+  background: #212121;
+  color: #FFFFFF;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(112,128,144,0.08);
+  transition: background 0.2s;
+  .material-icons {
+    font-size: 20px;
+  }
+  &:hover {
+    background: #333;
+  }
+  &:disabled {
+    background: #DDDDDD;
+    color: #666666;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  color: #D32F2F;
+  background: #FFF0F0;
+  border: 1px solid #D32F2F;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+.success {
+  color: #388E3C;
+  background: #E8F5E9;
+  border: 1px solid #388E3C;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.empty-state {
+  font-size: 16px;
+  color: #666666;
+  font-style: italic;
+  margin: 32px 0;
+  text-align: center;
+}
+
+.client-detail-error {
+  color: #D32F2F;
+  background: #FFF0F0;
+  border: 1px solid #D32F2F;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .client-detail-section {
+    padding: 16px 4px;
+  }
+  .client-info-card,
+  .client-projects-card,
+  .client-documents-card,
+  .client-password-card {
+    padding: 16px 6px;
+  }
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .edit-fields {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .client-detail-section {
+    padding: 8px 0;
+  }
+  .client-info-card,
+  .client-projects-card,
+  .client-documents-card,
+  .client-password-card {
+    padding: 8px 2px;
+  }
+  .info-label, .info-value {
+    font-size: 14px;
+  }
+  .projects-list li, .documents-list li {
+    font-size: 14px;
+    gap: 8px;
+    padding: 8px 0;
+  }
+}

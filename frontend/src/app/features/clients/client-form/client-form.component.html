@@ -1,5 +1,10 @@
 <section class="client-form-section">
-  <h1>{{ isEdit ? 'Editar Cliente' : 'Cadastrar Cliente' }}</h1>
+  <div class="form-header">
+    <button type="button" class="back-btn" (click)="onBack()">
+      <span class="material-icons">arrow_back</span> Voltar
+    </button>
+    <h1>{{ isEdit ? 'Editar Cliente' : 'Cadastrar Cliente' }}</h1>
+  </div>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" [class.loading]="loading">
     <div class="form-row">
       <div class="form-group">
@@ -59,7 +64,12 @@
         <div class="form-group"><input formControlName="neighborhood" type="text" placeholder="Bairro" /></div>
         <div class="form-group"><input formControlName="city" type="text" placeholder="Cidade" /></div>
         <div class="form-group"><input formControlName="state" type="text" placeholder="Estado" /></div>
-        <div class="form-group"><input formControlName="zip_code" type="text" placeholder="CEP" /></div>
+        <div class="form-group">
+          <input formControlName="zip_code" type="text" placeholder="CEP" (blur)="onBuscarCep()" />
+          <button type="button" (click)="onBuscarCep()" [disabled]="cepLoading" style="margin-left:8px">Buscar CEP</button>
+          <span *ngIf="cepLoading" class="cep-spinner">Buscando...</span>
+          <div class="error" *ngIf="cepError">{{ cepError }}</div>
+        </div>
       </div>
     </div>
     <div class="form-row">
@@ -75,9 +85,24 @@
         </select>
       </div>
     </div>
+    <div class="form-row">
+<!--      <div class="form-group">-->
+<!--        <label>Documentos (RG, CPF, etc.)</label>-->
+<!--        <app-file-upload formControlName="documents" [multiple]="true" [acceptedTypes]="['application/pdf','image/*']"></app-file-upload>-->
+<!--      </div>-->
+      <div class="form-group" *ngIf="isEdit">
+        <label>Senha</label>
+        <input type="text" [value]="generatedPassword" readonly />
+        <button type="button" class="secondary" (click)="onResetPassword()">Redefinir senha</button>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" formControlName="first_access" /> Primeiro acesso (obrigar troca de senha)
+        </label>
+      </div>
+    </div>
     <button type="submit" class="save-btn" [disabled]="loading">{{ isEdit ? 'Salvar Alterações' : 'Cadastrar Cliente' }}</button>
     <app-loading-spinner *ngIf="loading" size="small"></app-loading-spinner>
     <div *ngIf="error && !form.get('document')?.touched" class="form-error">{{ error }}</div>
   </form>
 </section>
-

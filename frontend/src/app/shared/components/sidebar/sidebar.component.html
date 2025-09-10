@@ -15,15 +15,15 @@
         </a>
       </li>
     </ul>
-    <div class="sidebar-footer" *ngIf="!isCollapsed">
-      <span class="caption">Favoritos: </span>
-      <ng-container *ngFor="let item of menuItems">
-        <span class="favorite-link" *ngIf="item.favorite">
-          <a [routerLink]="item.route" title="{{ item.label }}">
-            <span class="material-icons">{{ item.icon }}</span>
-          </a>
-        </span>
-      </ng-container>
-    </div>
+<!--    <div class="sidebar-footer" *ngIf="!isCollapsed">-->
+<!--      <span class="caption">Favoritos: </span>-->
+<!--      <ng-container *ngFor="let item of menuItems">-->
+<!--        <span class="favorite-link" *ngIf="item.favorite">-->
+<!--          <a [routerLink]="item.route" title="{{ item.label }}">-->
+<!--            <span class="material-icons">{{ item.icon }}</span>-->
+<!--          </a>-->
+<!--        </span>-->
+<!--      </ng-container>-->
+<!--    </div>-->
   </nav>
 </aside>

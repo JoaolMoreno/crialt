@@ -3,30 +3,31 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  background: #FFFFFF;
-  border-bottom: 1px solid #DDDDDD;
+  background: var(--color-dark);
+  border-bottom: 1px solid var(--color-light);
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  padding: 0 32px;
+  padding: 0 calc(var(--spacing-base) * 4);
   position: relative;
   min-height: 64px;
 }
 .logo {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: 'Diore', serif;
   font-size: 32px;
   font-weight: 400;
   letter-spacing: 1.5px;
-  color: #212121;
+  color: var(--color-bg);
   margin: 0;
   text-align: left;
   flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(53,39,28,0.15);
 }
 .main-nav {
   flex: 1;
-  margin-left: 32px;
+  margin-left: calc(var(--spacing-base) * 4);
 }
 .nav-menu {
   display: flex;
-  gap: 24px;
+  gap: calc(var(--spacing-base) * 3);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -34,29 +35,31 @@
 .nav-link {
   display: flex;
   align-items: center;
-  color: #212121;
+  color: var(--color-bg);
   text-decoration: none;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 600;
   border-radius: 4px;
-  padding: 8px 16px;
+  padding: var(--spacing-base) calc(var(--spacing-base) * 2);
   transition: background 0.2s, color 0.2s;
   position: relative;
+  text-shadow: 0 1px 2px rgba(53,39,28,0.10);
 }
 .nav-link:hover,
 .nav-link:focus {
-  background: #F5F5F5;
-  color: #708090;
+  background: var(--color-accent);
+  color: var(--color-bg);
 }
 .nav-icon {
   font-size: 20px;
-  margin-right: 8px;
-  color: #708090;
+  margin-right: var(--spacing-base);
+  color: var(--color-accent);
+  transition: color 0.2s;
 }
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: calc(var(--spacing-base) * 3);
   margin: 0;
 }
 .search-wrapper {
@@ -67,72 +70,87 @@
 .search-input {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   font-size: 16px;
-  padding: 8px 32px 8px 12px;
-  border: 1px solid #DDDDDD;
+  padding: var(--spacing-base) calc(var(--spacing-base) * 4) var(--spacing-base) calc(var(--spacing-base) * 1.5);
+  border: 1px solid var(--color-light);
   border-radius: 6px;
-  background: #F5F5F5;
-  color: #212121;
+  background: var(--color-bg);
+  color: var(--color-dark);
   outline: none;
   transition: border 0.2s;
 }
 .search-input:focus {
-  border-color: #708090;
+  border-color: var(--color-accent);
 }
 .search-icon {
   position: absolute;
-  right: 8px;
-  color: #708090;
+  right: var(--spacing-base);
+  color: var(--color-accent);
   font-size: 20px;
 }
 .notifications {
   position: relative;
-  margin-right: 8px;
+  margin-right: var(--spacing-base);
 }
 .notifications .material-icons {
   font-size: 24px;
-  color: #708090;
+  color: var(--color-accent);
 }
 .notification-badge {
   position: absolute;
   top: -4px;
   right: -8px;
-  background: #212121;
-  color: #FFFFFF;
-  font-size: 12px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border: 1px solid var(--color-bg);
   font-weight: 700;
-  border-radius: 50%;
-  padding: 2px 6px;
 }
 .profile-menu {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-base);
 }
 .avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  border: 2px solid var(--color-bg);
   object-fit: cover;
-  border: 1px solid #DDDDDD;
 }
 .profile-name {
+  color: var(--color-bg);
+  font-weight: 600;
   font-size: 16px;
-  font-weight: 400;
-  color: #212121;
-  margin-right: 8px;
 }
 .logout-btn {
-  background: none;
-  border: none;
-  color: #708090;
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-bg);
+  border-radius: 6px;
+  padding: 4px 8px;
   cursor: pointer;
-  font-size: 20px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: uppercase;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 .logout-btn:hover {
-  background: #F5F5F5;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border: 1px solid var(--color-bg);
+}
+.logout-btn .material-icons {
+  font-size: 20px;
+  color: var(--color-accent);
+}
+.nav-label {
+  color: var(--color-bg);
+  font-weight: 600;
+  font-size: 16px;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  letter-spacing: 0.5px;
 }
 .breadcrumb {
   display: flex;

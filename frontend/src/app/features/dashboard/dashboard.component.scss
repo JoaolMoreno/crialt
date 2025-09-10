@@ -1,33 +1,34 @@
 @import '../../../styles.scss';
 
 .dashboard-section {
-  padding: 32px;
-  background: #FFFFFF;
+  padding: calc(var(--spacing-base) * 4);
+  background: var(--color-bg);
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(33,33,33,0.08);
+  box-shadow: 0 2px 16px rgba(53,39,28,0.08);
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 h1 {
+  font-family: 'Diore', serif;
   font-size: 32px;
   font-weight: 400;
-  color: #212121;
+  color: var(--color-dark);
   letter-spacing: 1.5px;
-  margin-bottom: 32px;
+  margin-bottom: calc(var(--spacing-base) * 4);
 }
 
 .dashboard-cards {
   display: flex;
-  gap: 24px;
-  margin-bottom: 40px;
+  gap: calc(var(--spacing-base) * 3);
+  margin-bottom: calc(var(--spacing-base) * 5);
   flex-wrap: wrap;
 }
 
 .stats-card {
-  background: #F5F5F5;
+  background: var(--color-light);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(33,33,33,0.04);
-  padding: 24px 32px;
+  box-shadow: 0 1px 4px rgba(53,39,28,0.04);
+  padding: calc(var(--spacing-base) * 3) calc(var(--spacing-base) * 4);
   min-width: 180px;
   flex: 1 1 180px;
   display: flex;
@@ -39,26 +40,27 @@ h1 {
 .stats-title {
   font-size: 16px;
   font-weight: 600;
-  color: #666666;
-  margin-bottom: 8px;
+  color: var(--color-dark);
+  margin-bottom: var(--spacing-base);
 }
 
 .stats-value {
   font-size: 28px;
   font-weight: 700;
-  color: #212121;
+  color: var(--color-accent);
   letter-spacing: 1px;
 }
 
 .dashboard-recent-projects {
-  margin-top: 32px;
+  margin-top: calc(var(--spacing-base) * 4);
 }
 
 h2 {
+  font-family: 'Diore', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #212121;
-  margin-bottom: 24px;
+  color: var(--color-dark);
+  margin-bottom: calc(var(--spacing-base) * 3);
 }
 
 .recent-projects-list {
@@ -67,35 +69,35 @@ h2 {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  gap: calc(var(--spacing-base) * 3);
 }
 
 .recent-projects-list li {
-  background: #F5F5F5;
+  background: var(--color-light);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(33,33,33,0.04);
-  padding: 20px 24px;
+  box-shadow: 0 1px 4px rgba(53,39,28,0.04);
+  padding: calc(var(--spacing-base) * 2.5) calc(var(--spacing-base) * 3);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-base);
 }
 
 .project-name {
   font-size: 18px;
   font-weight: 600;
-  color: #212121;
+  color: var(--color-dark);
 }
 
 .project-client, .project-status, .project-date {
   font-size: 16px;
-  color: #666666;
+  color: var(--color-dark);
 }
 
 .empty-state {
   text-align: center;
-  color: #666666;
+  color: var(--color-dark);
   font-size: 18px;
-  margin-top: 32px;
+  margin-top: calc(var(--spacing-base) * 4);
 }
 
 .dashboard-loading {
@@ -136,4 +138,3 @@ h2 {
   color: #212121;
   margin-bottom: 16px;
 }
-

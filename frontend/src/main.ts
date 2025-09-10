@@ -1,3 +1,16 @@
+import { Chart, DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Legend, Tooltip } from 'chart.js';
+
+Chart.register(
+  DoughnutController,
+  BarController,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Legend,
+  Tooltip
+);
+
 import { enableProdMode } from '@angular/core';
 import { environment } from './app/environments/environment';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -10,4 +23,3 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, appConfig)
   .catch(err => console.error(err));
-

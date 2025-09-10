@@ -1,6 +1,9 @@
 <section class="client-list-section">
   <h1>Clientes</h1>
   <div class="client-list-actions">
+    <button class="export-btn" style="margin-right:16px;" (click)="onNewClient()">
+      <span class="material-icons">person_add</span> Novo Cliente
+    </button>
     <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="applyFilters()" />
     <select [(ngModel)]="selectedStatus" class="filter-select" (change)="applyFilters()">
       <option value="">Todos os status</option>
@@ -21,16 +24,16 @@
   <table class="client-table" *ngIf="!loading && filteredClients.length">
     <thead>
       <tr>
-        <th>Nome</th>
-        <th>CPF/CNPJ</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Data de Cadastro</th>
+        <th (click)="sortBy('name')" style="cursor:pointer">Nome <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="sortBy('document')" style="cursor:pointer">CPF/CNPJ <span *ngIf="sortColumn==='document'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="sortBy('email')" style="cursor:pointer">Email <span *ngIf="sortColumn==='email'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="sortBy('is_active')" style="cursor:pointer">Status <span *ngIf="sortColumn==='is_active'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="sortBy('created_at')" style="cursor:pointer">Data de Cadastro <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th>Ações</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let client of filteredClients">
+      <tr *ngFor="let client of paginatedClients">
         <td>{{ client.name }}</td>
         <td>{{ client.document }}</td>
         <td>{{ client.email }}</td>
@@ -41,18 +44,22 @@
         </td>
         <td>{{ client.created_at | date:'shortDate' }}</td>
         <td>
-          <button class="action-btn" (click)="onEditClient(client)" [disabled]="!isAdmin"><span class="material-icons">edit</span></button>
-          <button class="action-btn" (click)="onViewClient(client)"><span class="material-icons">visibility</span></button>
-          <button class="action-btn" (click)="onNewProject(client)"><span class="material-icons">add_circle</span></button>
-          <button class="action-btn" (click)="onToggleStatus(client)" [disabled]="!isAdmin">
+          <button class="action-btn" (click)="onEditClient(client)" [disabled]="!isAdmin" title="Editar cliente"><span class="material-icons">edit</span></button>
+          <button class="action-btn" (click)="onViewClient(client)" title="Visualizar cliente"><span class="material-icons">visibility</span></button>
+          <button class="action-btn" (click)="onNewProject(client)" title="Novo projeto"><span class="material-icons">add_circle</span></button>
+          <button class="action-btn" (click)="onToggleStatus(client)" [disabled]="!isAdmin" [title]="client.is_active ? 'Inativar cliente' : 'Ativar cliente'">
             <span class="material-icons">{{ client.is_active ? 'block' : 'check_circle' }}</span>
           </button>
         </td>
       </tr>
     </tbody>
   </table>
+  <div *ngIf="!loading && filteredClients.length > 0 && totalPages > 1" class="pagination-controls">
+    <button (click)="setPage(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
+    <span>Página {{currentPage}} de {{totalPages}}</span>
+    <button (click)="setPage(currentPage+1)" [disabled]="currentPage===totalPages">Próxima</button>
+  </div>
   <div *ngIf="!loading && !filteredClients.length" class="empty-state">Nenhum cliente encontrado.</div>
   <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
   <div *ngIf="error" class="client-list-error">{{ error }}</div>
 </section>
-

@@ -35,13 +35,13 @@ export class SidebarComponent {
       label: 'Clientes',
       icon: 'groups',
       route: '/clients',
-      notificationCount: 2
+      notificationCount: 0
     },
     {
       label: 'Projetos',
       icon: 'folder_special',
       route: '/projects',
-      notificationCount: 1
+      notificationCount: 0
     },
     {
       label: 'Etapas',

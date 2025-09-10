@@ -1,2 +1,197 @@
-/* SCSS vazio para ClientListComponent */
+@import '../../../../styles.scss';
 
+.client-list-section {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: var(--color-bg);
+  padding: calc(var(--spacing-base) * 4) calc(var(--spacing-base) * 3);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(53,39,28,0.06);
+  color: var(--color-dark);
+
+  h1 {
+    font-family: 'Diore', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    margin-bottom: calc(var(--spacing-base) * 3);
+    color: var(--color-dark);
+    text-align: left;
+  }
+}
+
+.client-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing-base) * 2);
+  margin-bottom: calc(var(--spacing-base) * 3);
+  align-items: center;
+
+  .search-input, .filter-select {
+    font-family: inherit;
+    font-size: 16px;
+    padding: var(--spacing-base) calc(var(--spacing-base) * 1.5);
+    border: 1px solid var(--color-light);
+    border-radius: 6px;
+    background: var(--color-light);
+    color: var(--color-dark);
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 180px;
+    &:focus {
+      border-color: var(--color-accent);
+    }
+  }
+
+  .export-btn {
+    background: var(--color-dark);
+    color: var(--color-bg);
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    padding: calc(var(--spacing-base) * 1.25) calc(var(--spacing-base) * 2.5);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-base);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(53,39,28,0.08);
+    transition: background 0.2s;
+    &:hover {
+      background: var(--color-accent);
+    }
+    .material-icons {
+      font-size: 20px;
+      color: var(--color-bg);
+    }
+  }
+}
+
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg);
+  box-shadow: 0 1px 4px rgba(53,39,28,0.04);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: calc(var(--spacing-base) * 3);
+
+  th, td {
+    font-family: inherit;
+    font-size: 16px;
+    padding: calc(var(--spacing-base) * 1.5) calc(var(--spacing-base) * 2);
+    text-align: left;
+    border-bottom: 1px solid var(--color-light);
+    color: var(--color-dark);
+  }
+  th {
+    font-weight: 600;
+    background: var(--color-light);
+    font-size: 18px;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: calc(var(--spacing-base) * 0.75);
+  margin-right: 4px;
+  color: #708090;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+  .material-icons {
+    font-size: 20px;
+    vertical-align: middle;
+  }
+  &:hover {
+    background: #F5F5F5;
+    color: #212121;
+  }
+  &:disabled {
+    color: #DDDDDD;
+    cursor: not-allowed;
+  }
+}
+
+.active {
+  color: #212121;
+  font-weight: 600;
+  background: #E8F5E9;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+.inactive {
+  color: #666666;
+  font-weight: 400;
+  background: #F5F5F5;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.empty-state {
+  font-size: 16px;
+  color: #666666;
+  font-style: italic;
+  margin: 32px 0;
+  text-align: center;
+}
+
+.client-list-error {
+  color: #D32F2F;
+  background: #FFF0F0;
+  border: 1px solid #D32F2F;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 900px) {
+  .client-list-section {
+    padding: 16px 4px;
+  }
+  .client-list-actions {
+    flex-direction: column;
+    gap: 12px;
+    .search-input, .filter-select {
+      min-width: 100%;
+    }
+  }
+  .client-table th, .client-table td {
+    padding: 8px 6px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .client-list-section {
+    padding: 8px 0;
+  }
+  .client-table {
+    font-size: 14px;
+    th, td {
+      padding: 6px 2px;
+      font-size: 13px;
+    }
+  }
+}

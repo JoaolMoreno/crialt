@@ -31,9 +31,14 @@ export class ClientFormComponent implements OnInit {
   cepLoading = false;
   cepError = '';
 
+  documents: File[] = [];
+  generatedPassword: string = '';
+  isAdmin: boolean = false;
+
   ngOnInit(): void {
     this.clientId = this.route.snapshot.paramMap.get('id');
     this.isEdit = !!this.clientId;
+    const draft = localStorage.getItem('clientFormDraft');
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       document: ['', [Validators.required]],
@@ -56,33 +61,38 @@ export class ClientFormComponent implements OnInit {
       }),
       notes: [''],
       is_active: [true],
-      first_access: [true]
+      first_access: [true],
+      documents: [[]],
     });
-    if (this.isEdit) {
-      this.loadClient();
+    if (draft && !this.isEdit) {
+      this.form.patchValue(JSON.parse(draft));
     }
-    this.form.get('address.zip_code')?.valueChanges.subscribe((cep: string) => {
-      if (cep && cep.length === 8) {
-        this.onBuscarCep(cep);
+    if (this.isEdit) {
+      this.loading = true;
+      this.clientService.getClientById(this.clientId!).subscribe({
+        next: (client) => {
+          this.form.patchValue(client);
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.error = 'Erro ao carregar cliente.';
+        }
+      });
+    }
+    this.form.valueChanges.subscribe(val => {
+      if (!this.isEdit) {
+        localStorage.setItem('clientFormDraft', JSON.stringify(val));
       }
     });
   }
 
-  loadClient(): void {
-    this.loading = true;
-    this.clientService.getClientById(this.clientId!).subscribe({
-      next: (client) => {
-        this.form.patchValue(client);
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.error = 'Erro ao carregar cliente.';
-      }
-    });
-  }
-
-  onBuscarCep(cep: string): void {
+  onBuscarCep(): void {
+    const cep = this.form.get('address.zip_code')?.value;
+    if (!cep || cep.length < 8) {
+      this.cepError = 'Informe um CEP válido.';
+      return;
+    }
     this.cepLoading = true;
     this.cepError = '';
     this.viaCepService.buscarCep(cep).subscribe((res: ViaCepResponse | null) => {
@@ -103,49 +113,35 @@ export class ClientFormComponent implements OnInit {
     });
   }
 
+  onResetPassword(): void {
+    // Mock: redefinir senha
+    this.generatedPassword = Math.random().toString(36).slice(-8);
+    alert('Senha redefinida: ' + this.generatedPassword);
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) return;
     this.loading = true;
-    this.error = '';
-    const clientData = this.form.value;
-    if (clientData.document_type === 'cpf') {
-      if (!cpfValidator(clientData.document)) {
-        this.error = 'CPF inválido.';
+    const data = { ...this.form.value };
+
+    this.clientService.updateClient(data, this.form.value.documents).subscribe({
+      next: () => {
         this.loading = false;
-        return;
-      }
-    } else {
-      if (!cnpjValidator(clientData.document)) {
-        this.error = 'CNPJ inválido.';
+        localStorage.removeItem('clientFormDraft');
+        this.router.navigate(['/clients']);
+      },
+      error: () => {
         this.loading = false;
-        return;
+        this.error = 'Erro ao salvar cliente.';
       }
-    }
+    });
+  }
+
+  onBack(): void {
     if (this.isEdit) {
-      this.clientService.updateClient(this.clientId!, clientData).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/clients']);
-        },
-        error: () => {
-          this.loading = false;
-          this.error = 'Erro ao atualizar cliente.';
-        }
-      });
+      this.router.navigate(['/clients']);
     } else {
-      this.clientService.createClient(clientData).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/clients']);
-        },
-        error: () => {
-          this.loading = false;
-          this.error = 'Erro ao cadastrar cliente.';
-        }
-      });
+      this.router.navigate(['/clients']);
     }
   }
 }

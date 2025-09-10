@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
             }
             this.revenueChartData.data.labels = months;
             this.revenueChartData.data.datasets[0].data = revenueByMonth;
-            // TODO: Buscar etapas próximas do vencimento
+
             this.loading = false;
           },
           error: () => {

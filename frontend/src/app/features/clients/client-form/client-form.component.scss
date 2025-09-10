@@ -1,2 +1,112 @@
-/* SCSS vazio para ClientFormComponent */
+@import '../../../../styles.scss';
 
+.client-form-section {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: var(--color-bg);
+  padding: calc(var(--spacing-base) * 4) calc(var(--spacing-base) * 3);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(53,39,28,0.06);
+  color: var(--color-dark);
+
+  h1 {
+    font-family: 'Diore', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    margin-bottom: calc(var(--spacing-base) * 3);
+    color: var(--color-dark);
+    text-align: left;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-base) * 3);
+  background: transparent;
+  &.loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing-base) * 3);
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-base);
+  min-width: 180px;
+  flex: 1 1 180px;
+  label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-bottom: 2px;
+  }
+  input, select, textarea {
+    font-family: inherit;
+    font-size: 16px;
+    padding: var(--spacing-base) calc(var(--spacing-base) * 1.5);
+    border: 1px solid var(--color-light);
+    border-radius: 6px;
+    background: var(--color-light);
+    color: var(--color-dark);
+    outline: none;
+    transition: border-color 0.2s;
+    &:focus {
+      border-color: var(--color-accent);
+    }
+  }
+  textarea {
+    min-height: 60px;
+    resize: vertical;
+  }
+  .error {
+    color: #D32F2F;
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 2px;
+  }
+}
+
+.address-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing-base) * 1.5);
+  label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-bottom: calc(var(--spacing-base) * 1);
+    width: 100%;
+  }
+  .form-group {
+    min-width: 120px;
+    flex: 1 1 120px;
+    margin-bottom: 0;
+  }
+}
+
+.save-btn {
+  background: var(--color-dark);
+  color: var(--color-bg);
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  padding: calc(var(--spacing-base) * 1.25) calc(var(--spacing-base) * 2.5);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(53,39,28,0.08);
+  transition: background 0.2s;
+  &:hover {
+    background: var(--color-accent);
+  }
+}
