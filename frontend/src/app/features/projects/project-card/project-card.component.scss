@@ -1,0 +1,55 @@
+.project-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(53,39,28,0.06);
+  padding: 24px;
+  margin: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 260px;
+  max-width: 320px;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background: var(--color-light);
+  color: var(--color-dark);
+}
+.status.active { background: var(--color-accent); color: #fff; }
+.status.paused { background: #FFD6D6; color: #b00020; }
+.status.completed { background: #D6FFD6; color: #2e7d32; }
+.value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.client {
+  font-size: 16px;
+  color: var(--color-dark);
+}
+.stage {
+  font-size: 15px;
+  color: var(--color-dark);
+}
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  .material-icons {
+    font-size: 20px;
+    color: var(--color-accent);
+  }
+  &:hover .material-icons {
+    color: var(--color-dark);
+  }
+}
+

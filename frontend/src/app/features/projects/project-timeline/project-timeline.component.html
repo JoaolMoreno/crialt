@@ -1,2 +1,29 @@
-<!-- Template vazio para ProjectTimelineComponent -->
-
+<section class="project-timeline-section" *ngIf="project">
+  <h1>Timeline do Projeto</h1>
+  <div class="timeline-filters">
+    <label for="filterPeriod">Filtrar por período:</label>
+    <input id="filterPeriod" type="month" (change)="onPeriodChange($event)" />
+  </div>
+  <div class="gantt-wrapper">
+    <div class="gantt-bar" *ngFor="let stage of stages" [class]="stage.status">
+      <div class="gantt-label">
+        <span>{{ stage.name }}</span>
+        <span class="dates">{{ stage.actual_start_date || stage.planned_start_date | date:'shortDate' }} - {{ stage.actual_end_date || stage.planned_end_date | date:'shortDate' }}</span>
+        <span *ngIf="stage.specific_data?.important_date" class="important-date" title="Marco importante">
+          <span class="material-icons">flag</span> {{ stage.specific_data.important_date | date:'shortDate' }}
+        </span>
+        <span *ngIf="stage.specific_data?.dependency_id" class="dependency-info" title="Depende da etapa anterior">
+          <span class="material-icons">call_merge</span> Depende de #{{ stage.specific_data.dependency_id }}
+        </span>
+      </div>
+      <div class="gantt-progress" [style.width.%]="stage.progress_percentage"></div>
+      <button class="btn-secundario" (click)="viewStageDetail(stage)">Detalhes</button>
+    </div>
+  </div>
+  <div class="timeline-actions">
+    <button class="btn-padrao" (click)="exportTimeline('pdf')"><span class="material-icons">download</span> Exportar PDF</button>
+    <button class="btn-padrao" (click)="exportTimeline('image')"><span class="material-icons">download</span> Exportar Imagem</button>
+  </div>
+</section>
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<div *ngIf="error" class="error-message">{{ error }}</div>

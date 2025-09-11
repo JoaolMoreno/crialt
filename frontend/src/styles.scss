@@ -194,6 +194,47 @@ button.cta {
   }
 }
 
+.btn-secundario {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 6px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(53,39,28,0.08);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  .material-icons {
+    font-size: 20px;
+    color: var(--color-accent);
+    transition: color 0.2s;
+  }
+  &:hover {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border-color: var(--color-accent);
+    .material-icons {
+      color: var(--color-bg);
+    }
+  }
+  &:disabled {
+    background: var(--color-light);
+    color: var(--color-dark);
+    cursor: not-allowed;
+    opacity: 0.5;
+    border-color: var(--color-light);
+    .material-icons {
+      color: var(--color-dark);
+    }
+  }
+}
+
 .section-bg {
   background: var(--color-light);
 }

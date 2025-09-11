@@ -37,6 +37,18 @@ export const appRoutes: Routes = [
                 loadComponent: () => import('./features/projects/project-form/project-form.component').then(m => m.ProjectFormComponent)
             },
             {
+                path: 'projects/:id',
+                loadComponent: () => import('./features/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent)
+            },
+            {
+                path: 'projects/:id/edit',
+                loadComponent: () => import('./features/projects/project-form/project-form.component').then(m => m.ProjectFormComponent)
+            },
+            {
+                path: 'projects/:id/timeline',
+                loadComponent: () => import('./features/projects/project-timeline/project-timeline.component').then(m => m.ProjectTimelineComponent)
+            },
+            {
                 path: 'stages',
                 loadComponent: () => import('./features/stages/stage-form/stage-form.component').then(m => m.StageFormComponent)
             },

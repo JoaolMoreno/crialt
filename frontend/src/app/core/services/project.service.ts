@@ -28,4 +28,16 @@ export class ProjectService {
   deleteProject(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
+
+  exportProjects(format: 'pdf' | 'excel'): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export?format=${format}`, { responseType: 'blob', withCredentials: true });
+  }
+
+  updateProjectsStatus(ids: string[], status: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/batch-status`, { ids, status }, { withCredentials: true });
+  }
+
+  getProjectTimeline(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}/timeline`, { withCredentials: true });
+  }
 }

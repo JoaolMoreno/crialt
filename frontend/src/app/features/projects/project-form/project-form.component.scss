@@ -1,2 +1,80 @@
-/* SCSS vazio para ProjectFormComponent */
+@use "../../../../styles.scss" as *;
 
+.project-form-section {
+  background: var(--color-bg);
+  padding: 32px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(53,39,28,0.06);
+  max-width: 700px;
+  margin: 32px auto;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-header h1 {
+  font-family: 'Diore', serif;
+  font-size: 32px;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+input, textarea, select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-light);
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #fff;
+  color: var(--color-dark);
+}
+
+label {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  color: var(--color-dark);
+  font-weight: 500;
+}
+
+.error-message {
+  color: var(--color-accent);
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+button {
+  margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+  .project-form-section {
+    padding: 16px 8px;
+    max-width: 100%;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

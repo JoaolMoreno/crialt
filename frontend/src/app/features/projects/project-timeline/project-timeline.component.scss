@@ -1,2 +1,81 @@
-/* SCSS vazio para ProjectTimelineComponent */
+@use "../../../../styles.scss" as *;
 
+.project-timeline-section {
+  background: var(--color-bg);
+  padding: 32px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(53,39,28,0.06);
+  max-width: 900px;
+  margin: 32px auto;
+}
+
+.gantt-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.gantt-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-light);
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: 0 1px 6px rgba(53,39,28,0.04);
+  position: relative;
+}
+
+.gantt-bar.in_progress {
+  border-left: 6px solid var(--color-accent);
+}
+.gantt-bar.completed {
+  border-left: 6px solid #4CAF50;
+}
+.gantt-bar.paused {
+  border-left: 6px solid #FFC107;
+}
+.gantt-bar.cancelled {
+  border-left: 6px solid #F44336;
+}
+
+.gantt-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+.dates {
+  font-size: 14px;
+  color: var(--color-dark);
+  font-style: italic;
+}
+
+.gantt-progress {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--color-accent);
+  min-width: 40px;
+  transition: width 0.3s;
+}
+
+.timeline-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .project-timeline-section {
+    padding: 16px 8px;
+    max-width: 100%;
+  }
+  .gantt-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 8px;
+  }
+}

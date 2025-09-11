@@ -1,2 +1,104 @@
-<!-- Template vazio para ProjectDetailComponent -->
+<!-- Template do ProjectDetailComponent -->
 
+<section class="project-detail-section" *ngIf="project">
+  <div class="header">
+    <div class="info">
+      <h1>{{ project.name }}</h1>
+      <div class="client">Cliente: <b>{{ project.clients[0]?.name }}</b></div>
+      <div class="value">Valor: <span class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</span></div>
+      <div class="status">Status: <span [class]="project.status">{{ project.status }}</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn-secundario" (click)="onEditProject()"><span class="material-icons">edit</span> Editar</button>
+      <button class="btn-secundario" (click)="onPauseProject()"><span class="material-icons">pause_circle</span> Pausar</button>
+      <button class="btn-secundario" (click)="onFinishProject()"><span class="material-icons">check_circle</span> Finalizar</button>
+    </div>
+  </div>
+  <div class="progress-bar-wrapper">
+    <app-progress-bar [progress]="progress"></app-progress-bar>
+    <span class="progress-label">{{ progress }}% concluído</span>
+  </div>
+  <div class="current-stage-widget" *ngIf="currentStage">
+    <h3>Etapa Atual</h3>
+    <div class="stage-name">{{ currentStage.name }}</div>
+    <div class="stage-status">Status: <span [class]="currentStage.status">{{ currentStage.status }}</span></div>
+    <div class="stage-dates">Início: {{ currentStage.actual_start_date || currentStage.planned_start_date | date:'shortDate' }} | Prazo: {{ currentStage.actual_end_date || currentStage.planned_end_date | date:'shortDate' }}</div>
+  </div>
+  <nav class="tabs">
+    <button [class.active]="activeTab==='overview'" (click)="setTab('overview')">Visão Geral</button>
+    <button [class.active]="activeTab==='timeline'" (click)="setTab('timeline')">Timeline</button>
+    <button [class.active]="activeTab==='files'" (click)="setTab('files')">Arquivos</button>
+    <button [class.active]="activeTab==='finance'" (click)="setTab('finance')">Financeiro</button>
+    <button [class.active]="activeTab==='history'" (click)="setTab('history')">Histórico</button>
+  </nav>
+  <div class="tab-content">
+    <div *ngIf="activeTab==='overview'">
+      <h2>Resumo do Projeto</h2>
+      <p>{{ project.description }}</p>
+      <div class="dates">Início: {{ project.start_date | date:'shortDate' }} | Prazo estimado: {{ project.estimated_end_date | date:'shortDate' }}</div>
+      <div class="scope">Área: {{ project.scope.total_area }} m² | Ambientes: {{ project.scope.rooms_included?.join(', ') }}</div>
+      <div class="notes" *ngIf="project.notes">Observações: {{ project.notes }}</div>
+    </div>
+    <div *ngIf="activeTab==='timeline'">
+      <h2>Timeline das Etapas</h2>
+      <table class="timeline-table">
+        <thead>
+          <tr>
+            <th>Etapa</th>
+            <th>Status</th>
+            <th>Início</th>
+            <th>Prazo</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stage of project.stages">
+            <td>{{ stage.name }}</td>
+            <td>{{ stage.status }}</td>
+            <td>{{ stage.actual_start_date || stage.planned_start_date | date:'shortDate' }}</td>
+            <td>{{ stage.actual_end_date || stage.planned_end_date | date:'shortDate' }}</td>
+            <td class="price">{{ stage.value | currency:'BRL':'symbol':'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="activeTab==='files'">
+      <h2>Arquivos do Projeto</h2>
+      <div *ngFor="let stage of project.stages">
+        <h3>{{ stage.name }}</h3>
+<!--        <ul>-->
+<!--          <li *ngFor="let file of stage.files">{{ file.name }} <button class="btn-secundario">Download</button></li>-->
+<!--        </ul>-->
+        <!-- <app-file-upload></app-file-upload> -->
+      </div>
+    </div>
+    <div *ngIf="activeTab==='finance'">
+      <h2>Financeiro</h2>
+      <table class="finance-table">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Valor Total</td>
+            <td class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</td>
+            <td>Pago/Em aberto</td>
+          </tr>
+          <!-- Adicionar pagamentos/orçamentos reais -->
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="activeTab==='history'">
+      <h2>Histórico de Alterações</h2>
+      <ul>
+        <li *ngFor="let log of project.history">{{ log.date | date:'short' }} - {{ log.action }}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<app-loading-spinner *ngIf="loading"></app-loading-spinner>
+<div *ngIf="error" class="error-message">{{ error }}</div>
