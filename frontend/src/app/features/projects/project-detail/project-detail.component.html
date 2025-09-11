@@ -4,7 +4,13 @@
   <div class="header">
     <div class="info">
       <h1>{{ project.name }}</h1>
-      <div class="client">Cliente: <b>{{ project.clients[0]?.name }}</b></div>
+      <div class="client">Cliente(s):
+        <b>
+          <ng-container *ngFor="let client of project.clients; let last = last">
+            {{ client.name }}<span *ngIf="!last">, </span>
+          </ng-container>
+        </b>
+      </div>
       <div class="value">Valor: <span class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</span></div>
       <div class="status">Status: <span [class]="project.status">{{ project.status }}</span></div>
     </div>
