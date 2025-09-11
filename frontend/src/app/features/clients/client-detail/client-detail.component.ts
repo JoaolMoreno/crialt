@@ -37,6 +37,7 @@ export class ClientDetailComponent implements OnInit {
   passwordError = '';
   passwordSuccess = '';
   canEdit = false;
+  showPasswordCard = false;
 
   ngOnInit(): void {
     const clientId = this.route.snapshot.paramMap.get('id');
@@ -85,11 +86,19 @@ export class ClientDetailComponent implements OnInit {
   enableEdit(): void {
     this.editMode = true;
     this.editData = { ...this.client };
+    this.showPasswordCard = false;
   }
 
   cancelEdit(): void {
     this.editMode = false;
     this.editData = { ...this.client };
+    this.showPasswordCard = false;
+  }
+
+  togglePasswordCard(): void {
+    this.showPasswordCard = !this.showPasswordCard;
+    this.passwordError = '';
+    this.passwordSuccess = '';
   }
 
   saveEdit(): void {

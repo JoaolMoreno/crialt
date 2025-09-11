@@ -60,6 +60,10 @@
   font-style: italic;
 }
 
+.material-icons {
+  font-family: 'Material Icons' !important;
+}
+
 :root {
   --color-dark: #35271C;
   --color-accent: #B95830;
@@ -157,6 +161,37 @@ button.cta {
   border-radius: 4px;
   padding: var(--spacing-base) calc(var(--spacing-base) * 3);
   cursor: pointer;
+}
+
+.btn-padrao {
+  background: var(--color-dark);
+  color: var(--color-bg);
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  padding: calc(var(--spacing-base) * 1) calc(var(--spacing-base) * 2.25);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(53,39,28,0.08);
+  transition: background 0.2s;
+  .material-icons {
+    font-size: 20px;
+    color: var(--color-bg);
+  }
+  &:hover {
+    background: var(--color-accent);
+  }
+  &:disabled {
+    background: var(--color-light);
+    color: var(--color-dark);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 .section-bg {

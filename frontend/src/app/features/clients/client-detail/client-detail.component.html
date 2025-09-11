@@ -58,6 +58,9 @@
         <button class="cancel-btn" *ngIf="editMode" (click)="cancelEdit()">
           <span class="material-icons">close</span> Cancelar
         </button>
+        <button class="password-btn" *ngIf="canEdit && !editMode" (click)="togglePasswordCard()">
+          <span class="material-icons">lock_reset</span> Trocar Senha
+        </button>
       </div>
       <div *ngIf="editMode" class="edit-fields">
         <input [(ngModel)]="editData.name" placeholder="Nome" />
@@ -93,7 +96,7 @@
       </ul>
       <div *ngIf="!documents.length" class="empty-state">Nenhum documento encontrado.</div>
     </div>
-    <div class="client-password-card" *ngIf="canEdit">
+    <div class="client-password-card" *ngIf="showPasswordCard">
       <h2>Trocar Senha</h2>
       <input type="password" #newPassword placeholder="Nova senha" />
       <button class="change-password-btn" (click)="changePassword(newPassword.value)" [disabled]="passwordLoading">
@@ -102,6 +105,9 @@
       <app-loading-spinner *ngIf="passwordLoading" size="small" [overlay]="false"></app-loading-spinner>
       <div *ngIf="passwordError" class="error">{{ passwordError }}</div>
       <div *ngIf="passwordSuccess" class="success">{{ passwordSuccess }}</div>
+      <button class="cancel-btn" (click)="togglePasswordCard()" style="margin-top:12px;">
+        <span class="material-icons">close</span> Fechar
+      </button>
     </div>
   </div>
 </section>

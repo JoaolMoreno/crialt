@@ -1,4 +1,4 @@
-@import '../../../../styles.scss';
+@use '../../../../styles.scss' as *;
 
 .client-detail-section {
   font-family: 'Montserrat', Arial, sans-serif;
@@ -65,42 +65,28 @@
   display: flex;
   gap: calc(var(--spacing-base) * 1.5);
   margin-top: calc(var(--spacing-base) * 2);
-  .edit-btn, .save-btn, .cancel-btn {
-    background: var(--color-dark);
-    color: var(--color-bg);
-    font-family: 'Montserrat', Arial, sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 6px;
-    padding: calc(var(--spacing-base) * 1) calc(var(--spacing-base) * 2.25);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-base);
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(53,39,28,0.08);
-    transition: background 0.2s;
-    .material-icons {
-      font-size: 20px;
-    }
-    &:hover {
-      background: var(--color-accent);
-    }
-    &:disabled {
-      background: var(--color-light);
-      color: var(--color-dark);
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
+
+  .edit-btn, .save-btn, .back-btn, .password-btn {
+    @extend .btn-padrao;
   }
   .cancel-btn {
     background: transparent;
     color: var(--color-dark);
     border: 1px solid var(--color-dark);
+    @extend .btn-padrao;
     &:hover {
       background: var(--color-light);
     }
+  }
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-base) * 2);
+  margin-bottom: calc(var(--spacing-base) * 3);
+  .back-btn {
+    @extend .btn-padrao;
   }
 }
 
