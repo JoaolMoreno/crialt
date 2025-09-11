@@ -10,14 +10,13 @@ from ..schemas.task import TaskRead, TaskCreate, TaskUpdate
 
 router = APIRouter()
 
-@router.get("/", response_model=List[TaskRead])
+@router.get("", response_model=List[TaskRead])
 def get_tasks(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     tasks = db.query(Task).all()
     return tasks
 
 @router.get("/stage/{stage_id}", response_model=List[TaskRead])
 def get_tasks_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
-    # Buscar a etapa e verificar permissão através do projeto
     stage = db.get(Stage, stage_id)
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa não encontrada")
@@ -36,7 +35,6 @@ def get_tasks_by_project(project_id: str, db: Session = Depends(get_db), actor =
         raise HTTPException(status_code=404, detail="Projeto não encontrado")
     client_ids = [str(client.id) for client in project.clients]
     client_resource_permission(client_ids, actor)
-    # Buscar todas as tasks das stages deste projeto
     tasks = db.query(Task).join(Stage).filter(Stage.project_id == project_id).all()
     return tasks
 
@@ -55,7 +53,7 @@ def get_task(task_id: str, db: Session = Depends(get_db), actor = Depends(get_cu
     client_resource_permission(client_ids, actor)
     return task
 
-@router.post("/", response_model=TaskRead)
+@router.post("", response_model=TaskRead)
 def create_task(task_data: TaskCreate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     # Verificar se a etapa existe
     stage = db.get(Stage, task_data.stage_id)

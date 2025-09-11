@@ -11,7 +11,7 @@ from ..services.file_service import FileService
 
 router = APIRouter()
 
-@router.get("/", response_model=List[FileRead])
+@router.get("", response_model=List[FileRead])
 def get_files(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     files = db.query(File).all()
     return files
@@ -72,7 +72,7 @@ def get_file(file_id: str, db: Session = Depends(get_db), actor = Depends(get_cu
 
     return file
 
-@router.post("/", response_model=FileRead)
+@router.post("", response_model=FileRead)
 def upload_file(
     file: UploadFile = FastAPIFile(...),
     file_data: FileCreate = Depends(),

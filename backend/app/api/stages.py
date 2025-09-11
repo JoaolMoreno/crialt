@@ -9,7 +9,7 @@ from ..schemas.stage import StageRead, StageCreate, StageUpdate
 
 router = APIRouter()
 
-@router.get("/", response_model=List[StageRead])
+@router.get("", response_model=List[StageRead])
 def get_stages(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     stages = db.query(Stage).all()
     return stages
@@ -36,9 +36,8 @@ def get_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_
     client_resource_permission(client_ids, actor)
     return stage
 
-@router.post("/", response_model=StageRead)
+@router.post("", response_model=StageRead)
 def create_stage(stage_data: StageCreate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
-    # Verificar se o projeto existe
     project = db.get(Project, stage_data.project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Projeto não encontrado")

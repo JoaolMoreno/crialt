@@ -19,7 +19,7 @@ def serialize_client(client):
         data["projects"] = []
     return ClientRead.model_validate(data)
 
-@router.get("/", response_model=List[ClientRead])
+@router.get("", response_model=List[ClientRead])
 def get_clients(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     clients = db.query(Client).all()
     return [serialize_client(client) for client in clients]
@@ -35,7 +35,7 @@ def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(ge
         return serialize_client(client)
     raise HTTPException(status_code=403, detail="Acesso negado")
 
-@router.post("/", response_model=ClientRead)
+@router.post("", response_model=ClientRead)
 def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     existing_email = db.query(Client).filter(Client.email == client_data.email).first()
     if existing_email:

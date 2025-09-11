@@ -15,7 +15,7 @@ def serialize_project(project):
     data["stages"] = [s.id for s in getattr(project, "stages", [])]
     return data
 
-@router.get("/", response_model=List[ProjectRead])
+@router.get("", response_model=List[ProjectRead])
 def get_projects(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     projects = db.query(Project).all()
     return [ProjectRead.model_validate(serialize_project(p)) for p in projects]
@@ -52,7 +52,7 @@ def get_project(project_id: str, db: Session = Depends(get_db), actor = Depends(
     client_resource_permission(client_ids, actor)
     return ProjectRead.model_validate(serialize_project(project))
 
-@router.post("/", response_model=ProjectRead)
+@router.post("", response_model=ProjectRead)
 def create_project(project_data: ProjectCreate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     service = ProjectService(db)
     project = service.create_project(project_data, admin_user.id)

@@ -15,7 +15,7 @@ def get_me(user: User = Depends(get_current_user)):
     return user
 
 
-@router.get("/", response_model=List[UserRead])
+@router.get("", response_model=List[UserRead])
 def get_users(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     users = db.query(User).all()
     return users
@@ -29,7 +29,7 @@ def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Dep
     return user
 
 
-@router.post("/", response_model=UserRead)
+@router.post("", response_model=UserRead)
 def create_user(user_data: UserCreate,
                 db: Session = Depends(get_db),
                 admin_user: User = Depends(get_current_actor_factory(["admin"]))
