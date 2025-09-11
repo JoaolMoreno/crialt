@@ -3,11 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientService } from '../../../core/services/client.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-
 import { ViaCepService, ViaCepResponse } from '../../../shared/services/via-cep.service';
 import { cpfValidator, cnpjValidator } from '../../../shared/utils/validators';
 import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
 import {NgIf} from "@angular/common";
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-client-form',
@@ -85,14 +85,27 @@ export class ClientFormComponent implements OnInit {
         localStorage.setItem('clientFormDraft', JSON.stringify(val));
       }
     });
+
+    // Busca automática de CEP após 3s do término da digitação
+    this.form.get('address.zip_code')?.valueChanges
+      .pipe(
+        debounceTime(3000),
+        distinctUntilChanged(),
+        filter((cep: string) => !!cep && cep.length === 8)
+      )
+      .subscribe((cep: string) => {
+        this.buscarCepAutomatico(cep);
+      });
+
+    // Aplica o validator correto ao campo document conforme o tipo
+    this.setDocumentValidator(this.form.get('document_type')?.value);
+    this.form.get('document_type')?.valueChanges.subscribe(type => {
+      this.setDocumentValidator(type);
+      this.form.get('document')?.updateValueAndValidity();
+    });
   }
 
-  onBuscarCep(): void {
-    const cep = this.form.get('address.zip_code')?.value;
-    if (!cep || cep.length < 8) {
-      this.cepError = 'Informe um CEP válido.';
-      return;
-    }
+  buscarCepAutomatico(cep: string): void {
     this.cepLoading = true;
     this.cepError = '';
     this.viaCepService.buscarCep(cep).subscribe((res: ViaCepResponse | null) => {
@@ -113,6 +126,16 @@ export class ClientFormComponent implements OnInit {
     });
   }
 
+  setDocumentValidator(type: string) {
+    const documentControl = this.form.get('document');
+    if (!documentControl) return;
+    if (type === 'cpf') {
+      documentControl.setValidators([Validators.required, cpfValidator]);
+    } else {
+      documentControl.setValidators([Validators.required, cnpjValidator]);
+    }
+  }
+
   onResetPassword(): void {
     // Mock: redefinir senha
     this.generatedPassword = Math.random().toString(36).slice(-8);
@@ -123,18 +146,31 @@ export class ClientFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.loading = true;
     const data = { ...this.form.value };
-
-    this.clientService.updateClient(data, this.form.value.documents).subscribe({
-      next: () => {
-        this.loading = false;
-        localStorage.removeItem('clientFormDraft');
-        this.router.navigate(['/clients']);
-      },
-      error: () => {
-        this.loading = false;
-        this.error = 'Erro ao salvar cliente.';
-      }
-    });
+    if (this.isEdit && this.clientId) {
+      this.clientService.updateClient(this.clientId, data).subscribe({
+        next: () => {
+          this.loading = false;
+          localStorage.removeItem('clientFormDraft');
+          this.router.navigate(['/clients']);
+        },
+        error: () => {
+          this.loading = false;
+          this.error = 'Erro ao salvar cliente.';
+        }
+      });
+    } else {
+      this.clientService.createClient(data).subscribe({
+        next: () => {
+          this.loading = false;
+          localStorage.removeItem('clientFormDraft');
+          this.router.navigate(['/clients']);
+        },
+        error: () => {
+          this.loading = false;
+          this.error = 'Erro ao salvar cliente.';
+        }
+      });
+    }
   }
 
   onBack(): void {

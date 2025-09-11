@@ -1,6 +1,6 @@
 <section class="client-form-section">
   <div class="form-header">
-    <button type="button" class="back-btn" (click)="onBack()">
+    <button type="button" class="btn-padrao back-btn" (click)="onBack()">
       <span class="material-icons">arrow_back</span> Voltar
     </button>
     <h1>{{ isEdit ? 'Editar Cliente' : 'Cadastrar Cliente' }}</h1>
@@ -19,7 +19,9 @@
           <option value="cpf">CPF</option>
           <option value="cnpj">CNPJ</option>
         </select>
-        <div class="error" *ngIf="form.get('document')?.invalid && form.get('document')?.touched">Documento obrigatório</div>
+        <div class="error" *ngIf="form.get('document')?.errors?.cpfInvalid && form.get('document')?.touched">CPF inválido</div>
+        <div class="error" *ngIf="form.get('document')?.errors?.cnpjInvalid && form.get('document')?.touched">CNPJ inválido</div>
+        <div class="error" *ngIf="form.get('document')?.invalid && form.get('document')?.touched && !form.get('document')?.errors?.cpfInvalid && !form.get('document')?.errors?.cnpjInvalid">Documento obrigatório</div>
         <div class="error" *ngIf="error && (form.get('document')?.touched || form.get('document_type')?.touched)">{{ error }}</div>
       </div>
       <div class="form-group">
@@ -58,18 +60,17 @@
     <div class="form-row">
       <div formGroupName="address" class="address-group">
         <label>Endereço</label>
+        <div class="form-group">
+          <input formControlName="zip_code" type="text" placeholder="CEP" />
+            <span *ngIf="cepLoading" class="cep-spinner">Buscando...</span>
+            <div class="error" *ngIf="cepError">{{ cepError }}</div>
+        </div>
         <div class="form-group"><input formControlName="street" type="text" placeholder="Rua" /></div>
         <div class="form-group"><input formControlName="number" type="text" placeholder="Número" /></div>
         <div class="form-group"><input formControlName="complement" type="text" placeholder="Complemento" /></div>
         <div class="form-group"><input formControlName="neighborhood" type="text" placeholder="Bairro" /></div>
         <div class="form-group"><input formControlName="city" type="text" placeholder="Cidade" /></div>
         <div class="form-group"><input formControlName="state" type="text" placeholder="Estado" /></div>
-        <div class="form-group">
-          <input formControlName="zip_code" type="text" placeholder="CEP" (blur)="onBuscarCep()" />
-          <button type="button" (click)="onBuscarCep()" [disabled]="cepLoading" style="margin-left:8px">Buscar CEP</button>
-          <span *ngIf="cepLoading" class="cep-spinner">Buscando...</span>
-          <div class="error" *ngIf="cepError">{{ cepError }}</div>
-        </div>
       </div>
     </div>
     <div class="form-row">
@@ -93,7 +94,7 @@
       <div class="form-group" *ngIf="isEdit">
         <label>Senha</label>
         <input type="text" [value]="generatedPassword" readonly />
-        <button type="button" class="secondary" (click)="onResetPassword()">Redefinir senha</button>
+        <button type="button" class="btn-padrao" (click)="onResetPassword()">Redefinir senha</button>
       </div>
       <div class="form-group">
         <label>
@@ -101,7 +102,9 @@
         </label>
       </div>
     </div>
-    <button type="submit" class="save-btn" [disabled]="loading">{{ isEdit ? 'Salvar Alterações' : 'Cadastrar Cliente' }}</button>
+    <button type="submit" class="btn-padrao" [disabled]="loading">
+      {{ isEdit ? 'Salvar Alterações' : 'Cadastrar Cliente' }}
+    </button>
     <app-loading-spinner *ngIf="loading" size="small"></app-loading-spinner>
     <div *ngIf="error && !form.get('document')?.touched" class="form-error">{{ error }}</div>
   </form>

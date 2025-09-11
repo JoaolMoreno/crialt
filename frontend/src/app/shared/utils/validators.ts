@@ -1,23 +1,29 @@
-// Validador de CPF
-export function cpfValidator(cpf: string): boolean {
-  cpf = cpf.replace(/[\D]/g, '');
-  if (cpf.length !== 11 || /^([0-9])\1+$/.test(cpf)) return false;
+import { AbstractControl } from '@angular/forms';
+
+// Validador de CPF para Angular Forms
+export function cpfValidator(control: AbstractControl): null | { cpfInvalid: true } {
+  let cpf = control.value;
+  if (!cpf) return null;
+  cpf = cpf.replace(/\D/g, '');
+  if (cpf.length !== 11 || /^([0-9])\1+$/.test(cpf)) return { cpfInvalid: true };
   let sum = 0;
   for (let i = 0; i < 9; i++) sum += Number(cpf.charAt(i)) * (10 - i);
   let firstCheck = 11 - (sum % 11);
   if (firstCheck > 9) firstCheck = 0;
-  if (firstCheck !== Number(cpf.charAt(9))) return false;
+  if (firstCheck !== Number(cpf.charAt(9))) return { cpfInvalid: true };
   sum = 0;
   for (let i = 0; i < 10; i++) sum += Number(cpf.charAt(i)) * (11 - i);
   let secondCheck = 11 - (sum % 11);
   if (secondCheck > 9) secondCheck = 0;
-  return secondCheck === Number(cpf.charAt(10));
+  return secondCheck === Number(cpf.charAt(10)) ? null : { cpfInvalid: true };
 }
 
-// Validador de CNPJ
-export function cnpjValidator(cnpj: string): boolean {
-  cnpj = cnpj.replace(/[\D]/g, '');
-  if (cnpj.length !== 14 || /^([0-9])\1+$/.test(cnpj)) return false;
+// Validador de CNPJ para Angular Forms
+export function cnpjValidator(control: AbstractControl): null | { cnpjInvalid: true } {
+  let cnpj = control.value;
+  if (!cnpj) return null;
+  cnpj = cnpj.replace(/\D/g, '');
+  if (cnpj.length !== 14 || /^([0-9])\1+$/.test(cnpj)) return { cnpjInvalid: true };
   let length = cnpj.length - 2;
   let numbers = cnpj.substring(0, length);
   let digits = cnpj.substring(length);
@@ -28,7 +34,7 @@ export function cnpjValidator(cnpj: string): boolean {
     if (pos < 2) pos = 9;
   }
   let firstCheck = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-  if (firstCheck !== Number(digits.charAt(0))) return false;
+  if (firstCheck !== Number(digits.charAt(0))) return { cnpjInvalid: true };
   length++;
   numbers = cnpj.substring(0, length);
   sum = 0;
@@ -38,6 +44,5 @@ export function cnpjValidator(cnpj: string): boolean {
     if (pos < 2) pos = 9;
   }
   let secondCheck = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-  return secondCheck === Number(digits.charAt(1));
+  return secondCheck === Number(digits.charAt(1)) ? null : { cnpjInvalid: true };
 }
-

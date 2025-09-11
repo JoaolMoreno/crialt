@@ -17,15 +17,15 @@ export const appRoutes: Routes = [
                 loadComponent: () => import('./features/clients/client-list/client-list.component').then(m => m.ClientListComponent)
             },
             {
+                path: 'clients/new',
+                loadComponent: () => import('./features/clients/client-form/client-form.component').then(m => m.ClientFormComponent)
+            },
+            {
                 path: 'clients/:id',
                 loadComponent: () => import('./features/clients/client-detail/client-detail.component').then(m => m.ClientDetailComponent)
             },
             {
                 path: 'clients/:id/edit',
-                loadComponent: () => import('./features/clients/client-form/client-form.component').then(m => m.ClientFormComponent)
-            },
-            {
-                path: 'clients/new',
                 loadComponent: () => import('./features/clients/client-form/client-form.component').then(m => m.ClientFormComponent)
             },
             {
