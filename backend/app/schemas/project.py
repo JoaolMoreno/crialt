@@ -42,6 +42,7 @@ class ProjectUpdate(BaseModel):
     scope: Optional[dict] = None
     notes: Optional[str] = None
     clients: Optional[List[UUID]] = None
+    stages: Optional[List[UUID]] = None
 
 class ProjectRead(ProjectBase):
     id: UUID

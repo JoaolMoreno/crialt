@@ -87,10 +87,32 @@ class ProjectService:
     def update_project(self, project_id: str, project_data) -> Project:
         project = self.db.get(Project, project_id)
         if not project:
-            return None
+            raise ValueError("Projeto não encontrado")
         update_data = project_data.model_dump(exclude_unset=True)
+
         for field, value in update_data.items():
-            setattr(project, field, value)
+            if field not in ["clients", "stages"]:
+                setattr(project, field, value)
+
+        if "clients" in update_data and update_data["clients"] is not None:
+            project.clients.clear()
+            for client_id in update_data["clients"]:
+                client = self.db.get(Client, client_id)
+                if client:
+                    project.clients.append(client)
+
+        if "stages" in update_data and update_data["stages"] is not None:
+            stage_ids = set(str(sid) for sid in update_data["stages"])
+            for stage in list(project.stages):
+                if str(stage.id) not in stage_ids:
+                    self.db.delete(stage)
+            self.db.flush()
+            existing_stage_ids = {str(stage.id) for stage in project.stages}
+            for stage_id in stage_ids:
+                if stage_id not in existing_stage_ids:
+                    stage = self.db.get(Stage, stage_id)
+                    if stage:
+                        stage.project_id = project.id
         project.updated_at = datetime.now(UTC)
         self.db.commit()
         self.db.refresh(project)
@@ -102,4 +124,3 @@ class ProjectService:
             return False
         self.db.delete(project)
         self.db.commit()
-        return True
