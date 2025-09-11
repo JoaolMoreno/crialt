@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..api.dependencies import get_db, get_current_actor, admin_required
+from ..api.dependencies import get_db, get_current_actor, get_current_actor_factory
 from ..models.client import Client
 from ..schemas.client import ClientCreate, ClientUpdate, ClientRead
 from ..services.auth_service import AuthService
@@ -20,12 +20,12 @@ def serialize_client(client):
     return ClientRead.model_validate(data)
 
 @router.get("/", response_model=List[ClientRead])
-def get_clients(db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def get_clients(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     clients = db.query(Client).all()
     return [serialize_client(client) for client in clients]
 
 @router.get("/{client_id}", response_model=ClientRead)
-def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
+def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
@@ -36,7 +36,7 @@ def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(ge
     raise HTTPException(status_code=403, detail="Acesso negado")
 
 @router.post("/", response_model=ClientRead)
-def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     existing_email = db.query(Client).filter(Client.email == client_data.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
@@ -49,8 +49,8 @@ def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admi
         document_type=client_data.document_type,
         rg_ie=client_data.rg_ie,
         birth_date=client_data.birth_date,
-        email=client_data.email,
-        secondary_email=client_data.secondary_email,
+        email=str(client_data.email),
+        secondary_email=str(client_data.secondary_email) if client_data.secondary_email else None,
         phone=client_data.phone,
         mobile=client_data.mobile,
         whatsapp=client_data.whatsapp,
@@ -66,7 +66,7 @@ def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admi
     return serialize_client(client)
 
 @router.put("/{client_id}", response_model=ClientRead)
-def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
@@ -81,7 +81,7 @@ def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depen
     return serialize_client(client)
 
 @router.delete("/{client_id}")
-def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
@@ -90,7 +90,7 @@ def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = De
     return {"message": "Cliente desativado com sucesso"}
 
 @router.post("/{client_id}/reset-password")
-def reset_client_password(client_id: str, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def reset_client_password(client_id: str, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
@@ -102,7 +102,7 @@ class PasswordSetRequest(BaseModel):
     password: str
 
 @router.post("/{client_id}/set-password")
-def set_client_password(client_id: str, payload: PasswordSetRequest, db: Session = Depends(get_db), admin_user = Depends(admin_required)):
+def set_client_password(client_id: str, payload: PasswordSetRequest, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
     client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")

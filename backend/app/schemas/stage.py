@@ -72,5 +72,4 @@ class StageRead(StageBase):
     tasks: Optional[List[UUID]] = None
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True

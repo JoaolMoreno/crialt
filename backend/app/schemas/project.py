@@ -51,5 +51,4 @@ class ProjectRead(ProjectBase):
     files: Optional[List[UUID]] = None
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True

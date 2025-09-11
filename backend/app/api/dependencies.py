@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
 from typing import Generator
@@ -13,9 +13,22 @@ from ..models.client import Client
 from ..core.database import SessionLocal
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
-from ..schemas.user import UserRole
+from fastapi import Request
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
+    async def __call__(self, request: Request) -> str | None:
+        auth_header = request.headers.get("Authorization")
+        scheme, param = get_authorization_scheme_param(auth_header)
+        if scheme and scheme.lower() == "bearer" and param:
+            return param
+        token = request.cookies.get("access_token")
+        if token:
+            return token
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
+        )
+
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/v1/auth/login")
 
 
 def get_db() -> Generator:
@@ -46,7 +59,7 @@ async def get_token(request: Request) -> str | None:
     return token
 
 
-def get_current_user(token: str = Depends(get_token), db: Session = Depends(get_db)) -> User:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     logger.debug(f'Entrando em get_current_user com token={token}')
     if not token:
         logger.warning('Token ausente na requisição')
@@ -73,9 +86,12 @@ def get_current_user(token: str = Depends(get_token), db: Session = Depends(get_
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
-def get_current_actor(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    logger.debug(f'Entrando em get_current_actor com token={token}')
+def get_current_actor(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), allowed_roles: list = None):
+    logger.debug(f'Entrando em get_current_actor com token={token}, allowed_roles={allowed_roles}')
     try:
+        if not token:
+            logger.warning('Token ausente na requisição')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token ausente")
         payload = decode_jwt_token(token)
         logger.debug(f'Payload decodificado: {payload}')
         actor_id = payload.get("sub")
@@ -85,11 +101,17 @@ def get_current_actor(token: str = Depends(oauth2_scheme), db: Session = Depends
         user = db.query(User).filter(User.id == actor_id).first()
         logger.debug(f'Usuário encontrado: {user}')
         if user and user.is_active:
+            if allowed_roles and getattr(user, "role", None) not in allowed_roles:
+                logger.debug(f'Usuário não tem role permitida: {user.role}')
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
             logger.debug('Usuário ativo retornado')
             return user
         client = db.query(Client).filter(Client.id == actor_id).first()
         logger.debug(f'Cliente encontrado: {client}')
         if client and client.is_active:
+            if allowed_roles and "client" not in allowed_roles:
+                logger.debug('Cliente não tem role permitida')
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
             logger.debug('Cliente ativo retornado')
             return client
         logger.debug('Usuário ou cliente não encontrado ou inativo')
@@ -99,13 +121,41 @@ def get_current_actor(token: str = Depends(oauth2_scheme), db: Session = Depends
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
-def admin_required(current_user: User = Depends(get_current_user)):
-    logger.debug(f'Entrando em admin_required com current_user={current_user}, role={getattr(current_user, "role", None)}')
-    if current_user.role != UserRole.admin:
-        logger.debug(f'Acesso negado: usuário não é admin (role real: {current_user.role})')
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a administradores")
-    logger.debug('Acesso admin permitido')
-    return current_user
+def get_current_actor_factory(allowed_roles: list = None):
+    def _get_current_actor(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        logger.debug(f'Entrando em get_current_actor com token={token}, allowed_roles={allowed_roles}')
+        try:
+            if not token:
+                logger.warning('Token ausente na requisição')
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token ausente")
+            payload = decode_jwt_token(token)
+            logger.debug(f'Payload decodificado: {payload}')
+            actor_id = payload.get("sub")
+            if actor_id is None:
+                logger.debug('actor_id não encontrado no payload')
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+            user = db.query(User).filter(User.id == actor_id).first()
+            logger.debug(f'Usuário encontrado: {user}')
+            if user and user.is_active:
+                if allowed_roles and getattr(user, "role", None) not in allowed_roles:
+                    logger.debug(f'Usuário não tem role permitida: {user.role}')
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
+                logger.debug('Usuário ativo retornado')
+                return user
+            client = db.query(Client).filter(Client.id == actor_id).first()
+            logger.debug(f'Cliente encontrado: {client}')
+            if client and client.is_active:
+                if allowed_roles and "client" not in allowed_roles:
+                    logger.debug('Cliente não tem role permitida')
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
+                logger.debug('Cliente ativo retornado')
+                return client
+            logger.debug('Usuário ou cliente não encontrado ou inativo')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário ou cliente não encontrado ou inativo")
+        except Exception as e:
+            logger.debug(f'Exceção em get_current_actor: {e}')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+    return _get_current_actor
 
 
 def client_resource_permission(resource_client_ids: list, actor = Depends(get_current_actor)):

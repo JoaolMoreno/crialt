@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 from ..core.config import settings
-from ..models import File
+from ..models.file import File
 from ..schemas.file import FileCreate, FileCategory
 
 
@@ -47,3 +47,16 @@ class FileService:
         self.db.commit()
         return file
 
+    def delete_file(self, file_id: str) -> bool:
+        file = self.db.get(File, file_id)
+        if not file:
+            return False
+        # Remove arquivo físico
+        try:
+            if os.path.exists(file.path):
+                os.remove(file.path)
+        except Exception:
+            pass
+        self.db.delete(file)
+        self.db.commit()
+        return True

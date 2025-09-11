@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPExc
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..api.dependencies import get_db, get_current_user, get_current_actor, admin_required, client_resource_permission
+from ..api.dependencies import get_db, get_current_user, get_current_actor_factory, client_resource_permission
 from ..models.user import User
 from ..models.file import File
 from ..models.project import Project
@@ -12,12 +12,12 @@ from ..services.file_service import FileService
 router = APIRouter()
 
 @router.get("/", response_model=List[FileRead])
-def get_files(db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def get_files(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     files = db.query(File).all()
     return files
 
 @router.get("/project/{project_id}", response_model=List[FileRead])
-def get_files_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
+def get_files_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     project = db.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Projeto não encontrado")
@@ -27,14 +27,14 @@ def get_files_by_project(project_id: str, db: Session = Depends(get_db), actor =
     return files
 
 @router.get("/client/{client_id}", response_model=List[FileRead])
-def get_files_by_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
+def get_files_by_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     # Verificar permissão para acessar arquivos do cliente
     client_resource_permission([client_id], actor)
     files = db.query(File).filter(File.client_id == client_id).all()
     return files
 
 @router.get("/stage/{stage_id}", response_model=List[FileRead])
-def get_files_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
+def get_files_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     # Buscar a etapa e verificar permissão através do projeto
     from ..models.stage import Stage
     stage = db.get(Stage, stage_id)
@@ -49,7 +49,7 @@ def get_files_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Dep
     return files
 
 @router.get("/{file_id}", response_model=FileRead)
-def get_file(file_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor)):
+def get_file(file_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     file = db.get(File, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="Arquivo não encontrado")
@@ -77,7 +77,7 @@ def upload_file(
     file: UploadFile = FastAPIFile(...),
     file_data: FileCreate = Depends(),
     db: Session = Depends(get_db),
-    actor = Depends(get_current_actor)
+    actor = Depends(get_current_actor_factory())
 ):
     # Verificar se o usuário tem permissão para fazer upload
     if file_data.project_id:
@@ -99,7 +99,7 @@ def upload_file(
     return FileRead.model_validate(saved_file)
 
 @router.put("/{file_id}", response_model=FileRead)
-def update_file(file_id: str, file_data: FileUpdate, db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def update_file(file_id: str, file_data: FileUpdate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     file = db.get(File, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="Arquivo não encontrado")
@@ -113,7 +113,7 @@ def update_file(file_id: str, file_data: FileUpdate, db: Session = Depends(get_d
     return file
 
 @router.delete("/{file_id}")
-def delete_file(file_id: str, db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def delete_file(file_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     file = db.get(File, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="Arquivo não encontrado")

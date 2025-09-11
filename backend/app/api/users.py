@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..api.dependencies import get_db, get_current_user, admin_required
+from ..api.dependencies import get_db, get_current_user, get_current_actor_factory
 from ..models import User
 from ..schemas.user import UserRead, UserCreate, UserUpdate
 from ..core.security import get_password_hash
@@ -16,13 +16,13 @@ def get_me(user: User = Depends(get_current_user)):
 
 
 @router.get("/", response_model=List[UserRead])
-def get_users(db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def get_users(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     users = db.query(User).all()
     return users
 
 
 @router.get("/{user_id}", response_model=UserRead)
-def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -32,7 +32,7 @@ def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Dep
 @router.post("/", response_model=UserRead)
 def create_user(user_data: UserCreate,
                 db: Session = Depends(get_db),
-                admin_user: User = Depends(admin_required)
+                admin_user: User = Depends(get_current_actor_factory(["admin"]))
                 ):
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
@@ -41,7 +41,7 @@ def create_user(user_data: UserCreate,
     user = User(
         name=user_data.name,
         username=user_data.username,
-        email=user_data.email,
+        email=str(user_data.email),
         password_hash=get_password_hash(user_data.password),
         role=user_data.role,
         avatar=user_data.avatar,
@@ -54,7 +54,7 @@ def create_user(user_data: UserCreate,
 
 
 @router.put("/{user_id}", response_model=UserRead)
-def update_user(user_id: str, user_data: UserUpdate, db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def update_user(user_id: str, user_data: UserUpdate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -72,7 +72,7 @@ def update_user(user_id: str, user_data: UserUpdate, db: Session = Depends(get_d
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(admin_required)):
+def delete_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

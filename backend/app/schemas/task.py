@@ -48,5 +48,4 @@ class TaskRead(TaskBase):
     assigned_to_id: Optional[UUID] = None
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True

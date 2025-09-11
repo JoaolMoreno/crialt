@@ -83,3 +83,23 @@ class ProjectService:
         if not project:
             raise ValueError("Projeto não encontrado")
         return project
+
+    def update_project(self, project_id: str, project_data) -> Project:
+        project = self.db.get(Project, project_id)
+        if not project:
+            return None
+        update_data = project_data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(project, field, value)
+        project.updated_at = datetime.now(UTC)
+        self.db.commit()
+        self.db.refresh(project)
+        return project
+
+    def delete_project(self, project_id: str) -> bool:
+        project = self.db.get(Project, project_id)
+        if not project:
+            return False
+        self.db.delete(project)
+        self.db.commit()
+        return True
