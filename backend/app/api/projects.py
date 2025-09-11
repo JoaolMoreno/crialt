@@ -5,15 +5,34 @@ from typing import List
 from ..api.dependencies import get_db, get_current_user, get_current_actor_factory, client_resource_permission
 from ..models import User, Client, Project
 from ..schemas.project import ProjectRead, ProjectCreate, ProjectUpdate
+from ..schemas.client import ClientBasicRead
+from ..schemas.stage import StageRead
+from ..schemas.file import FileRead
 from ..services.project_service import ProjectService
 
 router = APIRouter()
 
 def serialize_project(project):
-    data = project.__dict__.copy()
-    data["clients"] = [c.id for c in getattr(project, "clients", [])]
-    data["stages"] = [s.id for s in getattr(project, "stages", [])]
-    return data
+    return {
+        "id": project.id,
+        "name": project.name,
+        "description": getattr(project, "description", None),
+        "total_value": project.total_value,
+        "currency": project.currency,
+        "start_date": project.start_date,
+        "estimated_end_date": project.estimated_end_date,
+        "actual_end_date": getattr(project, "actual_end_date", None),
+        "status": project.status,
+        "work_address": getattr(project, "work_address", None),
+        "scope": getattr(project, "scope", None),
+        "notes": getattr(project, "notes", None),
+        "created_at": project.created_at,
+        "updated_at": project.updated_at,
+        "created_by_id": project.created_by_id,
+        "clients": [ClientBasicRead.model_validate(c) for c in getattr(project, "clients", [])],
+        "stages": [StageRead.model_validate(s) for s in getattr(project, "stages", [])],
+        "files": [FileRead.model_validate(f) for f in getattr(project, "files", [])] if hasattr(project, "files") else [],
+    }
 
 @router.get("", response_model=List[ProjectRead])
 def get_projects(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):

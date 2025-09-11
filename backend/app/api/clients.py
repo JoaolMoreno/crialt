@@ -8,13 +8,15 @@ from ..schemas.client import ClientCreate, ClientUpdate, ClientRead
 from ..services.auth_service import AuthService
 from ..core.security import get_password_hash
 from pydantic import BaseModel
+from ..schemas.project import ProjectRead
+from ..api.projects import serialize_project
 
 router = APIRouter()
 
 def serialize_client(client):
     data = client.__dict__.copy()
     if hasattr(client, "projects") and client.projects:
-        data["projects"] = [p.id for p in client.projects]
+        data["projects"] = [ProjectRead.model_validate(serialize_project(p)) for p in client.projects]
     else:
         data["projects"] = []
     return ClientRead.model_validate(data)

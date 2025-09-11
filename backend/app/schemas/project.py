@@ -1,8 +1,10 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime, date
 from pydantic import BaseModel
 import enum
+
+from .client import ClientBasicRead
 
 class ProjectStatus(str, enum.Enum):
     draft = "draft"
@@ -46,9 +48,13 @@ class ProjectRead(ProjectBase):
     created_at: datetime
     updated_at: datetime
     created_by_id: UUID
-    clients: List[UUID]
-    stages: Optional[List[UUID]] = None
-    files: Optional[List[UUID]] = None
+    clients: List[ClientBasicRead]
+    stages: Optional[List["StageRead"]] = None
+    files: Optional[List["FileRead"]] = None
 
     class Config:
         from_attributes = True
+
+from .stage import StageRead
+from .file import FileRead
+ProjectRead.model_rebuild()

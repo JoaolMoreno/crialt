@@ -1,12 +1,17 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime, date
 from pydantic import BaseModel, EmailStr
 import enum
 
+if TYPE_CHECKING:
+    from .project import ProjectRead
+
+
 class DocumentType(str, enum.Enum):
     cpf = "cpf"
     cnpj = "cnpj"
+
 
 class ClientBase(BaseModel):
     name: str
@@ -23,8 +28,10 @@ class ClientBase(BaseModel):
     notes: Optional[str] = None
     is_active: Optional[bool] = True
 
+
 class ClientCreate(ClientBase):
     password: Optional[str] = None
+
 
 class ClientUpdate(BaseModel):
     name: Optional[str] = None
@@ -42,10 +49,27 @@ class ClientUpdate(BaseModel):
     is_active: Optional[bool] = None
     password: Optional[str] = None
 
+
+class ClientBasicRead(BaseModel):
+    id: UUID
+    name: str
+    document: str
+    document_type: DocumentType
+    email: EmailStr
+    phone: str
+    is_active: Optional[bool] = True
+
+    class Config:
+        from_attributes = True
+
+
 class ClientRead(ClientBase):
     id: UUID
     first_access: bool
     created_at: datetime
     updated_at: datetime
-    projects: Optional[List[UUID]] = None
+    projects: Optional[List["ProjectRead"]] = None
     model_config = {"from_attributes": True}
+
+from .project import ProjectRead
+ClientRead.model_rebuild()
