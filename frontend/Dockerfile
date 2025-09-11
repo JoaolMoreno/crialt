@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build --configuration production
 
 # Etapa 2: Nginx
 FROM nginx:alpine AS runner
