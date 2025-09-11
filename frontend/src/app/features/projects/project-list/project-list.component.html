@@ -1,7 +1,7 @@
 <section class="project-list-section">
   <h1>Projetos</h1>
   <div class="project-list-actions">
-    <button class="btn-secundario" (click)="onNewProject()">
+    <button class="btn-padrao" (click)="onNewProject()">
       <span class="material-icons">add_circle</span> Novo Projeto
     </button>
     <input type="text" placeholder="Buscar por nome, cliente ou etapa..." [(ngModel)]="searchQuery" class="search-input" (input)="applyFilters()" />
@@ -21,16 +21,16 @@
       <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
     </select>
     <input type="number" [(ngModel)]="selectedValue" class="filter-select" placeholder="Valor mínimo" (input)="applyFilters()" />
-    <button class="btn-secundario" (click)="export('pdf')">
+    <button class="btn-padrao" (click)="export('pdf')">
       <span class="material-icons">download</span> Exportar
     </button>
   </div>
 
   <div class="view-toggle">
-    <button class="btn-secundario" [class.active]="viewMode==='list'" (click)="setViewMode('list')">
+    <button class="btn-padrao" [class.active]="viewMode==='list'" (click)="setViewMode('list')">
       <span class="material-icons">table_rows</span> Lista
     </button>
-    <button class="btn-secundario" [class.active]="viewMode==='grid'" (click)="setViewMode('grid')">
+    <button class="btn-padrao" [class.active]="viewMode==='grid'" (click)="setViewMode('grid')">
       <span class="material-icons">grid_view</span> Grid
     </button>
   </div>

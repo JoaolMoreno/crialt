@@ -1,8 +1,64 @@
-.login-section {
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: stretch;
   background: var(--color-bg);
+  z-index: 9999;
+}
+.login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+.login-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+}
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+  }
+  .login-right {
+    display: none;
+  }
+}
+.login-section {
+  background: white;
   padding: calc(var(--spacing-base) * 6) calc(var(--spacing-base) * 4);
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(53,39,28,0.08);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   min-width: 340px;
   max-width: 400px;
   margin: calc(var(--spacing-base) * 6) auto;
@@ -11,8 +67,8 @@
 .login-section h1 {
   font-family: 'Diore', serif;
   font-size: 32px;
-  font-weight: 400;
-  color: var(--color-dark);
+  font-weight: 600;
+  color: #2B1D16;
   margin-bottom: calc(var(--spacing-base) * 4);
   text-align: center;
   letter-spacing: 1.5px;
@@ -23,12 +79,12 @@
   flex-direction: column;
 }
 label {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-dark);
   margin-bottom: var(--spacing-base);
 }
-input[type="email"], input[type="password"] {
+input[type="text"], input[type="password"] {
   font-size: 16px;
   padding: calc(var(--spacing-base) * 1.25) calc(var(--spacing-base) * 1.5);
   border: 1px solid var(--color-light);
@@ -36,6 +92,10 @@ input[type="email"], input[type="password"] {
   background: var(--color-light);
   color: var(--color-dark);
   outline: none;
+}
+input::placeholder {
+  color: #8C7A70;
+  opacity: 1;
 }
 input:focus {
   border-color: var(--color-accent);
@@ -45,7 +105,7 @@ input:focus {
   background: var(--color-dark);
   color: var(--color-bg);
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
   border-radius: 4px;
   padding: calc(var(--spacing-base) * 1.5) 0;
@@ -54,6 +114,9 @@ input:focus {
   font-size: 16px;
   margin-top: var(--spacing-base);
   transition: background 0.2s;
+}
+.login-btn:hover:not(:disabled) {
+  background: var(--color-dark);
 }
 .login-btn:disabled {
   background: var(--color-light);
@@ -78,8 +141,10 @@ input:focus {
   text-decoration: none;
   font-style: italic;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  transition: color 0.2s, text-decoration 0.2s;
 }
 .register-link:hover, .forgot-link:hover {
+    color: var(--color-accent);
   text-decoration: underline;
 }
 form.loading {
