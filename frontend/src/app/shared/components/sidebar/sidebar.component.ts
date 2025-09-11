@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import {RouterLink} from "@angular/router";
 import {NgForOf, NgIf} from "@angular/common";
 
@@ -35,30 +36,48 @@ export class SidebarComponent {
       label: 'Clientes',
       icon: 'groups',
       route: '/clients',
-      notificationCount: 0
+      notificationCount: 0,
     },
     {
       label: 'Projetos',
       icon: 'folder_special',
       route: '/projects',
-      notificationCount: 0
+      notificationCount: 0,
     },
     {
       label: 'Etapas',
       icon: 'timeline',
-      route: '/stages'
+      route: '/stages',
     },
     {
       label: 'Arquivos',
       icon: 'attach_file',
-      route: '/files'
+      route: '/files',
     },
     {
       label: 'Configurações',
       icon: 'settings',
-      route: '/settings'
+      route: '/settings',
     }
   ];
+
+  constructor(private router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.updateFavorite(event.urlAfterRedirects);
+      }
+    });
+    this.updateFavorite(this.router.url);
+  }
+
+  updateFavorite(currentRoute: string) {
+    const cleanRoute = currentRoute.split('?')[0].split('#')[0];
+    const firstSegment = '/' + cleanRoute.split('/').filter(Boolean)[0];
+    this.menuItems = this.menuItems.map(item => ({
+      ...item,
+      favorite: item.route === firstSegment
+    }));
+  }
 
   toggleCollapse() {
     this.isCollapsed = !this.isCollapsed;
