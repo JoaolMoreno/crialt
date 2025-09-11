@@ -8,7 +8,7 @@ import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
-import {CurrencyPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {CurrencyPipe, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {ProjectCardComponent} from "../project-card/project-card.component";
 
@@ -17,7 +17,7 @@ import {ProjectCardComponent} from "../project-card/project-card.component";
   standalone: true,
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
-    imports: [FormsModule, DatePipe, LoadingSpinnerComponent, NgIf, NgForOf, CurrencyPipe, ProjectCardComponent]
+    imports: [FormsModule, DatePipe, LoadingSpinnerComponent, NgIf, NgForOf, CurrencyPipe, ProjectCardComponent, NgClass]
 })
 export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
@@ -263,5 +263,29 @@ export class ProjectListComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'draft': return 'Rascunho';
+      case 'active': return 'Ativo';
+      case 'paused': return 'Pausado';
+      case 'completed': return 'Concluído';
+      case 'cancelled': return 'Cancelado';
+      case 'in_progress': return 'Em andamento';
+      default: return status;
+    }
+  }
+
+  statusBadgeClass(status: string | undefined): string {
+    switch (status) {
+      case 'draft': return 'badge-draft';
+      case 'active': return 'badge-active';
+      case 'paused': return 'badge-paused';
+      case 'completed': return 'badge-completed';
+      case 'cancelled': return 'badge-cancelled';
+      case 'in_progress': return 'badge-active';
+      default: return 'badge-draft';
+    }
   }
 }

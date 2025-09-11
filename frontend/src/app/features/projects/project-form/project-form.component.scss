@@ -40,35 +40,7 @@
   gap: 16px;
 }
 
-input, textarea, select {
-  padding: 8px 12px;
-  border: 1px solid var(--color-light);
-  border-radius: 6px;
-  font-size: 16px;
-  font-family: 'Montserrat', Arial, sans-serif;
-  background: #fff;
-  color: var(--color-dark);
-}
-
-label {
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-size: 16px;
-  color: var(--color-dark);
-  font-weight: 500;
-}
-
-.error-message {
-  color: var(--color-accent);
-  font-size: 14px;
-  font-style: italic;
-  margin-top: 8px;
-}
-
-button {
-  margin-top: 12px;
-}
-
-.client-modal-overlay,
+client-modal-overlay,
 .stage-modal-overlay {
   position: fixed;
   top: 0;
@@ -102,32 +74,6 @@ button {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #B95830;
-  font-size: 32px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.2s;
-  padding: 0 8px;
-  line-height: 1;
-}
-.close-btn:hover {
-  color: #35271C;
-}
-
-.client-list, .stage-list {
-  max-height: 320px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-}
-
-.client-item, .stage-item {
-  padding: 6px 0;
-  font-size: 16px;
 }
 
 .selected-clients, .selected-stages {
@@ -171,6 +117,167 @@ button {
 
 input[type="text"] {
   margin-bottom: 10px;
+}
+
+.project-status-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.project-status-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Montserrat', Arial, sans-serif;
+  margin-right: 8px;
+  min-width: 90px;
+  text-align: center;
+}
+.badge-draft    { background: #e0e0e0; color: #757575; }
+.badge-active   { background: #e3f2fd; color: #1976d2; }
+.badge-paused   { background: #fff3e0; color: #f57c00; }
+.badge-completed{ background: #e8f5e9; color: #388e3c; }
+.badge-cancelled{ background: #ffebee; color: #d32f2f; }
+
+.status-edit-btn,
+.status-confirm-btn,
+.status-cancel-btn {
+  padding: 2px 8px;
+  font-size: 16px;
+  margin-left: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.status-select {
+  font-size: 15px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid #CDC0A6;
+  background: #fff;
+  margin-right: 8px;
+  min-width: 120px;
+}
+
+// Padronização para status e etapas em linha
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.status-label {
+  font-size: 16px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 500;
+  color: var(--color-dark);
+  margin-right: 4px;
+}
+
+// Botão de edição padronizado
+.btn-icon {
+  background: none;
+  border: none;
+  color: #B95830;
+  font-size: 18px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  min-width: 32px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-icon:hover, .btn-icon:focus {
+  background: #CDC0A6;
+  color: #35271C;
+}
+
+// Select inline para edição de status
+.status-select-inline {
+  font-size: 15px;
+  padding: 2px 12px;
+  border-radius: 8px;
+  border: 1px solid #CDC0A6;
+  background: #fff;
+  min-width: 80px;
+  height: 28px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+// Etapas em linha
+.etapa-row {
+  margin-bottom: 8px;
+}
+.etapa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.etapa-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.etapa-title {
+  font-size: 16px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 500;
+  color: var(--color-dark);
+  margin-right: 4px;
+}
+.etapa-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+}
+.remove-etapa-btn {
+  background: none;
+  border: none;
+  color: #c00;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0 4px;
+  border-radius: 6px;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.remove-etapa-btn:hover {
+  background: #ffebee;
+}
+
+.form-group.project-status-group.status-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.status-label, .status-badge, .btn-icon {
+  display: inline-flex;
+  align-items: center;
+}
+.status-badge {
+  margin-bottom: 0 !important;
+}
+.status-edit-btn {
+  margin-bottom: 0 !important;
 }
 
 @media (max-width: 960px) {

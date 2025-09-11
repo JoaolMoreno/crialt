@@ -24,74 +24,6 @@
   margin-bottom: 24px;
 }
 
-.search-input, .filter-select {
-  padding: 8px 12px;
-  border: 1px solid var(--color-light);
-  border-radius: 6px;
-  font-size: 16px;
-  font-family: 'Montserrat', Arial, sans-serif;
-  background: #fff;
-  color: var(--color-dark);
-  min-width: 180px;
-}
-
-.project-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(53,39,28,0.04);
-  overflow: hidden;
-}
-.project-table th, .project-table td {
-  padding: 12px 10px;
-  text-align: left;
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-size: 16px;
-  border-bottom: 1px solid var(--color-light);
-}
-.project-table th {
-  background: var(--color-light);
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-}
-.project-table tr:last-child td {
-  border-bottom: none;
-}
-.project-table .price {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-.action-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  margin-right: 6px;
-  padding: 4px;
-  .material-icons {
-    font-size: 20px;
-    color: var(--color-dark);
-  }
-  &:hover .material-icons {
-    color: var(--color-accent);
-  }
-  &:disabled .material-icons {
-    color: var(--color-light);
-    opacity: 0.5;
-  }
-}
-.error-message {
-  color: #b00020;
-  background: #fff0f0;
-  border: 1px solid #ffd6d6;
-  padding: 8px 16px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 15px;
-}
 .empty-message {
   text-align: center;
   color: var(--color-dark);
@@ -99,6 +31,7 @@
   margin: 32px 0;
   font-style: italic;
 }
+
 .pagination {
   display: flex;
   align-items: center;
@@ -126,20 +59,5 @@
       cursor: not-allowed;
       opacity: 0.6;
     }
-  }
-}
-@media (max-width: 900px) {
-  .project-list-section {
-    padding: 16px 4px;
-    max-width: 100vw;
-  }
-  .project-list-actions {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-  }
-  .project-table th, .project-table td {
-    font-size: 14px;
-    padding: 8px 6px;
   }
 }

@@ -22,11 +22,6 @@
   gap: 8px;
 }
 
-.value, .status {
-  font-size: 18px;
-  font-family: 'Montserrat', Arial, sans-serif;
-}
-
 .actions {
   display: flex;
   gap: 12px;
@@ -37,12 +32,6 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-}
-
-.progress-label {
-  font-size: 16px;
-  color: var(--color-dark);
-  font-family: 'Montserrat', Arial, sans-serif;
 }
 
 .current-stage-widget {
@@ -79,33 +68,4 @@
   border-radius: 8px;
   box-shadow: 0 1px 6px rgba(53,39,28,0.04);
   padding: 24px;
-}
-
-.timeline-table, .finance-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-}
-.timeline-table th, .timeline-table td,
-.finance-table th, .finance-table td {
-  padding: 10px 8px;
-  text-align: left;
-  font-family: 'Montserrat', Arial, sans-serif;
-}
-.timeline-table th, .finance-table th {
-  background: var(--color-light);
-  font-weight: 600;
-}
-.timeline-table tr:nth-child(even), .finance-table tr:nth-child(even) {
-  background: #f9f7f4;
-}
-
-@media (max-width: 900px) {
-  .project-detail-section {
-    padding: 16px 8px;
-    max-width: 100%;
-  }
-  .tab-content {
-    padding: 12px;
-  }
 }

@@ -250,3 +250,104 @@ button.cta {
 .mb-1 { margin-bottom: var(--spacing-base); }
 .mb-2 { margin-bottom: calc(var(--spacing-base) * 2); }
 .mb-3 { margin-bottom: calc(var(--spacing-base) * 3); }
+
+// UTILITÁRIOS PADRÃO
+.status-badge {
+  display: inline-block;
+  min-width: 80px;
+  height: 28px;
+  padding: 2px 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Montserrat', Arial, sans-serif;
+  line-height: 24px;
+  vertical-align: middle;
+  margin-right: 4px;
+  text-align: center;
+}
+.badge-draft    { background: #e0e0e0; color: #757575; }
+.badge-active   { background: #e3f2fd; color: #1976d2; }
+.badge-paused   { background: #fff3e0; color: #f57c00; }
+.badge-completed{ background: #e8f5e9; color: #388e3c; }
+.badge-cancelled{ background: #ffebee; color: #d32f2f; }
+
+.price {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.error-message {
+  color: var(--color-accent);
+  background: #fff0f0;
+  border: 1px solid #ffd6d6;
+  padding: 8px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-style: italic;
+}
+
+.input-padrao, input, textarea, select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-light);
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #fff;
+  color: var(--color-dark);
+}
+
+.label-padrao, label {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  color: var(--color-dark);
+  font-weight: 500;
+}
+
+.table-padrao {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(53,39,28,0.04);
+  overflow: hidden;
+}
+.table-padrao th, .table-padrao td {
+  padding: 12px 10px;
+  text-align: left;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 16px;
+  border-bottom: 1px solid var(--color-light);
+}
+.table-padrao th {
+  background: var(--color-light);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+.table-padrao tr:last-child td {
+  border-bottom: none;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-right: 6px;
+  padding: 4px;
+  .material-icons {
+    font-size: 20px;
+    color: var(--color-dark);
+  }
+  &:hover .material-icons {
+    color: var(--color-accent);
+  }
+  &:disabled .material-icons {
+    color: var(--color-light);
+    opacity: 0.5;
+  }
+}

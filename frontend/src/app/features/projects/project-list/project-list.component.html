@@ -75,7 +75,11 @@
         <td><input type="checkbox" [checked]="selectedProjects.includes(project.id)" (change)="toggleProjectSelection(project.id)" /></td>
         <td>{{ project.name }}</td>
         <td>{{ project.clients[0]?.name }}</td>
-        <td>{{ project.status }}</td>
+        <td>
+          <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">
+            {{ statusLabel(project.status) }}
+          </span>
+        </td>
         <td>{{ getCurrentStage(project)?.name }}</td>
         <td class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</td>
         <td>{{ project.created_at | date:'shortDate' }}</td>

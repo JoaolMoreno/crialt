@@ -1,2 +1,40 @@
-<!-- Template vazio para StageFormComponent -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div>
+    <label>Nome da etapa</label>
+    <input formControlName="name" type="text" />
+  </div>
+  <div>
+    <label>Descrição</label>
+    <textarea formControlName="description"></textarea>
+  </div>
+  <div>
+    <label>Data de início planejada</label>
+    <input formControlName="planned_start_date" type="date" />
+  </div>
+  <div>
+    <label>Data de término planejada</label>
+    <input formControlName="planned_end_date" type="date" />
+  </div>
+  <div>
+    <label>Valor</label>
+    <input formControlName="value" type="number" />
+  </div>
+  <div>
+    <label>Status</label>
+    <select formControlName="status">
+      <option value="pending">Pendente</option>
+      <option value="in_progress">Em andamento</option>
+      <option value="completed">Concluída</option>
+      <option value="cancelled">Cancelada</option>
+    </select>
+  </div>
+  <fieldset>
+    <legend>Escopo da etapa</legend>
+    <div *ngFor="let key of escopoKeys">
+      <label>{{ key }}</label>
+      <input [formControl]="form.get('specific_data.' + key)" type="text" />
+    </div>
+  </fieldset>
+  <button type="submit" [disabled]="form.invalid">Salvar</button>
+</form>
 

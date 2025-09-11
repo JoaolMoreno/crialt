@@ -11,8 +11,15 @@
           </ng-container>
         </b>
       </div>
-      <div class="value">Valor: <span class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</span></div>
-      <div class="status">Status: <span [class]="project.status">{{ project.status }}</span></div>
+      <div class="value">Valor: <span class="price">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</span></div>
+      <div class="status">Status: <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span></div>
+      <div class="address" *ngIf="project.work_address">
+        Endereço: {{ project.work_address.street }}, {{ project.work_address.number }}
+        <span *ngIf="project.work_address.complement"> - {{ project.work_address.complement }}</span>,
+        {{ project.work_address.neighborhood }}, {{ project.work_address.city }} - {{ project.work_address.state }}
+        <span *ngIf="project.work_address.zip_code"> ({{ project.work_address.zip_code }})</span>
+        <span *ngIf="project.work_address.reference"> - Ref: {{ project.work_address.reference }}</span>
+      </div>
     </div>
     <div class="actions">
       <button class="btn-secundario" (click)="onEditProject()"><span class="material-icons">edit</span> Editar</button>
@@ -27,8 +34,11 @@
   <div class="current-stage-widget" *ngIf="currentStage">
     <h3>Etapa Atual</h3>
     <div class="stage-name">{{ currentStage.name }}</div>
-    <div class="stage-status">Status: <span [class]="currentStage.status">{{ currentStage.status }}</span></div>
-    <div class="stage-dates">Início: {{ currentStage.actual_start_date || currentStage.planned_start_date | date:'shortDate' }} | Prazo: {{ currentStage.actual_end_date || currentStage.planned_end_date | date:'shortDate' }}</div>
+    <div class="stage-status">Status: <span class="status-badge" [ngClass]="statusBadgeClass(currentStage.status)">{{ statusLabel(currentStage.status) }}</span></div>
+    <div class="stage-dates">
+      Início: {{ (currentStage.actual_start_date || currentStage.planned_start_date) | date:'shortDate' }} |
+      Prazo: {{ (currentStage.actual_end_date || currentStage.planned_end_date) | date:'shortDate' }}
+    </div>
   </div>
   <nav class="tabs">
     <button [class.active]="activeTab==='overview'" (click)="setTab('overview')">Visão Geral</button>
@@ -41,9 +51,17 @@
     <div *ngIf="activeTab==='overview'">
       <h2>Resumo do Projeto</h2>
       <p>{{ project.description }}</p>
-      <div class="dates">Início: {{ project.start_date | date:'shortDate' }} | Prazo estimado: {{ project.estimated_end_date | date:'shortDate' }}</div>
-      <div class="scope">Área: {{ project.scope.total_area }} m² | Ambientes: {{ project.scope.rooms_included?.join(', ') }}</div>
+      <div class="dates">
+        Início: {{ project.start_date | date:'shortDate' }} |
+        Prazo estimado: {{ project.estimated_end_date | date:'shortDate' }}
+        <span *ngIf="project.actual_end_date">| Finalizado: {{ project.actual_end_date | date:'shortDate' }}</span>
+      </div>
+      <div class="scope">
+        <span *ngIf="project.scope.total_area">Área: {{ project.scope.total_area }} m²</span>
+        <span *ngIf="project.scope.rooms_included?.length"> | Ambientes: {{ project.scope.rooms_included.join(', ') }}</span>
+      </div>
       <div class="notes" *ngIf="project.notes">Observações: {{ project.notes }}</div>
+      <div class="technical-notes" *ngIf="project.scope.technical_notes">Notas técnicas: {{ project.scope.technical_notes }}</div>
     </div>
     <div *ngIf="activeTab==='timeline'">
       <h2>Timeline das Etapas</h2>
@@ -55,15 +73,37 @@
             <th>Início</th>
             <th>Prazo</th>
             <th>Valor</th>
+            <th>Escopo</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let stage of project.stages">
             <td>{{ stage.name }}</td>
             <td>{{ stage.status }}</td>
-            <td>{{ stage.actual_start_date || stage.planned_start_date | date:'shortDate' }}</td>
-            <td>{{ stage.actual_end_date || stage.planned_end_date | date:'shortDate' }}</td>
-            <td class="price">{{ stage.value | currency:'BRL':'symbol':'1.0-0' }}</td>
+            <td>{{ (stage.actual_start_date || stage.planned_start_date) | date:'shortDate' }}</td>
+            <td>{{ (stage.actual_end_date || stage.planned_end_date) | date:'shortDate' }}</td>
+            <td class="price">{{ stage.value | currency:project.currency:'symbol':'1.0-0' }}</td>
+            <td>
+              <div *ngIf="stage.specific_data && (stage.specific_data | json) !== '{}'" class="escopo-tabela">
+                <table>
+                  <tbody>
+                    <tr *ngFor="let key of stage.specific_data | keyvalue; let i = index">
+                      <td><b>{{ key.key }}</b></td>
+                      <td>
+                        <!-- LOG DO VALOR DO ESCOPO -->
+                        <span style="color: #b71c1c; font-size: 12px; font-family: monospace;">LOG: {{ key.value | json }}</span><br>
+                        <ng-container *ngIf="key.value === null || key.value === undefined">-</ng-container>
+                        <ng-container *ngIf="key.value !== null && key.value !== undefined">
+                          <span *ngIf="key.value.constructor === String || key.value.constructor === Number || key.value.constructor === Boolean">{{ key.value }}</span>
+                          <span *ngIf="key.value.constructor === Object || key.value.constructor === Array"><pre>{{ key.value | json }}</pre></span>
+                        </ng-container>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <span *ngIf="!stage.specific_data || (stage.specific_data | json) === '{}'">Sem escopo definido</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -72,10 +112,17 @@
       <h2>Arquivos do Projeto</h2>
       <div *ngFor="let stage of project.stages">
         <h3>{{ stage.name }}</h3>
-<!--        <ul>-->
-<!--          <li *ngFor="let file of stage.files">{{ file.name }} <button class="btn-secundario">Download</button></li>-->
-<!--        </ul>-->
+        <ul *ngIf="stage.files?.length">
+          <li *ngFor="let file of stage.files">{{ file.original_name }} <button class="btn-secundario">Download</button></li>
+        </ul>
+        <span *ngIf="!stage.files || stage.files.length === 0">Nenhum arquivo nesta etapa.</span>
         <!-- <app-file-upload></app-file-upload> -->
+      </div>
+      <div *ngIf="project.files?.length">
+        <h3>Arquivos Gerais do Projeto</h3>
+        <ul>
+          <li *ngFor="let file of project.files">{{ file.original_name }} <button class="btn-secundario">Download</button></li>
+        </ul>
       </div>
     </div>
     <div *ngIf="activeTab==='finance'">
@@ -91,8 +138,8 @@
         <tbody>
           <tr>
             <td>Valor Total</td>
-            <td class="price">{{ project.total_value | currency:'BRL':'symbol':'1.0-0' }}</td>
-            <td>Pago/Em aberto</td>
+            <td class="price">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
+            <td>{{ project.status === 'completed' ? 'Pago' : 'Em aberto' }}</td>
           </tr>
           <!-- Adicionar pagamentos/orçamentos reais -->
         </tbody>
@@ -100,9 +147,7 @@
     </div>
     <div *ngIf="activeTab==='history'">
       <h2>Histórico de Alterações</h2>
-      <ul>
-        <li *ngFor="let log of project.history">{{ log.date | date:'short' }} - {{ log.action }}</li>
-      </ul>
+      <span>Nenhum histórico disponível.</span>
     </div>
   </div>
 </section>

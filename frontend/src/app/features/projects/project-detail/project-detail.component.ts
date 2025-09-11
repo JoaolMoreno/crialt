@@ -4,7 +4,7 @@ import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
 import { ProgressBarComponent } from '../project-progress-bar/progress-bar.component';
-import {CurrencyPipe, DatePipe, NgForOf, NgIf} from "@angular/common";
+import {CurrencyPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
 
 @Component({
@@ -12,7 +12,7 @@ import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinne
   standalone: true,
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss'],
-    imports: [ProgressBarComponent, DatePipe, CurrencyPipe, LoadingSpinnerComponent, NgIf, NgForOf]
+    imports: [ProgressBarComponent, DatePipe, CurrencyPipe, LoadingSpinnerComponent, NgIf, NgForOf, JsonPipe, KeyValuePipe, NgClass]
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -71,4 +71,34 @@ export class ProjectDetailComponent implements OnInit {
   onFinishProject() {
     // Implementar chamada ao serviço para finalizar
   }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'draft': return 'Rascunho';
+      case 'active': return 'Ativo';
+      case 'paused': return 'Pausado';
+      case 'completed': return 'Concluído';
+      case 'cancelled': return 'Cancelado';
+      case 'in_progress': return 'Em andamento';
+      default: return status;
+    }
+  }
+
+  statusBadgeClass(status: string | undefined): string {
+    switch (status) {
+      case 'draft': return 'badge-draft';
+      case 'active': return 'badge-active';
+      case 'paused': return 'badge-paused';
+      case 'completed': return 'badge-completed';
+      case 'cancelled': return 'badge-cancelled';
+      case 'in_progress': return 'badge-active';
+      default: return 'badge-draft';
+    }
+  }
+
+    protected readonly String = String;
+    protected readonly Number = Number;
+    protected readonly Boolean = Boolean;
+    protected readonly Object = Object;
+    protected readonly Array = Array;
 }
