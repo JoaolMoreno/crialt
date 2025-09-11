@@ -24,7 +24,7 @@ class Client(Base):
     phone = Column(String, nullable=False)
     mobile = Column(String, nullable=True)
     whatsapp = Column(String, nullable=True)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)
     first_access = Column(Boolean, default=True)
     address = Column(JSON, nullable=True)
     notes = Column(String, nullable=True)
