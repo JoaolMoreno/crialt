@@ -68,6 +68,121 @@ button {
   margin-top: 12px;
 }
 
+.client-modal-overlay,
+.stage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(53, 39, 28, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.client-modal,
+.stage-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(53,39,28,0.18);
+  padding: 32px 24px 24px 24px;
+  min-width: 340px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #B95830;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0 8px;
+  line-height: 1;
+}
+.close-btn:hover {
+  color: #35271C;
+}
+
+.client-list, .stage-list {
+  max-height: 320px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.client-item, .stage-item {
+  padding: 6px 0;
+  font-size: 16px;
+}
+
+.selected-clients, .selected-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.selected-client, .selected-stage {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #CDC0A6;
+  color: #35271C;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 15px;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #B95830;
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 8px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.2s, transform 0.2s;
+  vertical-align: middle;
+  border-radius: 50%;
+  outline: none;
+}
+.remove-btn:hover, .remove-btn:focus {
+  color: #fff;
+  background: #B95830;
+  transform: scale(1.15);
+}
+
+input[type="text"] {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 960px) {
+    .form-row {
+        flex-direction: column;
+    }
+    .form-row .form-group {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
 @media (max-width: 700px) {
   .project-form-section {
     padding: 16px 8px;
@@ -76,5 +191,14 @@ button {
   .form-row {
     flex-direction: column;
     gap: 8px;
+  }
+  .form-row .form-group {
+    width: 100%;
+    min-width: 0;
+  }
+  .client-modal, .stage-modal {
+    min-width: 0;
+    width: 98vw;
+    padding: 18px 8px 12px 8px;
   }
 }

@@ -1,6 +1,6 @@
 <section class="project-form-section">
   <div class="form-header">
-    <button type="button" class="back-btn" (click)="onBack()">
+    <button type="button" class="btn-padrao" (click)="onBack()">
       <span class="material-icons">arrow_back</span> Voltar
     </button>
     <h1>{{ isEdit ? 'Editar Projeto' : 'Novo Projeto' }}</h1>
@@ -16,14 +16,42 @@
     </div>
     <div class="form-group">
       <label for="clientId">Cliente(s)</label>
-      <select id="clientId" formControlName="clientId" multiple>
-        <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
-      </select>
+      <div>
+        <button type="button" class="btn-padrao" (click)="openClientModal()">Selecionar Cliente(s)</button>
+        <div class="selected-clients" *ngIf="selectedClients.length">
+          <span *ngFor="let client of selectedClients" class="selected-client">
+            {{ client.name }} ({{ client.document }})
+            <button type="button" class="remove-btn" (click)="toggleClientSelection(client)" title="Remover cliente">&times;</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de seleção de clientes -->
+    <div class="client-modal-overlay" *ngIf="showClientModal">
+      <div class="client-modal">
+        <div class="modal-header">
+          <h2>Selecionar Cliente(s)</h2>
+          <button type="button" class="close-btn" (click)="closeClientModal()">&times;</button>
+        </div>
+        <input type="text" placeholder="Buscar por nome ou documento" [(ngModel)]="clientSearch" [ngModelOptions]="{standalone: true}" />
+        <div class="client-list">
+          <div *ngIf="loadingClients">Carregando...</div>
+          <div *ngFor="let client of filteredClients" class="client-item">
+            <label>
+              <input type="checkbox" [checked]="isClientSelected(client)" (change)="toggleClientSelection(client)" />
+              {{ client.name }} ({{ client.document }})
+            </label>
+          </div>
+          <div *ngIf="!filteredClients.length && !loadingClients">Nenhum cliente encontrado.</div>
+        </div>
+        <button type="button" class="btn-padrao" (click)="closeClientModal()">Confirmar seleção</button>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label for="value">Valor Total</label>
-        <input id="value" formControlName="value" type="number" required />
+        <input id="value" formControlName="value" type="text" inputmode="decimal" placeholder="Ex: 15000,00" (input)="formatValueInput($event)" />
       </div>
       <div class="form-group">
         <label for="startDate">Data de Início</label>
@@ -44,7 +72,7 @@
     </div>
     <div class="form-group">
       <label>Configuração de Etapas</label>
-      <!-- Seleção de etapas, prazos e valores individuais -->
+
       <div *ngFor="let stage of stages">
         <input type="checkbox" [value]="stage.id" /> {{ stage.name }}
         <input type="date" [value]="stage.planned_start_date" placeholder="Início planejado" />
@@ -65,12 +93,55 @@
       </div>
     </div>
     <div class="form-group">
-      <label>Anexos</label>
-<!--      <app-file-upload></app-file-upload>-->
+      <label for="stages">Etapa(s)</label>
+      <div>
+        <button type="button" class="btn-padrao" (click)="openStageModal()">Selecionar Etapa(s)</button>
+        <div class="selected-stages" *ngIf="selectedStages.length">
+          <span *ngFor="let stage of selectedStages" class="selected-stage">
+            {{ stage.name }}
+            <button type="button" class="remove-btn" (click)="toggleStageSelection(stage)" title="Remover etapa">&times;</button>
+          </span>
+        </div>
+      </div>
     </div>
+
+    <!-- Modal de seleção de etapas -->
+    <div class="stage-modal-overlay" *ngIf="showStageModal">
+      <div class="stage-modal">
+        <div class="modal-header">
+          <h2>Selecionar Etapa(s)</h2>
+          <button type="button" class="close-btn" (click)="closeStageModal()">&times;</button>
+        </div>
+        <input type="text" placeholder="Buscar por nome da etapa" [(ngModel)]="stageSearch" [ngModelOptions]="{standalone: true}" />
+        <div class="stage-list">
+          <div *ngIf="loadingStages">Carregando...</div>
+          <div *ngFor="let stage of filteredStages" class="stage-item">
+            <label>
+              <input type="checkbox" [checked]="isStageSelected(stage)" (change)="toggleStageSelection(stage)" />
+              {{ stage.name }}
+            </label>
+          </div>
+          <div *ngIf="!filteredStages.length && !loadingStages">Nenhuma etapa encontrada.</div>
+        </div>
+        <button type="button" class="btn-padrao" (click)="closeStageModal()">Confirmar seleção</button>
+      </div>
+    </div>
+<!--    <div class="form-group">-->
+<!--      <label>Anexos</label>-->
+<!--      <app-file-upload></app-file-upload>-->
+<!--    </div>-->
     <div *ngIf="error" class="error-message">{{ error }}</div>
-    <button type="submit" class="btn-padrao" [disabled]="form.invalid || loading">
+    <button type="submit" class="btn-padrao" [disabled]="loading">
       <span class="material-icons">save</span> Salvar
     </button>
+    <div *ngIf="form.get('value')?.invalid && (form.get('value')?.dirty || form.get('value')?.touched)" class="form-errors">
+      Informe um valor válido (ex: 1.000,00).
+    </div>
+    <div *ngIf="form.invalid && !loading" class="form-errors">
+      <div *ngIf="form.get('name')?.invalid">Preencha o nome do projeto.</div>
+      <div *ngIf="form.get('clientId')?.invalid">Selecione pelo menos um cliente.</div>
+      <div *ngIf="form.get('startDate')?.invalid">Informe a data de início.</div>
+      <div *ngIf="form.get('endDate')?.invalid">Informe a data limite.</div>
+    </div>
   </form>
 </section>
