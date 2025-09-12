@@ -73,3 +73,10 @@ class StageRead(StageBase):
 
     class Config:
         from_attributes = True
+
+class PaginatedStages(BaseModel):
+    total: int
+    count: int
+    offset: int
+    limit: int
+    items: List[StageRead]

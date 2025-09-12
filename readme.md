@@ -904,3 +904,40 @@ Este sistema foi projetado especificamente para atender às necessidades da **Cr
 A estrutura modular permite crescimento orgânico, começando com funcionalidades essenciais e expandindo conforme a necessidade. O foco em type safety, SSR e boas práticas de desenvolvimento assegura um código maintível e robusto.
 
 **Próximos passos**: Setup do ambiente de desenvolvimento e início da implementação seguindo as especificações detalhadas neste documento.
+
+---
+
+## 🔄 Paginação, Filtros e Ordenação nos Endpoints de Listagem
+
+Todos os endpoints de listagem da API (clientes, projetos, etapas, arquivos, tarefas) implementam os seguintes recursos e formato de resposta:
+
+- **Paginação**: Parâmetros `limit` (quantidade por página, padrão 20, máximo 100) e `offset` (página inicial, padrão 0).
+- **Filtros**: Parâmetros de query para busca por campos relevantes (ex: nome, status, datas, cliente, etc). Cada endpoint aceita filtros específicos conforme o modelo.
+- **Ordenação**: Parâmetros `order_by` (campo para ordenar, ex: `created_at`, `name`, etc) e `order_dir` (`asc` ou `desc`).
+
+### Formato de resposta paginada
+```json
+{
+  "total": 120,           // total de registros encontrados
+  "count": 20,            // quantidade exibida nesta página
+  "offset": 0,            // índice inicial
+  "limit": 20,            // quantidade máxima por página
+  "items": [ ... ]        // lista dos registros
+}
+```
+
+### Exemplo de uso (clientes):
+```http
+GET /clients?limit=10&offset=0&order_by=name&order_dir=asc&name=João&is_active=true
+```
+
+### Endpoints cobertos:
+- `/clients` (clientes)
+- `/projects` (projetos)
+- `/projects/my` (projetos do usuário)
+- `/projects/client/{client_id}` (projetos por cliente)
+- `/stages` (etapas)
+- `/files` (arquivos)
+- `/tasks` (tarefas)
+
+Esses recursos garantem performance, flexibilidade e melhor experiência para telas de listagem, exportação e relatórios.

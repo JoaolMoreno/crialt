@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
 
-from ..api.dependencies import get_db, get_current_user, get_current_actor_factory, client_resource_permission
+from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
 from ..models import User, Client, Project
-from ..schemas.project import ProjectRead, ProjectCreate, ProjectUpdate
 from ..schemas.client import ClientBasicRead
-from ..schemas.stage import StageRead
 from ..schemas.file import FileRead
+from ..schemas.project import ProjectRead, ProjectCreate, ProjectUpdate, PaginatedProjects
+from ..schemas.stage import StageRead
 from ..services.project_service import ProjectService
 
 router = APIRouter()
@@ -34,32 +33,121 @@ def serialize_project(project):
         "files": [FileRead.model_validate(f) for f in getattr(project, "files", [])] if hasattr(project, "files") else [],
     }
 
-@router.get("", response_model=List[ProjectRead])
-def get_projects(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    projects = db.query(Project).all()
-    return [ProjectRead.model_validate(serialize_project(p)) for p in projects]
+def list_projects_query(query, limit, offset, order_by, order_dir, name=None, status=None, start_date=None, client_id=None):
+    if name:
+        query = query.filter(Project.name.ilike(f"%{name}%"))
+    if status:
+        query = query.filter(Project.status == status)
+    if start_date:
+        query = query.filter(Project.start_date == start_date)
+    if client_id:
+        query = query.join(Project.clients).filter(Client.id == client_id)
+    # Ordenação
+    if hasattr(Project, order_by):
+        order_col = getattr(Project, order_by)
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    return query
 
-@router.get("/my", response_model=List[ProjectRead])
-def get_my_projects(db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
+@router.get("", response_model=PaginatedProjects)
+def get_projects(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_actor_factory(["admin"])),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    name: str = Query(None),
+    status: str = Query(None),
+    start_date: str = Query(None),
+    client_id: str = Query(None),
+):
+    query = list_projects_query(db.query(Project), limit, offset, order_by, order_dir, name, status, start_date, client_id)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
+    return PaginatedProjects(
+        total=total,
+        count=len(result),
+        offset=offset,
+        limit=limit,
+        items=result
+    )
+
+@router.get("/my", response_model=PaginatedProjects)
+def get_my_projects(
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory()),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    name: str = Query(None),
+    status: str = Query(None),
+    start_date: str = Query(None),
+    client_id: str = Query(None),
+):
+    query = None
     # Admin: retorna todos os projetos
     if hasattr(actor, "role") and getattr(actor, "role", None) == "admin":
-        projects = db.query(Project).all()
+        query = db.query(Project)
     # Cliente: retorna projetos vinculados ao cliente
     elif isinstance(actor, Client):
-        projects = db.query(Project).join(Project.clients).filter(Client.id == actor.id).all()
+        query = db.query(Project).join(Project.clients).filter(Client.id == actor.id)
     # Usuário comum: retorna projetos do seu client_id
     elif hasattr(actor, "client_id"):
-        projects = db.query(Project).join(Project.clients).filter(Client.id == actor.client_id).all()
-    else:
-        projects = []
-    return [ProjectRead.model_validate(serialize_project(p)) for p in projects]
+        query = db.query(Project).join(Project.clients).filter(Client.id == actor.client_id)
 
-@router.get("/client/{client_id}", response_model=List[ProjectRead])
-def get_projects_by_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
-    # Verificar permissão para acessar projetos do cliente
+    if query is not None:
+        query = list_projects_query(query, limit, offset, order_by, order_dir, name, status, start_date, client_id)
+        total = query.count()
+        items = query.offset(offset).limit(limit).all()
+        result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
+        return PaginatedProjects(
+            total=total,
+            count=len(result),
+            offset=offset,
+            limit=limit,
+            items=result
+        )
+    else:
+        return PaginatedProjects(
+            total=0,
+            count=0,
+            offset=offset,
+            limit=limit,
+            items=[]
+        )
+
+@router.get("/client/{client_id}", response_model=PaginatedProjects)
+def get_projects_by_client(
+    client_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory()),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    name: str = Query(None),
+    status: str = Query(None),
+    start_date: str = Query(None),
+):
     client_resource_permission([client_id], actor)
-    projects = db.query(Project).join(Project.clients).filter(Client.id == client_id).all()
-    return [ProjectRead.model_validate(serialize_project(p)) for p in projects]
+    query = db.query(Project).join(Project.clients).filter(Client.id == client_id)
+    query = list_projects_query(query, limit, offset, order_by, order_dir, name, status, start_date, client_id)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
+    return PaginatedProjects(
+        total=total,
+        count=len(result),
+        offset=offset,
+        limit=limit,
+        items=result
+    )
 
 @router.get("/{project_id}", response_model=ProjectRead)
 def get_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):

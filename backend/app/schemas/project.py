@@ -1,10 +1,12 @@
-from typing import Optional, List, TYPE_CHECKING
-from uuid import UUID
-from datetime import datetime, date
-from pydantic import BaseModel
 import enum
+from datetime import datetime, date
+from typing import Optional, List
+from uuid import UUID
+
+from pydantic import BaseModel
 
 from .client import ClientBasicRead
+
 
 class ProjectStatus(str, enum.Enum):
     draft = "draft"
@@ -59,3 +61,10 @@ class ProjectRead(ProjectBase):
 from .stage import StageRead
 from .file import FileRead
 ProjectRead.model_rebuild()
+
+class PaginatedProjects(BaseModel):
+    total: int
+    count: int
+    offset: int
+    limit: int
+    items: List[ProjectRead]

@@ -1,18 +1,57 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
-from ..models.stage import Stage
 from ..models.project import Project
-from ..schemas.stage import StageRead, StageCreate, StageUpdate
+from ..models.stage import Stage
+from ..schemas.stage import StageRead, StageCreate, StageUpdate, PaginatedStages
 
 router = APIRouter()
 
-@router.get("", response_model=List[StageRead])
-def get_stages(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
-    stages = db.query(Stage).all()
-    return stages
+@router.get("", response_model=PaginatedStages)
+def get_stages(
+    db: Session = Depends(get_db),
+    admin_user = Depends(get_current_actor_factory(["admin"])),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    name: str = Query(None),
+    type: str = Query(None),
+    status: str = Query(None),
+    project_id: str = Query(None),
+    planned_start_date: str = Query(None),
+):
+    query = db.query(Stage)
+    if name:
+        query = query.filter(Stage.name.ilike(f"%{name}%"))
+    if type:
+        query = query.filter(Stage.type == type)
+    if status:
+        query = query.filter(Stage.status == status)
+    if project_id:
+        query = query.filter(Stage.project_id == project_id)
+    if planned_start_date:
+        query = query.filter(Stage.planned_start_date == planned_start_date)
+    # Ordenação
+    if hasattr(Stage, order_by):
+        order_col = getattr(Stage, order_by)
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return PaginatedStages(
+        total=total,
+        count=len(items),
+        offset=offset,
+        limit=limit,
+        items=items
+    )
 
 @router.get("/project/{project_id}", response_model=List[StageRead])
 def get_stages_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):

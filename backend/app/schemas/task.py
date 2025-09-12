@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -49,3 +49,10 @@ class TaskRead(TaskBase):
 
     class Config:
         from_attributes = True
+
+class PaginatedTasks(BaseModel):
+    total: int
+    count: int
+    offset: int
+    limit: int
+    items: List[TaskRead]

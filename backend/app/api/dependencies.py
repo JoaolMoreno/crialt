@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 from typing import Generator
 
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, status
 from fastapi.security.utils import get_authorization_scheme_param
 
 from ..core.security import decode_jwt_token

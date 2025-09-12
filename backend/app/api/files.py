@@ -1,20 +1,62 @@
-from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 
-from ..api.dependencies import get_db, get_current_user, get_current_actor_factory, client_resource_permission
-from ..models.user import User
+from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
 from ..models.file import File
 from ..models.project import Project
-from ..schemas.file import FileRead, FileCreate, FileUpdate
+from ..models.user import User
+from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles
 from ..services.file_service import FileService
 
 router = APIRouter()
 
-@router.get("", response_model=List[FileRead])
-def get_files(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    files = db.query(File).all()
-    return files
+@router.get("", response_model=PaginatedFiles)
+def get_files(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_actor_factory(["admin"])),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    original_name: str = Query(None),
+    category: str = Query(None),
+    project_id: str = Query(None),
+    client_id: str = Query(None),
+    stage_id: str = Query(None),
+    uploaded_by_id: str = Query(None),
+):
+    query = db.query(File)
+    if original_name:
+        query = query.filter(File.original_name.ilike(f"%{original_name}%"))
+    if category:
+        query = query.filter(File.category == category)
+    if project_id:
+        query = query.filter(File.project_id == project_id)
+    if client_id:
+        query = query.filter(File.client_id == client_id)
+    if stage_id:
+        query = query.filter(File.stage_id == stage_id)
+    if uploaded_by_id:
+        query = query.filter(File.uploaded_by_id == uploaded_by_id)
+    # Ordenação
+    if hasattr(File, order_by):
+        order_col = getattr(File, order_by)
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return PaginatedFiles(
+        total=total,
+        count=len(items),
+        offset=offset,
+        limit=limit,
+        items=items
+    )
 
 @router.get("/project/{project_id}", response_model=List[FileRead])
 def get_files_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):

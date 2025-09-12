@@ -1,19 +1,64 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
-from ..models.task import Task
-from ..models.stage import Stage
 from ..models.project import Project
-from ..schemas.task import TaskRead, TaskCreate, TaskUpdate
+from ..models.stage import Stage
+from ..models.task import Task
+from ..schemas.task import TaskRead, TaskCreate, TaskUpdate, PaginatedTasks
 
 router = APIRouter()
 
-@router.get("", response_model=List[TaskRead])
-def get_tasks(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
-    tasks = db.query(Task).all()
-    return tasks
+@router.get("", response_model=PaginatedTasks)
+def get_tasks(
+    db: Session = Depends(get_db),
+    admin_user = Depends(get_current_actor_factory(["admin"])),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    title: str = Query(None),
+    status: str = Query(None),
+    priority: str = Query(None),
+    due_date: str = Query(None),
+    stage_id: str = Query(None),
+    created_by_id: str = Query(None),
+    assigned_to_id: str = Query(None),
+):
+    query = db.query(Task)
+    if title:
+        query = query.filter(Task.title.ilike(f"%{title}%"))
+    if status:
+        query = query.filter(Task.status == status)
+    if priority:
+        query = query.filter(Task.priority == priority)
+    if due_date:
+        query = query.filter(Task.due_date == due_date)
+    if stage_id:
+        query = query.filter(Task.stage_id == stage_id)
+    if created_by_id:
+        query = query.filter(Task.created_by_id == created_by_id)
+    if assigned_to_id:
+        query = query.filter(Task.assigned_to_id == assigned_to_id)
+    # Ordenação
+    if hasattr(Task, order_by):
+        order_col = getattr(Task, order_by)
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return PaginatedTasks(
+        total=total,
+        count=len(items),
+        offset=offset,
+        limit=limit,
+        items=items
+    )
 
 @router.get("/stage/{stage_id}", response_model=List[TaskRead])
 def get_tasks_by_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):

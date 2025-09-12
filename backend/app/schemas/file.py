@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
@@ -40,3 +40,10 @@ class FileRead(FileBase):
 
     class Config:
         from_attributes = True
+
+class PaginatedFiles(BaseModel):
+    total: int
+    count: int
+    offset: int
+    limit: int
+    items: List[FileRead]

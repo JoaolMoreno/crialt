@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
-
-from ..api.dependencies import get_db, get_current_actor, get_current_actor_factory
-from ..models.client import Client
-from ..schemas.client import ClientCreate, ClientUpdate, ClientRead
-from ..services.auth_service import AuthService
-from ..core.security import get_password_hash
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from ..schemas.project import ProjectRead
+from sqlalchemy.orm import Session
+
+from ..api.dependencies import get_db, get_current_actor_factory
 from ..api.projects import serialize_project
+from ..core.security import get_password_hash
+from ..models.client import Client
+from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients
+from ..schemas.project import ProjectRead
+from ..services.auth_service import AuthService
 
 router = APIRouter()
 
@@ -21,10 +20,46 @@ def serialize_client(client):
         data["projects"] = []
     return ClientRead.model_validate(data)
 
-@router.get("", response_model=List[ClientRead])
-def get_clients(db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):
-    clients = db.query(Client).all()
-    return [serialize_client(client) for client in clients]
+@router.get("", response_model=PaginatedClients)
+def get_clients(
+    db: Session = Depends(get_db),
+    admin_user = Depends(get_current_actor_factory(["admin"])),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    order_by: str = Query("created_at"),
+    order_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    name: str = Query(None),
+    document: str = Query(None),
+    email: str = Query(None),
+    is_active: bool = Query(None),
+):
+    query = db.query(Client)
+    if name:
+        query = query.filter(Client.name.ilike(f"%{name}%"))
+    if document:
+        query = query.filter(Client.document == document)
+    if email:
+        query = query.filter(Client.email == email)
+    if is_active is not None:
+        query = query.filter(Client.is_active == is_active)
+    # Ordenação
+    if hasattr(Client, order_by):
+        order_col = getattr(Client, order_by)
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    result = [serialize_client(client) for client in items]
+    return PaginatedClients(
+        total=total,
+        count=len(result),
+        offset=offset,
+        limit=limit,
+        items=result
+    )
 
 @router.get("/{client_id}", response_model=ClientRead)
 def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):

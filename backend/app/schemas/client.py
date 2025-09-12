@@ -1,8 +1,9 @@
+import enum
+from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
-from datetime import datetime, date
+
 from pydantic import BaseModel, EmailStr
-import enum
 
 if TYPE_CHECKING:
     from .project import ProjectRead
@@ -71,5 +72,13 @@ class ClientRead(ClientBase):
     projects: Optional[List["ProjectRead"]] = None
     model_config = {"from_attributes": True}
 
-from .project import ProjectRead
+
+class PaginatedClients(BaseModel):
+    total: int
+    count: int
+    offset: int
+    limit: int
+    items: List[ClientRead]
+
+
 ClientRead.model_rebuild()
