@@ -2,13 +2,14 @@ import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import {Router} from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
+import {NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-    imports: [SharedModule]
+  imports: [SharedModule, NgOptimizedImage]
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);
