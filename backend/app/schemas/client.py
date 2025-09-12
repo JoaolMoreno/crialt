@@ -79,6 +79,3 @@ class PaginatedClients(BaseModel):
     offset: int
     limit: int
     items: List[ClientRead]
-
-
-ClientRead.model_rebuild()

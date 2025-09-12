@@ -60,7 +60,9 @@ class ProjectRead(ProjectBase):
 
 from .stage import StageRead
 from .file import FileRead
-ProjectRead.model_rebuild()
+from .client import ClientRead
+
+ClientRead.model_rebuild()
 
 class PaginatedProjects(BaseModel):
     total: int
