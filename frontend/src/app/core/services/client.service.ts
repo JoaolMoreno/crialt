@@ -10,8 +10,17 @@ export class ClientService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/clients`;
 
+  private filterParams(params: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && !(typeof v === 'string' && v.trim() === '')
+      )
+    );
+  }
+
   getClients(params: Record<string, any> = {}): Observable<PaginatedClient> {
-    const query = new URLSearchParams(params).toString();
+    const filteredParams = this.filterParams(params);
+    const query = new URLSearchParams(filteredParams).toString();
     return this.http.get<PaginatedClient>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
