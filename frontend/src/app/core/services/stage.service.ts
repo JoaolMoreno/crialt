@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Stage } from '../models/stage.model';
+import { PaginatedStage } from '../models/paginated-stage.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -9,8 +10,9 @@ export class StageService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/stages`;
 
-  getStages(): Observable<Stage[]> {
-    return this.http.get<Stage[]>(this.apiUrl, { withCredentials: true });
+  getStages(params: Record<string, any> = {}): Observable<PaginatedStage> {
+    const query = new URLSearchParams(params).toString();
+    return this.http.get<PaginatedStage>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
   getStageById(id: string): Observable<Stage> {

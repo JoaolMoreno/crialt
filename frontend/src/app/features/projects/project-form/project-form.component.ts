@@ -113,7 +113,7 @@ export class ProjectFormComponent {
     this.loadingClients = true;
     this.clientService.getClients().subscribe({
       next: (clients) => {
-        this.clients = clients;
+        this.clients = clients.items;
         this.loadingClients = false;
       },
       error: () => {
@@ -160,7 +160,7 @@ export class ProjectFormComponent {
     this.loadingStages = true;
     this.stageService.getStages().subscribe({
       next: (stages) => {
-        this.etapasDisponiveis = stages;
+        this.etapasDisponiveis = stages.items;
         this.loadingStages = false;
       },
       error: () => {

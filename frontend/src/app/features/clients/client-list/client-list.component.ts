@@ -18,22 +18,17 @@ export class ClientListComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   clients: Client[] = [];
-  filteredClients: Client[] = [];
-  loading = false;
-  error = '';
-  searchQuery = '';
-  selectedStatus = '';
-  selectedDocumentType = '';
-  selectedDate = '';
-  isAdmin = false;
-
-  // Paginação
+  total = 0;
   pageSize = 10;
   currentPage = 1;
-  totalPages = 1;
-  // Ordenação
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  searchQuery = '';
+  selectedStatus = '';
+  selectedDate = '';
+  loading = false;
+  error = '';
+  isAdmin = false;
 
   ngOnInit(): void {
     this.authService.getCurrentUser().subscribe(user => {
@@ -45,10 +40,19 @@ export class ClientListComponent implements OnInit {
   loadClients(): void {
     this.loading = true;
     this.error = '';
-    this.clientService.getClients().subscribe({
-      next: (clients) => {
-        this.clients = clients;
-        this.applyFilters();
+    const params: Record<string, any> = {
+      limit: this.pageSize,
+      offset: (this.currentPage - 1) * this.pageSize,
+      order_by: this.sortColumn || 'created_at',
+      order_dir: this.sortDirection,
+      name: this.searchQuery || undefined,
+      is_active: this.selectedStatus || undefined,
+      created_at: this.selectedDate || undefined
+    };
+    this.clientService.getClients(params).subscribe({
+      next: (res) => {
+        this.clients = res.items;
+        this.total = res.total;
         this.loading = false;
       },
       error: () => {
@@ -58,58 +62,24 @@ export class ClientListComponent implements OnInit {
     });
   }
 
-  get paginatedClients(): Client[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    return this.filteredClients.slice(start, end);
-  }
-
-  setPage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
+  onPageChange(page: number): void {
     this.currentPage = page;
+    this.loadClients();
   }
 
-  sortBy(column: 'name' | 'document' | 'email' | 'is_active' | 'created_at'): void {
-    const validColumns = {
-      name: (c: Client) => c.name,
-      document: (c: Client) => c.document,
-      email: (c: Client) => c.email,
-      is_active: (c: Client) => c.is_active,
-      created_at: (c: Client) => c.created_at
-    };
-    if (!validColumns[column]) return;
+  onSortChange(column: string): void {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    this.filteredClients.sort((a, b) => {
-      let valA = validColumns[column](a);
-      let valB = validColumns[column](b);
-      if (typeof valA === 'string') valA = valA.toLowerCase();
-      if (typeof valB === 'string') valB = valB.toLowerCase();
-      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
-      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
+    this.loadClients();
   }
 
-  applyFilters(): void {
-    this.filteredClients = this.clients.filter(client => {
-      const matchesSearch = this.searchQuery ? (
-        client.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        client.document.toLowerCase().includes(this.searchQuery.toLowerCase())
-      ) : true;
-      const matchesStatus = this.selectedStatus ? (
-        this.selectedStatus === 'active' ? client.is_active : !client.is_active
-      ) : true;
-      const matchesDocumentType = this.selectedDocumentType ? client.document_type === this.selectedDocumentType : true;
-      const matchesDate = this.selectedDate ? client.created_at.startsWith(this.selectedDate) : true;
-      return matchesSearch && matchesStatus && matchesDocumentType && matchesDate;
-    });
-    this.totalPages = Math.max(1, Math.ceil(this.filteredClients.length / this.pageSize));
+  onFilterChange(): void {
     this.currentPage = 1;
+    this.loadClients();
   }
 
   onEditClient(client: Client): void {
@@ -143,9 +113,5 @@ export class ClientListComponent implements OnInit {
 
   onNewClient(): void {
     this.router.navigate(['/clients/new']);
-  }
-
-  ngOnChanges(): void {
-    this.applyFilters();
   }
 }

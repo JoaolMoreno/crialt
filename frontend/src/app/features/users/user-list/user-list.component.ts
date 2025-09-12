@@ -16,11 +16,15 @@ export class UserListComponent implements OnInit {
   private readonly router = inject(Router);
 
   users: User[] = [];
-  filteredUsers: User[] = [];
-  loading = false;
+  total = 0;
+  pageSize = 10;
+  currentPage = 1;
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
   searchQuery = '';
   selectedRole = '';
   selectedStatus = '';
+  loading = false;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -28,10 +32,19 @@ export class UserListComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.applyFilters();
+    const params: Record<string, any> = {
+      limit: this.pageSize,
+      offset: (this.currentPage - 1) * this.pageSize,
+      order_by: this.sortColumn || 'created_at',
+      order_dir: this.sortDirection,
+      role: this.selectedRole || undefined,
+      is_active: this.selectedStatus || undefined,
+      search: this.searchQuery || undefined
+    };
+    this.userService.getUsers(params).subscribe({
+      next: (res) => {
+        this.users = res.items;
+        this.total = res.total;
         this.loading = false;
       },
       error: () => {
@@ -40,18 +53,24 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  applyFilters(): void {
-    this.filteredUsers = this.users.filter(user => {
-      const matchesSearch = this.searchQuery ? (
-        user.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(this.searchQuery.toLowerCase())
-      ) : true;
-      const matchesRole = this.selectedRole ? user.role === this.selectedRole : true;
-      const matchesStatus = this.selectedStatus ? (
-        this.selectedStatus === 'active' ? user.is_active : !user.is_active
-      ) : true;
-      return matchesSearch && matchesRole && matchesStatus;
-    });
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadUsers();
+  }
+
+  onSortChange(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.loadUsers();
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.loadUsers();
   }
 
   onNewUser(): void {
@@ -84,9 +103,5 @@ export class UserListComponent implements OnInit {
         }
       });
     }
-  }
-
-  ngOnChanges(): void {
-    this.applyFilters();
   }
 }

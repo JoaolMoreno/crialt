@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ProjectService } from '../../core/services/project.service';
 import { ClientService } from '../../core/services/client.service';
+import { DashboardService, DashboardData } from '../../core/services/dashboard.service';
 import { Project } from '../../core/models/project.model';
 import { ChartConfiguration } from 'chart.js';
 import { SharedModule } from '../../shared/shared.module';
@@ -15,6 +16,7 @@ import { SharedModule } from '../../shared/shared.module';
 export class DashboardComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly clientService = inject(ClientService);
+  private readonly dashboardService = inject(DashboardService);
 
   loading = false;
   error = '';
@@ -72,65 +74,28 @@ export class DashboardComponent implements OnInit {
   loadDashboardData(): void {
     this.loading = true;
     this.error = '';
-    this.clientService.getClients().subscribe({
-      next: (clients) => {
-        this.totalClients = clients.filter(c => c.is_active).length;
-        this.projectService.getProjects().subscribe({
-          next: (projects) => {
-            this.activeProjects = projects.filter(p => p.status === 'active').length;
-            const now = new Date();
-            this.completedProjectsThisMonth = projects.filter(p => {
-              if (!p.actual_end_date) return false;
-              const endDate = new Date(p.actual_end_date);
-              return endDate.getMonth() === now.getMonth() && endDate.getFullYear() === now.getFullYear();
-            }).length;
-            this.monthRevenue = projects.filter(p => {
-              if (!p.actual_end_date) return false;
-              const endDate = new Date(p.actual_end_date);
-              return endDate.getMonth() === now.getMonth() && endDate.getFullYear() === now.getFullYear();
-            }).reduce((sum, p) => sum + p.total_value, 0);
-            this.recentProjects = projects.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
-            // Gráfico de status dos projetos
-            const statusCounts = {
-              active: 0, paused: 0, completed: 0, cancelled: 0, draft: 0
-            };
-            projects.forEach(p => {
-              if (statusCounts[p.status] !== undefined) statusCounts[p.status]++;
-            });
-            this.projectsStatusChartData.data.datasets[0].data = [
-              statusCounts.active,
-              statusCounts.paused,
-              statusCounts.completed,
-              statusCounts.cancelled,
-              statusCounts.draft
-            ];
-            // Gráfico de receita mensal (últimos 6 meses)
-            const months: string[] = [];
-            const revenueByMonth: number[] = [];
-            for (let i = 5; i >= 0; i--) {
-              const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-              months.push(d.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }));
-              const monthRevenue = projects.filter(p => {
-                if (!p.actual_end_date) return false;
-                const endDate = new Date(p.actual_end_date);
-                return endDate.getMonth() === d.getMonth() && endDate.getFullYear() === d.getFullYear();
-              }).reduce((sum, p) => sum + p.total_value, 0);
-              revenueByMonth.push(monthRevenue);
-            }
-            this.revenueChartData.data.labels = months;
-            this.revenueChartData.data.datasets[0].data = revenueByMonth;
-
-            this.loading = false;
-          },
-          error: () => {
-            this.loading = false;
-            this.error = 'Erro ao buscar projetos.';
-          }
-        });
+    this.dashboardService.getDashboardData().subscribe({
+      next: (data: DashboardData) => {
+        this.totalClients = data.total_clients;
+        this.activeProjects = data.active_projects;
+        this.completedProjectsThisMonth = data.completed_projects_this_month;
+        this.monthRevenue = data.month_revenue;
+        this.recentProjects = data.recent_projects;
+        this.stagesNearDeadline = data.stages_near_deadline;
+        this.projectsStatusChartData.data.datasets[0].data = [
+          data.projects_status_counts.active || 0,
+          data.projects_status_counts.paused || 0,
+          data.projects_status_counts.completed || 0,
+          data.projects_status_counts.cancelled || 0,
+          data.projects_status_counts.draft || 0
+        ];
+        this.revenueChartData.data.labels = data.revenue_by_month.map(m => `${m.month}/${m.year}`);
+        this.revenueChartData.data.datasets[0].data = data.revenue_by_month.map(m => m.value);
+        this.loading = false;
       },
       error: () => {
         this.loading = false;
-        this.error = 'Erro ao buscar clientes.';
+        this.error = 'Erro ao buscar dados do dashboard.';
       }
     });
   }

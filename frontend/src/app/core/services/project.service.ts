@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Project } from '../models/project.model';
+import { PaginatedProject } from '../models/paginated-project.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -9,8 +10,9 @@ export class ProjectService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/projects`;
 
-  getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(this.apiUrl, { withCredentials: true });
+  getProjects(params: Record<string, any> = {}): Observable<PaginatedProject> {
+    const query = new URLSearchParams(params).toString();
+    return this.http.get<PaginatedProject>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
   getProjectById(id: string): Observable<Project> {

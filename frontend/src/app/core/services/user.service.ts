@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
+import { PaginatedUser } from '../models/paginated-user.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -9,8 +10,9 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/users`;
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl, { withCredentials: true });
+  getUsers(params: Record<string, any> = {}): Observable<PaginatedUser> {
+    const query = new URLSearchParams(params).toString();
+    return this.http.get<PaginatedUser>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
   getUserById(id: string): Observable<User> {

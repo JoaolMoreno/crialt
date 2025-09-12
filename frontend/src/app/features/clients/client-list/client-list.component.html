@@ -4,36 +4,31 @@
     <button class="export-btn" style="margin-right:16px;" (click)="onNewClient()">
       <span class="material-icons">person_add</span> Novo Cliente
     </button>
-    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="applyFilters()" />
-    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="applyFilters()">
+    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
+    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="active">Ativo</option>
       <option value="inactive">Inativo</option>
     </select>
-    <select [(ngModel)]="selectedDocumentType" class="filter-select" (change)="applyFilters()">
-      <option value="">Todos os tipos</option>
-      <option value="cpf">CPF</option>
-      <option value="cnpj">CNPJ</option>
-    </select>
-    <input type="date" [(ngModel)]="selectedDate" class="filter-select" (change)="applyFilters()" />
+    <input type="date" [(ngModel)]="selectedDate" class="filter-select" (change)="onFilterChange()" />
     <button class="export-btn" (click)="onExport()">
       <span class="material-icons">download</span> Exportar
     </button>
   </div>
 
-  <table class="client-table" *ngIf="!loading && filteredClients.length">
+  <table class="client-table" *ngIf="!loading && clients.length">
     <thead>
       <tr>
-        <th (click)="sortBy('name')" style="cursor:pointer">Nome <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="sortBy('document')" style="cursor:pointer">CPF/CNPJ <span *ngIf="sortColumn==='document'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="sortBy('email')" style="cursor:pointer">Email <span *ngIf="sortColumn==='email'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="sortBy('is_active')" style="cursor:pointer">Status <span *ngIf="sortColumn==='is_active'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="sortBy('created_at')" style="cursor:pointer">Data de Cadastro <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('name')" style="cursor:pointer">Nome <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('document')" style="cursor:pointer">CPF/CNPJ <span *ngIf="sortColumn==='document'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('email')" style="cursor:pointer">Email <span *ngIf="sortColumn==='email'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('is_active')" style="cursor:pointer">Status <span *ngIf="sortColumn==='is_active'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('created_at')" style="cursor:pointer">Data de Cadastro <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th>Ações</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let client of paginatedClients">
+      <tr *ngFor="let client of clients">
         <td>{{ client.name }}</td>
         <td>{{ client.document }}</td>
         <td>{{ client.email }}</td>
@@ -54,12 +49,13 @@
       </tr>
     </tbody>
   </table>
-  <div *ngIf="!loading && filteredClients.length > 0 && totalPages > 1" class="pagination-controls">
-    <button (click)="setPage(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
-    <span>Página {{currentPage}} de {{totalPages}}</span>
-    <button (click)="setPage(currentPage+1)" [disabled]="currentPage===totalPages">Próxima</button>
-  </div>
-  <div *ngIf="!loading && !filteredClients.length" class="empty-state">Nenhum cliente encontrado.</div>
+  <div *ngIf="!loading && !clients.length" class="empty-state">Nenhum cliente encontrado.</div>
   <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
   <div *ngIf="error" class="client-list-error">{{ error }}</div>
+  <!-- Paginação -->
+  <div *ngIf="!loading && total > pageSize" class="pagination-controls">
+    <button (click)="onPageChange(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
+    <span>Página {{currentPage}} de {{(total/pageSize) | ceil}}</span>
+    <button (click)="onPageChange(currentPage+1)" [disabled]="currentPage>=((total/pageSize) | ceil)">Próxima</button>
+  </div>
 </section>

@@ -10,6 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
+import { PaginatedProject } from '../../../core/models/paginated-project.model';
+import { PaginatedClient } from '../../../core/models/paginated-client.model';
+import { PaginatedStage } from '../../../core/models/paginated-stage.model';
 
 @Component({
   selector: 'app-project-list',
@@ -26,29 +29,24 @@ export class ProjectListComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   projects: Project[] = [];
-  filteredProjects: Project[] = [];
-  paginatedProjects: Project[] = [];
   clients: Client[] = [];
   stages: Stage[] = [];
-  loading = false;
-  error = '';
+  total = 0;
+  pageSize = 10;
+  currentPage = 1;
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
   searchQuery = '';
   selectedStatus = '';
   selectedClient = '';
   selectedPeriod = '';
   selectedStage = '';
   selectedValue = '';
+  loading = false;
+  error = '';
   isAdmin = false;
   selectedProjects: string[] = [];
   batchStatus: string = '';
-
-  // Paginação
-  pageSize = 10;
-  currentPage = 1;
-  totalPages = 1;
-  // Ordenação
-  sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
   viewMode: 'list' | 'grid' = 'list';
 
   ngOnInit(): void {
@@ -62,62 +60,60 @@ export class ProjectListComponent implements OnInit {
   loadProjects(): void {
     this.loading = true;
     this.error = '';
-    this.projectService.getProjects().subscribe({
-      next: (projects) => {
-        this.projects = projects;
-        this.filteredProjects = projects;
-        this.totalPages = Math.ceil(projects.length / this.pageSize) || 1;
-        this.currentPage = 1;
-        this.paginate();
+    const params: Record<string, any> = {
+      limit: this.pageSize,
+      offset: (this.currentPage - 1) * this.pageSize,
+      order_by: this.sortColumn || 'created_at',
+      order_dir: this.sortDirection,
+      status: this.selectedStatus || undefined,
+      client_id: this.selectedClient || undefined,
+      stage: this.selectedStage || undefined,
+      value: this.selectedValue || undefined,
+      search: this.searchQuery || undefined,
+      period: this.selectedPeriod || undefined
+    };
+    this.projectService.getProjects(params).subscribe({
+      next: (res: PaginatedProject) => {
+        this.projects = res.items;
+        this.total = res.total;
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Erro ao carregar projetos.';
+      error: () => {
         this.loading = false;
+        this.error = 'Erro ao buscar projetos.';
       }
     });
   }
 
   loadClientsAndStages(): void {
     this.clientService.getClients().subscribe({
-      next: (clients) => { this.clients = clients; },
+      next: (res: PaginatedClient) => { this.clients = res.items; },
       error: () => { this.clients = []; }
     });
     this.stageService.getStages().subscribe({
-      next: (stages) => { this.stages = stages; },
+      next: (res: PaginatedStage) => { this.stages = res.items; },
       error: () => { this.stages = []; }
     });
   }
 
-  applyFilters(): void {
-    let filtered = [...this.projects];
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(query) ||
-        (p.clients[0]?.name?.toLowerCase().includes(query)) ||
-        (this.getCurrentStage(p)?.name?.toLowerCase().includes(query))
-      );
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadProjects();
+  }
+
+  onSortChange(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
     }
-    if (this.selectedStatus) {
-      filtered = filtered.filter(p => p.status === this.selectedStatus);
-    }
-    if (this.selectedClient) {
-      filtered = filtered.filter(p => p.clients.some(c => c.id === this.selectedClient));
-    }
-    if (this.selectedStage) {
-      filtered = filtered.filter(p => p.stages.some(s => s.id === this.selectedStage));
-    }
-    if (this.selectedPeriod) {
-      filtered = filtered.filter(p => p.created_at?.startsWith(this.selectedPeriod));
-    }
-    if (this.selectedValue) {
-      filtered = filtered.filter(p => p.total_value >= +this.selectedValue);
-    }
-    this.filteredProjects = filtered;
-    this.totalPages = Math.ceil(filtered.length / this.pageSize) || 1;
+    this.loadProjects();
+  }
+
+  onFilterChange(): void {
     this.currentPage = 1;
-    this.paginate();
+    this.loadProjects();
   }
 
   setViewMode(mode: 'list' | 'grid') {
@@ -133,61 +129,6 @@ export class ProjectListComponent implements OnInit {
     const total = project.stages.length;
     const completed = project.stages.filter(s => s.status === 'completed').length;
     return Math.round((completed / total) * 100);
-  }
-
-  paginate(): void {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.paginatedProjects = this.filteredProjects.slice(start, end);
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.paginate();
-  }
-
-  sortBy(column: string): void {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.filteredProjects.sort((a, b) => {
-      let aValue: any = '';
-      let bValue: any = '';
-      switch (column) {
-        case 'name':
-          aValue = a.name;
-          bValue = b.name;
-          break;
-        case 'client':
-          aValue = a.clients[0]?.name || '';
-          bValue = b.clients[0]?.name || '';
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'stage':
-          aValue = this.getCurrentStage(a)?.name || '';
-          bValue = this.getCurrentStage(b)?.name || '';
-          break;
-        case 'value':
-          aValue = a.total_value;
-          bValue = b.total_value;
-          break;
-        case 'created_at':
-          aValue = a.created_at;
-          bValue = b.created_at;
-          break;
-      }
-      if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    this.paginate();
   }
 
   onEditProject(project: Project): void {
@@ -238,7 +179,7 @@ export class ProjectListComponent implements OnInit {
    */
   toggleSelectAll(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
-    const pageProjectIds = this.paginatedProjects.map(p => p.id);
+    const pageProjectIds = this.projects.map(p => p.id);
     if (checked) {
       // Adiciona todos os projetos da página atual à seleção, sem duplicar
       this.selectedProjects = Array.from(new Set([...this.selectedProjects, ...pageProjectIds]));
@@ -269,5 +210,8 @@ export class ProjectListComponent implements OnInit {
   }
   statusBadgeClass(status: string): string {
     return 'status-badge ' + getStatusBadge(status).color;
+  }
+  get totalPages(): number {
+    return Math.ceil(this.total / this.pageSize);
   }
 }

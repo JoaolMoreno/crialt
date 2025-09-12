@@ -9,6 +9,8 @@ import { Project } from '../../../core/models/project.model';
 import { File } from '../../../core/models/file.model';
 import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from '../../../shared/shared.module';
+import { PaginatedProject } from '../../../core/models/paginated-project.model';
+import { PaginatedFile } from '../../../core/models/paginated-file.model';
 
 @Component({
   selector: 'app-client-detail',
@@ -67,17 +69,23 @@ export class ClientDetailComponent implements OnInit {
   }
 
   loadProjects(clientId: string): void {
-    this.projectService.getProjects().subscribe({
-      next: (projects) => {
-        this.projects = projects.filter(p => p.clients.some(c => c.id === clientId));
+    this.projectService.getProjects({ client_id: clientId }).subscribe({
+      next: (projects: PaginatedProject) => {
+        this.projects = projects.items;
+      },
+      error: () => {
+        this.projects = [];
       }
     });
   }
 
   loadDocuments(clientId: string): void {
-    this.fileService.getFiles().subscribe({
-      next: (files) => {
-        this.documents = files.filter(f => f.client_id === clientId);
+    this.fileService.getFiles({ client_id: clientId }).subscribe({
+      next: (files: PaginatedFile) => {
+        this.documents = files.items;
+      },
+      error: () => {
+        this.documents = [];
       }
     });
   }

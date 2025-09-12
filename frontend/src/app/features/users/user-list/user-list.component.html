@@ -1,14 +1,14 @@
 <section class="user-list-section">
   <h1>Usuários</h1>
   <div class="user-list-actions">
-    <input type="text" placeholder="Buscar por nome ou email..." [(ngModel)]="searchQuery" class="search-input" />
-    <select [(ngModel)]="selectedRole" class="filter-select">
+    <input type="text" placeholder="Buscar por nome ou email..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
+    <select [(ngModel)]="selectedRole" class="filter-select" (change)="onFilterChange()">
       <option value="">Todos os papéis</option>
       <option value="admin">Admin</option>
       <option value="architect">Arquiteto</option>
       <option value="assistant">Assistente</option>
     </select>
-    <select [(ngModel)]="selectedStatus" class="filter-select">
+    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="active">Ativo</option>
       <option value="inactive">Inativo</option>
@@ -18,7 +18,7 @@
     </button>
   </div>
 
-  <table class="user-table" *ngIf="!loading && filteredUsers.length">
+  <table class="user-table" *ngIf="!loading && users.length">
     <thead>
       <tr>
         <th>Nome</th>
@@ -29,7 +29,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of filteredUsers">
+      <tr *ngFor="let user of users">
         <td>{{ user.name }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.role }}</td>
@@ -48,7 +48,12 @@
       </tr>
     </tbody>
   </table>
-  <div *ngIf="!loading && !filteredUsers.length" class="empty-state">Nenhum usuário encontrado.</div>
+  <div *ngIf="!loading && !users.length" class="empty-state">Nenhum usuário encontrado.</div>
   <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
+  <!-- Paginação -->
+  <div *ngIf="!loading && total > pageSize" class="pagination-controls">
+    <button (click)="onPageChange(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
+    <span>Página {{currentPage}} de {{(total/pageSize) | ceil}}</span>
+    <button (click)="onPageChange(currentPage+1)" [disabled]="currentPage>=((total/pageSize) | ceil)">Próxima</button>
+  </div>
 </section>
-

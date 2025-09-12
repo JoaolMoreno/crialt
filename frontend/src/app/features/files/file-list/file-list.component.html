@@ -2,8 +2,8 @@
   <div class="file-list-header">
     <h1>Gestão de Arquivos</h1>
     <div class="file-list-actions">
-      <input type="text" placeholder="Buscar arquivos..." [(ngModel)]="searchQuery" class="search-input" />
-      <select [(ngModel)]="selectedCategory" class="filter-select">
+      <input type="text" placeholder="Buscar arquivos..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
+      <select [(ngModel)]="selectedCategory" class="filter-select" (change)="onFilterChange()">
         <option value="">Todas as categorias</option>
         <option value="document">Documentos</option>
         <option value="image">Imagens</option>
@@ -32,7 +32,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let file of filteredFiles">
+        <tr *ngFor="let file of files">
           <td>{{ file.original_name }}</td>
           <td>{{ file.category }}</td>
           <td>{{ file.size | number }} bytes</td>
@@ -49,8 +49,12 @@
     <div *ngIf="!loading && !files.length" class="empty-state">
       Nenhum arquivo encontrado.
     </div>
+    <!-- Paginação -->
+    <div *ngIf="!loading && total > pageSize" class="pagination-controls">
+      <button (click)="onPageChange(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
+      <span>Página {{currentPage}} de {{(total/pageSize) | ceil}}</span>
+      <button (click)="onPageChange(currentPage+1)" [disabled]="currentPage>=((total/pageSize) | ceil)">Próxima</button>
+    </div>
   </div>
-
   <!-- Modal de upload e confirmação podem ser implementados aqui -->
 </section>
-

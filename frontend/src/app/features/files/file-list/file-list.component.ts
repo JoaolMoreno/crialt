@@ -14,10 +14,14 @@ export class FileListComponent implements OnInit {
   private readonly fileService = inject(FileService);
 
   files: File[] = [];
-  filteredFiles: File[] = [];
-  loading = false;
+  total = 0;
+  pageSize = 10;
+  currentPage = 1;
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
   searchQuery = '';
   selectedCategory = '';
+  loading = false;
 
   ngOnInit(): void {
     this.loadFiles();
@@ -25,10 +29,18 @@ export class FileListComponent implements OnInit {
 
   loadFiles(): void {
     this.loading = true;
-    this.fileService.getFiles().subscribe({
-      next: (files) => {
-        this.files = files;
-        this.applyFilters();
+    const params: Record<string, any> = {
+      limit: this.pageSize,
+      offset: (this.currentPage - 1) * this.pageSize,
+      order_by: this.sortColumn || 'created_at',
+      order_dir: this.sortDirection,
+      category: this.selectedCategory || undefined,
+      search: this.searchQuery || undefined
+    };
+    this.fileService.getFiles(params).subscribe({
+      next: (res) => {
+        this.files = res.items;
+        this.total = res.total;
         this.loading = false;
       },
       error: () => {
@@ -37,12 +49,24 @@ export class FileListComponent implements OnInit {
     });
   }
 
-  applyFilters(): void {
-    this.filteredFiles = this.files.filter(file => {
-      const matchesCategory = this.selectedCategory ? file.category === this.selectedCategory : true;
-      const matchesSearch = this.searchQuery ? file.original_name.toLowerCase().includes(this.searchQuery.toLowerCase()) : true;
-      return matchesCategory && matchesSearch;
-    });
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadFiles();
+  }
+
+  onSortChange(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.loadFiles();
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.loadFiles();
   }
 
   onOpenUploadModal(): void {
@@ -65,10 +89,5 @@ export class FileListComponent implements OnInit {
         }
       });
     }
-  }
-
-  // Atualiza filtros ao mudar busca ou categoria
-  ngOnChanges(): void {
-    this.applyFilters();
   }
 }

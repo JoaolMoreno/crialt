@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Client } from '../models/client.model';
+import { PaginatedClient } from '../models/paginated-client.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -9,8 +10,9 @@ export class ClientService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/clients`;
 
-  getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>(this.apiUrl, { withCredentials: true });
+  getClients(params: Record<string, any> = {}): Observable<PaginatedClient> {
+    const query = new URLSearchParams(params).toString();
+    return this.http.get<PaginatedClient>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
   getClientById(id: string): Observable<Client> {
