@@ -83,6 +83,13 @@ def login(
         return {"access_token": token, "token_type": "bearer", "client": ClientRead.model_validate(client, from_attributes=True)}
     raise HTTPException(status_code=401, detail="Credenciais inválidas")
 
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(key="access_token", path="/")
+    return {"msg": "Logout realizado com sucesso"}
+
+
 @router.patch("/change-password")
 def change_password(password_data: ChangePasswordRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     auth = AuthService(db)
