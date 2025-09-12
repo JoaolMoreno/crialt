@@ -1,15 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgForOf} from "@angular/common";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {SharedModule} from "../../../shared/shared.module";
 
 @Component({
     selector: 'app-stage-form',
     standalone: true,
     templateUrl: './stage-form.component.html',
-    imports: [
-        ReactiveFormsModule,
-        NgForOf
-    ],
+    imports: [SharedModule],
     styleUrls: ['./stage-form.component.scss']
 })
 export class StageFormComponent implements OnInit {

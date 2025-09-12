@@ -5,240 +5,256 @@
     </button>
     <h1>{{ isEdit ? 'Editar Projeto' : 'Novo Projeto' }}</h1>
   </div>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="project-form">
-    <div class="form-group project-status-group status-row">
-      <label class="status-label">Status do Projeto:</label>
-      <ng-container *ngIf="!editProjectStatus; else editStatusBlock">
-        <span class="status-badge" [ngClass]="statusBadgeClass(form.get('status')?.value)">
-          {{ statusLabel(form.get('status')?.value) }}
-        </span>
-        <button type="button" class="btn-icon status-edit-btn" (click)="toggleEditProjectStatus()" title="Editar status">
-          <span class="material-icons">edit</span>
-        </button>
-      </ng-container>
-      <ng-template #editStatusBlock>
-        <select formControlName="status" class="status-select-inline">
-          <option value="draft">Rascunho</option>
-          <option value="active">Ativo</option>
-          <option value="paused">Pausado</option>
-          <option value="completed">Concluído</option>
-          <option value="cancelled">Cancelado</option>
-        </select>
-        <button type="button" class="btn-icon status-confirm-btn" (click)="saveProjectStatus()" title="Confirmar">
-          <span class="material-icons">check</span>
-        </button>
-        <button type="button" class="btn-icon status-cancel-btn" (click)="toggleEditProjectStatus()" title="Cancelar">
-          <span class="material-icons">close</span>
-        </button>
-      </ng-template>
-    </div>
-    <div class="form-group">
-      <label for="name">Nome do Projeto</label>
-      <input id="name" formControlName="name" type="text" required />
-    </div>
-    <div class="form-group">
-      <label for="description">Descrição</label>
-      <textarea id="description" formControlName="description"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="clientId">Cliente(s)</label>
-      <div>
-        <button type="button" class="btn-padrao" (click)="openClientModal()">Selecionar Cliente(s)</button>
-        <div class="selected-clients" *ngIf="selectedClients.length">
-          <span *ngFor="let client of selectedClients" class="selected-client">
-            {{ client.name }} ({{ client.document }})
-            <button type="button" class="remove-btn" (click)="toggleClientSelection(client)" title="Remover cliente">&times;</button>
+  <ng-container *ngIf="!loading; else skeletonForm">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="project-form">
+      <div class="form-group project-status-group status-row">
+        <label class="status-label">Status do Projeto:</label>
+        <ng-container *ngIf="!editProjectStatus; else editStatusBlock">
+          <span class="status-badge" [ngClass]="statusBadgeClass(form.get('status')?.value)">
+            {{ statusLabel(form.get('status')?.value) }}
           </span>
-        </div>
+          <button type="button" class="btn-icon status-edit-btn" (click)="toggleEditProjectStatus()" title="Editar status">
+            <span class="material-icons">edit</span>
+          </button>
+        </ng-container>
+        <ng-template #editStatusBlock>
+          <select formControlName="status" class="status-select-inline">
+            <option value="draft">Rascunho</option>
+            <option value="active">Ativo</option>
+            <option value="paused">Pausado</option>
+            <option value="completed">Concluído</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+          <button type="button" class="btn-icon status-confirm-btn" (click)="saveProjectStatus()" title="Confirmar">
+            <span class="material-icons">check</span>
+          </button>
+          <button type="button" class="btn-icon status-cancel-btn" (click)="toggleEditProjectStatus()" title="Cancelar">
+            <span class="material-icons">close</span>
+          </button>
+        </ng-template>
       </div>
-    </div>
-
-    <!-- Modal de seleção de clientes -->
-    <div class="client-modal-overlay" *ngIf="showClientModal">
-      <div class="client-modal">
-        <div class="modal-header">
-          <h2>Selecionar Cliente(s)</h2>
-          <button type="button" class="close-btn" (click)="closeClientModal()">&times;</button>
-        </div>
-        <input type="text" placeholder="Buscar por nome ou documento" [(ngModel)]="clientSearch" [ngModelOptions]="{standalone: true}" />
-        <div class="client-list">
-          <div *ngIf="loadingClients">Carregando...</div>
-          <div *ngFor="let client of filteredClients" class="client-item">
-            <label>
-              <input type="checkbox" [checked]="isClientSelected(client)" (change)="toggleClientSelection(client)" />
+      <div class="form-group">
+        <label for="name">Nome do Projeto</label>
+        <input id="name" formControlName="name" type="text" required />
+      </div>
+      <div class="form-group">
+        <label for="description">Descrição</label>
+        <textarea id="description" formControlName="description"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="clientId">Cliente(s)</label>
+        <div>
+          <button type="button" class="btn-padrao" (click)="openClientModal()">Selecionar Cliente(s)</button>
+          <div class="selected-clients" *ngIf="selectedClients.length">
+            <span *ngFor="let client of selectedClients" class="selected-client">
               {{ client.name }} ({{ client.document }})
-            </label>
+              <button type="button" class="remove-btn" (click)="toggleClientSelection(client)" title="Remover cliente">&times;</button>
+            </span>
           </div>
-          <div *ngIf="!filteredClients.length && !loadingClients">Nenhum cliente encontrado.</div>
         </div>
-        <button type="button" class="btn-padrao" (click)="closeClientModal()">Confirmar seleção</button>
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label for="value">Valor Total</label>
-        <input id="value" formControlName="value" type="text" inputmode="decimal" placeholder="Ex: 15000,00" (input)="formatValueInput($event)" />
-      </div>
-      <div class="form-group">
-        <label for="startDate">Data de Início</label>
-        <input id="startDate" formControlName="startDate" type="date" required />
-      </div>
-      <div class="form-group">
-        <label for="endDate">Data Limite</label>
-        <input id="endDate" formControlName="endDate" type="date" required />
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="address">Endereço da Obra</label>
-      <input id="address" formControlName="address" type="text" />
-    </div>
 
-    <div class="escopo-card">
-      <h2 class="escopo-title">Escopo do Projeto</h2>
-      <div [formGroup]="form.get('scope')!" class="escopo-grid">
-        <div class="escopo-col-esquerda">
-          <div class="form-group">
-            <label for="total_area">Área total (m²)</label>
-            <input id="total_area" formControlName="total_area" type="number" />
+      <!-- Modal de seleção de clientes -->
+      <div class="client-modal-overlay" *ngIf="showClientModal">
+        <div class="client-modal">
+          <div class="modal-header">
+            <h2>Selecionar Cliente(s)</h2>
+            <button type="button" class="close-btn" (click)="closeClientModal()">&times;</button>
           </div>
-          <div class="form-group">
-            <label for="rooms_included">Ambientes incluídos</label>
-            <input id="rooms_included" formControlName="rooms_included" type="text" placeholder="Ex: Sala, Cozinha, Banheiro" />
-            <small>Separe os ambientes por vírgula</small>
+          <input type="text" placeholder="Buscar por nome ou documento" [(ngModel)]="clientSearch" [ngModelOptions]="{standalone: true}" />
+          <div class="client-list">
+            <div *ngIf="loadingClients">Carregando...</div>
+            <div *ngFor="let client of filteredClients" class="client-item">
+              <label>
+                <input type="checkbox" [checked]="isClientSelected(client)" (change)="toggleClientSelection(client)" />
+                {{ client.name }} ({{ client.document }})
+              </label>
+            </div>
+            <div *ngIf="!filteredClients.length && !loadingClients">Nenhum cliente encontrado.</div>
           </div>
-        </div>
-        <div class="escopo-col-direita">
-          <div class="form-group">
-            <label for="technical_notes">Observações técnicas</label>
-            <textarea id="technical_notes" formControlName="technical_notes" placeholder="Observações técnicas" rows="5"></textarea>
-          </div>
+          <button type="button" class="btn-padrao" (click)="closeClientModal()">Confirmar seleção</button>
         </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label>Configuração de Etapas</label>
-      <button type="button" class="btn-padrao" (click)="adicionarEtapa()" style="margin-bottom: 12px;">
-        <span class="material-icons">add</span> Adicionar etapa
-      </button>
-      <div class="etapas-list">
-        <div *ngFor="let stage of stages" class="etapa-card etapa-row">
-          <div class="etapa-header">
-            <div class="etapa-main">
-              <span class="etapa-title">{{ stage.name }}</span>
-              <ng-container *ngIf="!editStageStatus[stage.id]; else editStageStatusBlock">
-                <span class="status-badge etapa-badge">{{ statusLabel(stage.status) }}</span>
-                <button type="button" class="btn-icon etapa-edit-btn" (click)="$event.stopPropagation(); toggleEditStageStatus(stage.id)">
-                  <span class="material-icons">edit</span>
-                </button>
-              </ng-container>
-              <ng-template #editStageStatusBlock>
-                <select [(ngModel)]="stage.status" [ngModelOptions]="{standalone: true}" class="status-select-inline" (click)="$event.stopPropagation()">
-                  <option value="pending">Pendente</option>
-                  <option value="in_progress">Em andamento</option>
-                  <option value="completed">Concluída</option>
-                  <option value="cancelled">Cancelada</option>
-                  <option value="on_hold">Em espera</option>
-                </select>
-                <button type="button" class="btn-icon etapa-confirm-btn" (click)="$event.stopPropagation(); saveStageStatus(stage.id)">
-                  <span class="material-icons">check</span>
-                </button>
-                <button type="button" class="btn-icon etapa-cancel-btn" (click)="$event.stopPropagation(); toggleEditStageStatus(stage.id)">
-                  <span class="material-icons">close</span>
-                </button>
-              </ng-template>
-            </div>
-            <div class="etapa-icons">
-              <span class="etapa-toggle" style="cursor:pointer;">{{ getVisual(stage.id)?.expanded ? '▲' : '▼' }}</span>
-              <button type="button" class="remove-etapa-btn" (click)="$event.stopPropagation(); removerEtapa(stage.id)" title="Remover etapa">
-                <span class="material-icons">delete</span>
-              </button>
-            </div>
-          </div>
-          <div *ngIf="getVisual(stage.id)?.expanded" class="etapa-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Início planejado</label>
-                <input type="date" [(ngModel)]="stage.planned_start_date" [ngModelOptions]="{standalone: true}" />
-              </div>
-              <div class="form-group">
-                <label>Término planejado</label>
-                <input type="date" [(ngModel)]="stage.planned_end_date" [ngModelOptions]="{standalone: true}" />
-              </div>
-              <div class="form-group">
-                <label>Progresso (%)</label>
-                <input type="number" min="0" max="100" [(ngModel)]="stage.progress_percentage" [ngModelOptions]="{standalone: true}" placeholder="0 a 100" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Valor</label>
-                <input type="number" [(ngModel)]="stage.value" [ngModelOptions]="{standalone: true}" placeholder="Valor" />
-              </div>
-              <div class="form-group">
-                <label>Status de Pagamento</label>
-                <select [(ngModel)]="stage.payment_status" [ngModelOptions]="{standalone: true}">
-                  <option value="pending">Pendente</option>
-                  <option value="partial">Parcial</option>
-                  <option value="paid">Pago</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Status da Etapa</label>
-                <select [(ngModel)]="stage.status" [ngModelOptions]="{standalone: true}">
-                  <option value="pending">Pendente</option>
-                  <option value="in_progress">Em andamento</option>
-                  <option value="completed">Concluída</option>
-                  <option value="cancelled">Cancelada</option>
-                  <option value="on_hold">Em espera</option>
-                </select>
-              </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="value">Valor Total</label>
+          <input id="value" formControlName="value" type="text" inputmode="decimal" placeholder="Ex: 15000,00" (input)="formatValueInput($event)" />
+        </div>
+        <div class="form-group">
+          <label for="startDate">Data de Início</label>
+          <input id="startDate" formControlName="startDate" type="date" required />
+        </div>
+        <div class="form-group">
+          <label for="endDate">Data Limite</label>
+          <input id="endDate" formControlName="endDate" type="date" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="address">Endereço da Obra</label>
+        <input id="address" formControlName="address" type="text" />
+      </div>
+
+      <div class="escopo-card">
+        <h2 class="escopo-title">Escopo do Projeto</h2>
+        <div *ngIf="form.get('scope')" [formGroup]="form.get('scope')" class="escopo-grid">
+          <div class="escopo-col-esquerda">
+            <div class="form-group">
+              <label for="total_area">Área total (m²)</label>
+              <input id="total_area" formControlName="total_area" type="number" />
             </div>
             <div class="form-group">
-              <label>Notas</label>
-              <textarea [(ngModel)]="stage.notes" [ngModelOptions]="{standalone: true}" rows="2" placeholder="Notas da etapa"></textarea>
+              <label for="rooms_included">Ambientes incluídos</label>
+              <input id="rooms_included" formControlName="rooms_included" type="text" placeholder="Ex: Sala, Cozinha, Banheiro" />
+              <small>Separe os ambientes por vírgula</small>
+            </div>
+          </div>
+          <div class="escopo-col-direita">
+            <div class="form-group">
+              <label for="technical_notes">Observações técnicas</label>
+              <textarea id="technical_notes" formControlName="technical_notes" placeholder="Observações técnicas" rows="5"></textarea>
             </div>
           </div>
         </div>
       </div>
+      <div class="form-group">
+        <label>Configuração de Etapas</label>
+        <button type="button" class="btn-padrao" (click)="adicionarEtapa()" style="margin-bottom: 12px;">
+          <span class="material-icons">add</span> Adicionar etapa
+        </button>
+        <div class="etapas-list">
+          <div *ngFor="let stage of stages" class="etapa-card etapa-row">
+            <div class="etapa-header">
+              <div class="etapa-main">
+                <span class="etapa-title">{{ stage.name }}</span>
+                <ng-container *ngIf="!editStageStatus[stage.id]; else editStageStatusBlock">
+                  <span class="status-badge etapa-badge" [ngClass]="statusBadgeClass(stage.status)">{{ statusLabel(stage.status) }}</span>
+                  <button type="button" class="btn-icon etapa-edit-btn" (click)="$event.stopPropagation(); toggleEditStageStatus(stage.id)">
+                    <span class="material-icons">edit</span>
+                  </button>
+                </ng-container>
+                <ng-template #editStageStatusBlock>
+                  <select [(ngModel)]="stage.status" [ngModelOptions]="{standalone: true}" class="status-select-inline" (click)="$event.stopPropagation()">
+                    <option value="pending">Pendente</option>
+                    <option value="in_progress">Em andamento</option>
+                    <option value="completed">Concluída</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="on_hold">Em espera</option>
+                  </select>
+                  <button type="button" class="btn-icon etapa-confirm-btn" (click)="$event.stopPropagation(); saveStageStatus(stage.id)">
+                    <span class="material-icons">check</span>
+                  </button>
+                  <button type="button" class="btn-icon etapa-cancel-btn" (click)="$event.stopPropagation(); toggleEditStageStatus(stage.id)">
+                    <span class="material-icons">close</span>
+                  </button>
+                </ng-template>
+              </div>
+              <div class="etapa-icons">
+                <span class="etapa-toggle" style="cursor:pointer;">{{ getVisual(stage.id)?.expanded ? '▲' : '▼' }}</span>
+                <button type="button" class="remove-etapa-btn" (click)="$event.stopPropagation(); removerEtapa(stage.id)" title="Remover etapa">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="getVisual(stage.id)?.expanded" class="etapa-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Início planejado</label>
+                  <input type="date" [(ngModel)]="stage.planned_start_date" [ngModelOptions]="{standalone: true}" />
+                </div>
+                <div class="form-group">
+                  <label>Término planejado</label>
+                  <input type="date" [(ngModel)]="stage.planned_end_date" [ngModelOptions]="{standalone: true}" />
+                </div>
+                <div class="form-group">
+                  <label>Progresso (%)</label>
+                  <input type="number" min="0" max="100" [(ngModel)]="stage.progress_percentage" [ngModelOptions]="{standalone: true}" placeholder="0 a 100" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Valor</label>
+                  <input type="number" [(ngModel)]="stage.value" [ngModelOptions]="{standalone: true}" placeholder="Valor" />
+                </div>
+                <div class="form-group">
+                  <label>Status de Pagamento</label>
+                  <select [(ngModel)]="stage.payment_status" [ngModelOptions]="{standalone: true}">
+                    <option value="pending">Pendente</option>
+                    <option value="partial">Parcial</option>
+                    <option value="paid">Pago</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Status da Etapa</label>
+                  <select [(ngModel)]="stage.status" [ngModelOptions]="{standalone: true}">
+                    <option value="pending">Pendente</option>
+                    <option value="in_progress">Em andamento</option>
+                    <option value="completed">Concluída</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="on_hold">Em espera</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Notas</label>
+                <textarea [(ngModel)]="stage.notes" [ngModelOptions]="{standalone: true}" rows="2" placeholder="Notas da etapa"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- RESUMO DAS ETAPAS ATIVAS -->
+      <div class="etapas-resumo" *ngIf="etapasAtivas().length">
+        <h3>Resumo das Etapas</h3>
+        <table class="etapas-tabela">
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Progresso</th>
+              <th>Status</th>
+              <th>Pagamento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let stage of etapasAtivas()">
+              <td>{{ stage.name }}</td>
+              <td>{{ stage.planned_start_date }}</td>
+              <td>{{ stage.planned_end_date }}</td>
+              <td>{{ stage.progress_percentage || 0 }}%</td>
+              <td>{{ stage.status }}</td>
+              <td>{{ stage.payment_status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="error" class="error-message">{{ error }}</div>
+      <button type="submit" class="btn-padrao" [disabled]="loading">
+        <span class="material-icons">save</span> Salvar
+      </button>
+      <div *ngIf="form.get('value')?.invalid && (form.get('value')?.dirty || form.get('value')?.touched)" class="form-errors">
+        Informe um valor válido (ex: 1.000,00).
+      </div>
+      <div *ngIf="form.invalid && !loading" class="form-errors">
+        <div *ngIf="form.get('name')?.invalid">Preencha o nome do projeto.</div>
+        <div *ngIf="form.get('clientId')?.invalid">Selecione pelo menos um cliente.</div>
+        <div *ngIf="form.get('startDate')?.invalid">Informe a data de início.</div>
+        <div *ngIf="form.get('endDate')?.invalid">Informe a data limite.</div>
+      </div>
+    </form>
+  </ng-container>
+  <ng-template #skeletonForm>
+    <div class="project-form skeleton-form">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-input"></div>
+      <div class="skeleton skeleton-btn"></div>
     </div>
-    <!-- RESUMO DAS ETAPAS ATIVAS -->
-    <div class="etapas-resumo" *ngIf="etapasAtivas().length">
-      <h3>Resumo das Etapas</h3>
-      <table class="etapas-tabela">
-        <thead>
-          <tr>
-            <th>Etapa</th>
-            <th>Início</th>
-            <th>Fim</th>
-            <th>Progresso</th>
-            <th>Status</th>
-            <th>Pagamento</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let stage of etapasAtivas()">
-            <td>{{ stage.name }}</td>
-            <td>{{ stage.planned_start_date }}</td>
-            <td>{{ stage.planned_end_date }}</td>
-            <td>{{ stage.progress_percentage || 0 }}%</td>
-            <td>{{ stage.status }}</td>
-            <td>{{ stage.payment_status }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div *ngIf="error" class="error-message">{{ error }}</div>
-    <button type="submit" class="btn-padrao" [disabled]="loading">
-      <span class="material-icons">save</span> Salvar
-    </button>
-    <div *ngIf="form.get('value')?.invalid && (form.get('value')?.dirty || form.get('value')?.touched)" class="form-errors">
-      Informe um valor válido (ex: 1.000,00).
-    </div>
-    <div *ngIf="form.invalid && !loading" class="form-errors">
-      <div *ngIf="form.get('name')?.invalid">Preencha o nome do projeto.</div>
-      <div *ngIf="form.get('clientId')?.invalid">Selecione pelo menos um cliente.</div>
-      <div *ngIf="form.get('startDate')?.invalid">Informe a data de início.</div>
-      <div *ngIf="form.get('endDate')?.invalid">Informe a data limite.</div>
-    </div>
-  </form>
+  </ng-template>
 </section>

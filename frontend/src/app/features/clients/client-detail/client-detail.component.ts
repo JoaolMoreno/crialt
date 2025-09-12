@@ -8,14 +8,12 @@ import { Client } from '../../../core/models/client.model';
 import { Project } from '../../../core/models/project.model';
 import { File } from '../../../core/models/file.model';
 import { getStatusBadge } from '../../../core/models/status.model';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
   selector: 'app-client-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingSpinnerComponent],
+  imports: [SharedModule],
   templateUrl: './client-detail.component.html',
   styleUrls: ['./client-detail.component.scss']
 })

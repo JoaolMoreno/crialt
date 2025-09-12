@@ -43,6 +43,8 @@
       *ngFor="let project of paginatedProjects"
       [project]="project"
       [progress]="getProjectProgress(project)"
+      (edit)="onEditProject(project)"
+      (view)="onViewProject(project)"
     ></app-project-card>
   </div>
 

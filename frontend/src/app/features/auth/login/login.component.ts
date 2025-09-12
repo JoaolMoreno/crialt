@@ -1,16 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import {Router, RouterLink} from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
-import {NgIf, NgOptimizedImage} from "@angular/common";
+import {Router} from '@angular/router';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-    imports: [FormsModule, LoadingSpinnerComponent, RouterLink, NgIf, NgOptimizedImage]
+    imports: [SharedModule]
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);

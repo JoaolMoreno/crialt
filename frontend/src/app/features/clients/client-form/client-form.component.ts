@@ -2,11 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientService } from '../../../core/services/client.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from '../../../shared/shared.module';
 import { ViaCepService, ViaCepResponse } from '../../../shared/services/via-cep.service';
 import { cpfValidator, cnpjValidator } from '../../../shared/utils/validators';
-import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
-import {NgIf} from "@angular/common";
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 @Component({
@@ -14,7 +12,7 @@ import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
   standalone: true,
   templateUrl: './client-form.component.html',
   styleUrls: ['./client-form.component.scss'],
-    imports: [ReactiveFormsModule, LoadingSpinnerComponent, NgIf]
+    imports: [SharedModule]
 })
 export class ClientFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

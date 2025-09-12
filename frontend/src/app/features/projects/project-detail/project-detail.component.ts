@@ -3,17 +3,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
-import { ProgressBarComponent } from '../project-progress-bar/progress-bar.component';
-import {CurrencyPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass, NgForOf, NgIf} from "@angular/common";
-import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
 import { getStatusBadge } from '../../../core/models/status.model';
+import {SharedModule} from "../../../shared/shared.module";
+import {ProgressBarComponent} from "../project-progress-bar/progress-bar.component";
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss'],
-    imports: [ProgressBarComponent, DatePipe, CurrencyPipe, LoadingSpinnerComponent, NgIf, NgForOf, JsonPipe, KeyValuePipe, NgClass]
+    imports: [SharedModule, ProgressBarComponent]
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -71,6 +70,9 @@ export class ProjectDetailComponent implements OnInit {
   }
   onFinishProject() {
     // Implementar chamada ao serviço para finalizar
+  }
+  onBack(): void {
+    this.router.navigate(['/projects']);
   }
 
   statusLabel(status: string): string {

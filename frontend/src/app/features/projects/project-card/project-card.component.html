@@ -1,8 +1,8 @@
 <div class="project-card">
   <div class="card-header">
-    <span class="status" [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
-    <button class="action-btn" title="Detalhes"><span class="material-icons">visibility</span></button>
-    <button class="action-btn" title="Editar"><span class="material-icons">edit</span></button>
+    <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
+    <button class="action-btn" title="Detalhes" (click)="onView()"><span class="material-icons">visibility</span></button>
+    <button class="action-btn" title="Editar" (click)="onEdit()"><span class="material-icons">edit</span></button>
   </div>
   <h3>{{ project.name }}</h3>
   <div class="client">{{ project.clients[0]?.name }}</div>

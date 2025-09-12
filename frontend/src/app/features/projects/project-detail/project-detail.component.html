@@ -1,6 +1,7 @@
-<!-- Template do ProjectDetailComponent -->
-
 <section class="project-detail-section" *ngIf="project">
+  <button class="btn-padrao" (click)="onBack()" style="margin-bottom: 16px;">
+    <span class="material-icons">arrow_back</span> Voltar
+  </button>
   <div class="header">
     <div class="info">
       <h1>{{ project.name }}</h1>
@@ -90,8 +91,6 @@
                     <tr *ngFor="let key of stage.specific_data | keyvalue; let i = index">
                       <td><b>{{ key.key }}</b></td>
                       <td>
-                        <!-- LOG DO VALOR DO ESCOPO -->
-                        <span style="color: #b71c1c; font-size: 12px; font-family: monospace;">LOG: {{ key.value | json }}</span><br>
                         <ng-container *ngIf="key.value === null || key.value === undefined">-</ng-container>
                         <ng-container *ngIf="key.value !== null && key.value !== undefined">
                           <span *ngIf="key.value.constructor === String || key.value.constructor === Number || key.value.constructor === Boolean">{{ key.value }}</span>

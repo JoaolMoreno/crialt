@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import {RouterLink} from "@angular/router";
-import {NgForOf, NgIf} from "@angular/common";
+import { SharedModule } from '../../shared.module';
 
 interface SidebarMenuItem {
   label: string;
@@ -15,11 +14,7 @@ interface SidebarMenuItem {
 @Component({
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
-    imports: [
-        RouterLink,
-        NgForOf,
-        NgIf
-    ],
+    imports: [SharedModule],
     styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent {

@@ -1,16 +1,31 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './components/header/header.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
+import { RouterOutlet, RouterLink } from '@angular/router';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
-import { RouterModule } from '@angular/router';
+import { BaseChartDirective } from 'ng2-charts';
 
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule,
-    HeaderComponent,
-    SidebarComponent,
+    ReactiveFormsModule,
+    RouterOutlet,
+    RouterLink,
+    NgIf,
+    NgForOf,
+    BaseChartDirective,
+    LoadingSpinnerComponent,
+    FormsModule
+  ],
+  exports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterOutlet,
+    RouterLink,
+    NgIf,
+    NgForOf,
+    BaseChartDirective,
     LoadingSpinnerComponent
   ]
 })

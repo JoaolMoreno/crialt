@@ -3,21 +3,14 @@ import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
-import {DatePipe, NgClass, NgForOf, NgIf} from "@angular/common";
-import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
-import { getStatusBadge } from '../../../core/models/status.model';
+import { SharedModule } from '../../../shared/shared.module';
+import { getStatusBadge } from "../../../core/models/status.model";
 
 @Component({
     selector: 'app-project-timeline',
     standalone: true,
     templateUrl: './project-timeline.component.html',
-    imports: [
-        DatePipe,
-        LoadingSpinnerComponent,
-        NgIf,
-        NgForOf,
-        NgClass
-    ],
+    imports: [SharedModule],
     styleUrls: ['./project-timeline.component.scss']
 })
 export class ProjectTimelineComponent implements OnInit {

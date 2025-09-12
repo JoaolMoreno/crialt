@@ -1,25 +1,19 @@
 import { Component, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ClientService } from '../../../core/services/client.service';
 import { Client } from '../../../core/models/client.model';
-import {NgIf, NgForOf, NgClass} from '@angular/common';
 import { StageService } from '../../../core/services/stage.service';
 import { Stage } from '../../../core/models/stage.model';
 import { getStatusBadge } from '../../../core/models/status.model';
+import { SharedModule } from "../../../shared/shared.module";
 
 @Component({
     selector: 'app-project-form',
     standalone: true,
     templateUrl: './project-form.component.html',
-    imports: [
-        ReactiveFormsModule,
-        NgIf,
-        NgForOf,
-        FormsModule,
-        NgClass
-    ],
+    imports: [SharedModule],
     styleUrls: ['./project-form.component.scss']
 })
 export class ProjectFormComponent {

@@ -7,18 +7,16 @@ import { Client } from '../../../core/models/client.model';
 import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { FormsModule } from '@angular/forms';
-import {CurrencyPipe, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import {ProjectCardComponent} from "../project-card/project-card.component";
+import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
+import {ProjectCardComponent} from "../project-card/project-card.component";
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
-    imports: [FormsModule, DatePipe, LoadingSpinnerComponent, NgIf, NgForOf, CurrencyPipe, ProjectCardComponent, NgClass]
+    imports: [SharedModule, ProjectCardComponent]
 })
 export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);

@@ -2,17 +2,15 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ProjectService } from '../../core/services/project.service';
 import { ClientService } from '../../core/services/client.service';
 import { Project } from '../../core/models/project.model';
-import { ChartConfiguration, ChartType } from 'chart.js';
-import { CommonModule } from '@angular/common';
-import {LoadingSpinnerComponent} from "../../shared/components/loading-spinner/loading-spinner.component";
-import {BaseChartDirective} from "ng2-charts";
+import { ChartConfiguration } from 'chart.js';
+import { SharedModule } from '../../shared/shared.module';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-    imports: [CommonModule, LoadingSpinnerComponent, BaseChartDirective]
+  imports: [SharedModule]
 })
 export class DashboardComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
