@@ -1,4 +1,4 @@
-@import '../../../styles.scss';
+@use '../../../styles.scss' as *;
 
 .dashboard-section {
   padding: calc(var(--spacing-base) * 4);

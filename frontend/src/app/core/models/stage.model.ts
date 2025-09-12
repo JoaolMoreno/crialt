@@ -2,6 +2,7 @@ import { Project } from './project.model';
 import { File } from './file.model';
 import { Task } from './task.model';
 import { User } from './user.model';
+import { StageStatus } from './status.model';
 
 export type StageType =
   | 'levantamento'
@@ -9,13 +10,6 @@ export type StageType =
   | 'estudo_preliminar'
   | 'projeto_executivo'
   | 'assessoria_pos_projeto';
-
-export type StageStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled'
-  | 'on_hold';
 
 export type PaymentStatus = 'pending' | 'partial' | 'paid';
 
@@ -48,4 +42,3 @@ export interface Stage {
   created_by: User;
   assigned_to?: User;
 }
-

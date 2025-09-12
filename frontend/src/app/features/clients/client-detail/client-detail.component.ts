@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Client } from '../../../core/models/client.model';
 import { Project } from '../../../core/models/project.model';
 import { File } from '../../../core/models/file.model';
+import { getStatusBadge } from '../../../core/models/status.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -144,5 +145,12 @@ export class ClientDetailComponent implements OnInit {
 
   onBack(): void {
     this.router.navigate(['/clients']);
+  }
+
+  statusLabel(status: string): string {
+    return getStatusBadge(status as any).label;
+  }
+  statusBadgeClass(status: string): string {
+    return 'status-badge ' + getStatusBadge(status).color;
   }
 }

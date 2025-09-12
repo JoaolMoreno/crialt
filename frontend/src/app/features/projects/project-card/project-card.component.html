@@ -1,6 +1,6 @@
 <div class="project-card">
   <div class="card-header">
-    <span class="status" [class]="project.status">{{ project.status }}</span>
+    <span class="status" [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
     <button class="action-btn" title="Detalhes"><span class="material-icons">visibility</span></button>
     <button class="action-btn" title="Editar"><span class="material-icons">edit</span></button>
   </div>

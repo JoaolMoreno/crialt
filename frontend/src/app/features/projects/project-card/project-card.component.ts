@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project } from '../../../core/models/project.model';
-import { ProgressBarComponent } from '../../projects/project-progress-bar/progress-bar.component';
+import { ProgressBarComponent } from '../project-progress-bar/progress-bar.component';
+import { getStatusBadge } from '../../../core/models/status.model';
 
 @Component({
     selector: 'app-project-card',
@@ -18,5 +19,11 @@ export class ProjectCardComponent {
         if (!this.project?.stages?.length) return '-';
         const activeStage = this.project.stages.find(s => s.status === 'in_progress');
         return activeStage?.name || '-';
+    }
+    statusLabel(status: string): string {
+        return getStatusBadge(status).label;
+    }
+    statusBadgeClass(status: string): string {
+        return 'status-badge ' + getStatusBadge(status).color;
     }
 }

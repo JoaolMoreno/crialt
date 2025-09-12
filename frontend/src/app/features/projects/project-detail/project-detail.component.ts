@@ -6,6 +6,7 @@ import { Stage } from '../../../core/models/stage.model';
 import { ProgressBarComponent } from '../project-progress-bar/progress-bar.component';
 import {CurrencyPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
+import { getStatusBadge } from '../../../core/models/status.model';
 
 @Component({
   selector: 'app-project-detail',
@@ -73,27 +74,10 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   statusLabel(status: string): string {
-    switch (status) {
-      case 'draft': return 'Rascunho';
-      case 'active': return 'Ativo';
-      case 'paused': return 'Pausado';
-      case 'completed': return 'Concluído';
-      case 'cancelled': return 'Cancelado';
-      case 'in_progress': return 'Em andamento';
-      default: return status;
-    }
+    return getStatusBadge(status).label;
   }
-
-  statusBadgeClass(status: string | undefined): string {
-    switch (status) {
-      case 'draft': return 'badge-draft';
-      case 'active': return 'badge-active';
-      case 'paused': return 'badge-paused';
-      case 'completed': return 'badge-completed';
-      case 'cancelled': return 'badge-cancelled';
-      case 'in_progress': return 'badge-active';
-      default: return 'badge-draft';
-    }
+  statusBadgeClass(status: string): string {
+    return 'status-badge ' + getStatusBadge(status).color;
   }
 
     protected readonly String = String;

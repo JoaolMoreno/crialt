@@ -3,8 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import {DatePipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinner/loading-spinner.component";
+import { getStatusBadge } from '../../../core/models/status.model';
 
 @Component({
     selector: 'app-project-timeline',
@@ -14,7 +15,8 @@ import {LoadingSpinnerComponent} from "../../../shared/components/loading-spinne
         DatePipe,
         LoadingSpinnerComponent,
         NgIf,
-        NgForOf
+        NgForOf,
+        NgClass
     ],
     styleUrls: ['./project-timeline.component.scss']
 })
@@ -84,5 +86,12 @@ export class ProjectTimelineComponent implements OnInit {
   onPeriodChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.filterByPeriod(value);
+  }
+
+  statusLabel(status: string): string {
+    return getStatusBadge(status).label;
+  }
+  statusBadgeClass(status: string): string {
+    return 'status-badge ' + getStatusBadge(status).color;
   }
 }

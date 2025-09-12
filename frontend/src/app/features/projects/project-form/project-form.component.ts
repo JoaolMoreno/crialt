@@ -7,6 +7,7 @@ import { Client } from '../../../core/models/client.model';
 import {NgIf, NgForOf, NgClass} from '@angular/common';
 import { StageService } from '../../../core/services/stage.service';
 import { Stage } from '../../../core/models/stage.model';
+import { getStatusBadge } from '../../../core/models/status.model';
 
 @Component({
     selector: 'app-project-form',
@@ -334,25 +335,10 @@ export class ProjectFormComponent {
   }
 
   statusLabel(status: string): string {
-    switch (status) {
-      case 'pending': return 'Pendente';
-      case 'in_progress': return 'Em andamento';
-      case 'completed': return 'Concluída';
-      case 'cancelled': return 'Cancelada';
-      case 'on_hold': return 'Em espera';
-      default: return status;
-    }
+    return getStatusBadge(status).label;
   }
-
-  statusBadgeClass(status: string | undefined): string {
-    switch (status) {
-      case 'draft': return 'badge-draft';
-      case 'active': return 'badge-active';
-      case 'paused': return 'badge-paused';
-      case 'completed': return 'badge-completed';
-      case 'cancelled': return 'badge-cancelled';
-      default: return 'badge-draft';
-    }
+  statusBadgeClass(status: string): string {
+    return 'status-badge ' + getStatusBadge(status).color;
   }
 }
 

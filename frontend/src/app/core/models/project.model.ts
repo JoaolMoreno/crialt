@@ -2,6 +2,7 @@ import { Client } from './client.model';
 import { Stage } from './stage.model';
 import { File } from './file.model';
 import { User } from './user.model';
+import { ProjectStatus } from './status.model';
 
 export interface Project {
   id: string;
@@ -12,7 +13,7 @@ export interface Project {
   start_date: string;
   estimated_end_date: string;
   actual_end_date?: string;
-  status: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled';
+  status: ProjectStatus;
   work_address: {
     street: string;
     number: string;
@@ -36,4 +37,3 @@ export interface Project {
   files: File[];
   created_by: User;
 }
-

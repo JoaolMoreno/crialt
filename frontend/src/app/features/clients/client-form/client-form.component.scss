@@ -1,4 +1,4 @@
-@import '../../../../styles.scss';
+@use '../../../../styles.scss' as *;
 
 .client-form-section {
   font-family: 'Montserrat', Arial, sans-serif;

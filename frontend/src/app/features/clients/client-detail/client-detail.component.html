@@ -74,7 +74,10 @@
       <ul class="projects-list">
         <li *ngFor="let project of projects">
           <span class="project-name">{{ project.name }}</span>
-          <span class="project-status">Status: {{ project.status }}</span>
+          <span class="project-status">
+            Status:
+            <span [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
+          </span>
           <span class="project-date">Criado em: {{ project.created_at | date:'shortDate' }}</span>
           <button class="view-btn" (click)="navigateToProject(project.id)">
             <span class="material-icons">visibility</span> Ver Projeto

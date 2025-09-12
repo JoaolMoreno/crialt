@@ -8,6 +8,7 @@
     <div class="gantt-bar" *ngFor="let stage of stages" [class]="stage.status">
       <div class="gantt-label">
         <span>{{ stage.name }}</span>
+        <span class="status-badge" [ngClass]="statusBadgeClass(stage.status)">{{ statusLabel(stage.status) }}</span>
         <span class="dates">{{ stage.actual_start_date || stage.planned_start_date | date:'shortDate' }} - {{ stage.actual_end_date || stage.planned_end_date | date:'shortDate' }}</span>
         <span *ngIf="stage.specific_data?.important_date" class="important-date" title="Marco importante">
           <span class="material-icons">flag</span> {{ stage.specific_data.important_date | date:'shortDate' }}
