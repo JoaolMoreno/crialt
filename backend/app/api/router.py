@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from ..api import auth, users, clients, projects, stages, files, tasks
+from ..api import auth, users, clients, projects, stages, files, tasks, dashboard
 
 api_router = APIRouter()
 
@@ -11,3 +11,4 @@ api_router.include_router(projects.router, prefix="/projects", tags=["projects"]
 api_router.include_router(stages.router, prefix="/stages", tags=["stages"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
