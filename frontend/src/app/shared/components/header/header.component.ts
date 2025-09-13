@@ -18,12 +18,12 @@ interface HeaderMenuItem {
 })
 export class HeaderComponent {
   menuItems: HeaderMenuItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Clientes', icon: 'groups', route: '/clients' },
-    { label: 'Projetos', icon: 'folder_special', route: '/projects' },
-    { label: 'Etapas', icon: 'timeline', route: '/stages' },
-    { label: 'Arquivos', icon: 'attach_file', route: '/files' },
-    { label: 'Configurações', icon: 'settings', route: '/settings' }
+    // { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    // { label: 'Clientes', icon: 'groups', route: '/clients' },
+    // { label: 'Projetos', icon: 'folder_special', route: '/projects' },
+    // { label: 'Etapas', icon: 'timeline', route: '/stages' },
+    // { label: 'Arquivos', icon: 'attach_file', route: '/files' },
+    // { label: 'Configurações', icon: 'settings', route: '/settings' }
   ];
 
   notificationsCount = 3;
@@ -43,11 +43,6 @@ export class HeaderComponent {
 
   get user$() {
     return this.authService.user$;
-  }
-
-  onSearch(query: string) {
-    // Implementar busca global
-    this.searchQuery = query;
   }
 
   onProfileAction(action: string) {
