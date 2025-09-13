@@ -26,10 +26,13 @@
   <div class="dashboard-recent-projects">
     <h2>Projetos Recentes</h2>
     <ul class="recent-projects-list">
-      <li *ngFor="let project of recentProjects">
+      <li *ngFor="let project of recentProjects" class="recent-project-card" [routerLink]="['/projetos', project.id]">
         <div class="project-name">{{ project.name }}</div>
-        <div class="project-client">Cliente: {{ project.clients[0]?.name || '-' }}</div>
-        <div class="project-status">Status: {{ project.status }}</div>
+        <div class="project-client">Cliente: {{ project.client_name || '-' }}</div>
+        <div class="project-status">
+          Status:
+          <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
+        </div>
         <div class="project-date">Criado em: {{ project.created_at | date:'shortDate' }}</div>
       </li>
     </ul>

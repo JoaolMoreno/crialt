@@ -54,8 +54,8 @@
   <div *ngIf="error" class="client-list-error">{{ error }}</div>
   <!-- Paginação -->
   <div *ngIf="!loading && total > pageSize" class="pagination-controls">
-    <button (click)="onPageChange(currentPage-1)" [disabled]="currentPage===1">Anterior</button>
+    <button *ngIf="currentPage > 1" class="btn-padrao" (click)="onPageChange(currentPage-1)">Anterior</button>
     <span>Página {{currentPage}} de {{(total/pageSize) | ceil}}</span>
-    <button (click)="onPageChange(currentPage+1)" [disabled]="currentPage>=((total/pageSize) | ceil)">Próxima</button>
+    <button *ngIf="currentPage < ((total/pageSize) | ceil)" class="btn-padrao" (click)="onPageChange(currentPage+1)">Próxima</button>
   </div>
 </section>

@@ -1,10 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ProjectService } from '../../core/services/project.service';
-import { ClientService } from '../../core/services/client.service';
 import { DashboardService, DashboardData } from '../../core/services/dashboard.service';
-import { Project } from '../../core/models/project.model';
+import { DashboardProject } from '../../core/models/dashboard-project.model';
 import { ChartConfiguration } from 'chart.js';
 import { SharedModule } from '../../shared/shared.module';
+import {getStatusBadge} from "../../core/models/status.model";
 
 @Component({
   selector: 'app-dashboard',
@@ -14,8 +13,6 @@ import { SharedModule } from '../../shared/shared.module';
   imports: [SharedModule]
 })
 export class DashboardComponent implements OnInit {
-  private readonly projectService = inject(ProjectService);
-  private readonly clientService = inject(ClientService);
   private readonly dashboardService = inject(DashboardService);
 
   loading = false;
@@ -29,7 +26,7 @@ export class DashboardComponent implements OnInit {
   stagesNearDeadline = 0;
 
   // Projetos recentes
-  recentProjects: Project[] = [];
+  recentProjects: DashboardProject[] = [];
 
   // Gráficos
   projectsStatusChartData: ChartConfiguration<'doughnut'> = {
@@ -98,5 +95,12 @@ export class DashboardComponent implements OnInit {
         this.error = 'Erro ao buscar dados do dashboard.';
       }
     });
+  }
+
+  statusLabel(status: string): string {
+    return getStatusBadge(status).label;
+  }
+  statusBadgeClass(status: string): string {
+    return 'status-badge ' + getStatusBadge(status).color;
   }
 }

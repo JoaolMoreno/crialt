@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ProjectService } from '../../../core/services/project.service';
-import { ClientService } from '../../../core/services/client.service';
 import { StageService } from '../../../core/services/stage.service';
 import { Project } from '../../../core/models/project.model';
-import { Client } from '../../../core/models/client.model';
 import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -11,7 +9,6 @@ import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
 import { PaginatedProject } from '../../../core/models/paginated-project.model';
-import { PaginatedClient } from '../../../core/models/paginated-client.model';
 import { PaginatedStage } from '../../../core/models/paginated-stage.model';
 
 @Component({
@@ -23,13 +20,11 @@ import { PaginatedStage } from '../../../core/models/paginated-stage.model';
 })
 export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
-  private readonly clientService = inject(ClientService);
   private readonly stageService = inject(StageService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
   projects: Project[] = [];
-  clients: Client[] = [];
   stages: Stage[] = [];
   total = 0;
   pageSize = 10;
@@ -38,7 +33,6 @@ export class ProjectListComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
   searchQuery = '';
   selectedStatus = '';
-  selectedClient = '';
   selectedPeriod = '';
   selectedStage = '';
   selectedValue = '';
@@ -54,7 +48,7 @@ export class ProjectListComponent implements OnInit {
       this.isAdmin = user?.role === 'admin';
     });
     this.loadProjects();
-    this.loadClientsAndStages();
+    this.loadStages();
   }
 
   loadProjects(): void {
@@ -66,7 +60,6 @@ export class ProjectListComponent implements OnInit {
       order_by: this.sortColumn || 'created_at',
       order_dir: this.sortDirection,
       status: this.selectedStatus || undefined,
-      client_id: this.selectedClient || undefined,
       stage: this.selectedStage || undefined,
       value: this.selectedValue || undefined,
       search: this.searchQuery || undefined,
@@ -85,11 +78,7 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
-  loadClientsAndStages(): void {
-    this.clientService.getClients().subscribe({
-      next: (res: PaginatedClient) => { this.clients = res.items; },
-      error: () => { this.clients = []; }
-    });
+  loadStages(): void {
     this.stageService.getStages().subscribe({
       next: (res: PaginatedStage) => { this.stages = res.items; },
       error: () => { this.stages = []; }

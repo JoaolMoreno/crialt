@@ -32,36 +32,6 @@
   font-style: italic;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 16px;
-  button {
-    background: var(--color-dark);
-    color: var(--color-bg);
-    font-family: 'Montserrat', Arial, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 18px;
-    box-shadow: 0 1px 4px rgba(53,39,28,0.08);
-    transition: background 0.2s;
-    &:hover {
-      background: var(--color-accent);
-    }
-    &:disabled {
-      background: var(--color-light);
-      color: var(--color-dark);
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-  }
-}
-
 .view-toggle {
   display: flex;
   gap: 12px;
