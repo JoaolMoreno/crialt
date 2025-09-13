@@ -941,3 +941,23 @@ GET /clients?limit=10&offset=0&order_by=name&order_dir=asc&name=João&is_active=
 - `/tasks` (tarefas)
 
 Esses recursos garantem performance, flexibilidade e melhor experiência para telas de listagem, exportação e relatórios.
+
+## 🔄 Cache Inteligente nos Endpoints de Listagem e Dashboard
+
+Todos os endpoints de listagem e o dashboard utilizam cache inteligente no backend para garantir performance e dados atualizados. O cache é sensível aos parâmetros de paginação, filtros e ordenação, e é invalidado automaticamente nas ações de criação, edição e exclusão dos principais recursos (clientes, projetos, etapas, arquivos, tarefas).
+
+- **Cache por parâmetros**: Cada combinação de filtros, ordenação e paginação gera uma chave única de cache.
+- **Validação automática**: O cache é consultado antes de executar queries pesadas.
+- **Invalidado em alterações**: Ao criar, editar ou excluir clientes, projetos, etapas, arquivos ou tarefas, o cache dos endpoints relacionados e do dashboard é limpo automaticamente.
+- **Dashboard sempre atualizado**: O cache do dashboard é invalidado junto com qualquer alteração relevante nos dados principais.
+- **Configuração flexível**: O tempo de expiração do cache pode ser ajustado conforme necessidade.
+
+### Exemplo de funcionamento
+- Ao criar um novo cliente, o cache das listagens de clientes e do dashboard é invalidado.
+- Ao editar um projeto, o cache das listagens de projetos e do dashboard é invalidado.
+- O mesmo ocorre para etapas, arquivos e tarefas.
+
+Essa abordagem garante alta performance nas consultas e consistência dos dados exibidos para todos os usuários.
+
+---
+
