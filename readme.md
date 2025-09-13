@@ -91,7 +91,9 @@ crialt-system/
 │   │   │   ├── user.py
 │   │   │   ├── client.py
 │   │   │   ├── project.py
-│   │   │   ├── stage.py
+│   │   │   ├── stage_type.py             # Tipos de etapa (cadastrável)
+│   │   │   ├── stage.py                  # Instâncias dinâmicas de etapa
+│   │   │   ├── task.py
 │   │   │   └── file.py
 │   │   │
 │   │   ├── schemas/                      # Pydantic schemas
@@ -100,7 +102,9 @@ crialt-system/
 │   │   │   ├── user.py
 │   │   │   ├── client.py
 │   │   │   ├── project.py
-│   │   │   ├── stage.py
+│   │   │   ├── stage_type.py             # Schemas para tipos de etapa
+│   │   │   ├── stage.py                  # Schemas para etapas dinâmicas
+│   │   │   ├── task.py
 │   │   │   └── file.py
 │   │   │
 │   │   ├── api/                          # Rotas e endpoints
@@ -112,7 +116,9 @@ crialt-system/
 │   │   │   ├── users.py
 │   │   │   ├── clients.py
 │   │   │   ├── projects.py
-│   │   │   ├── stages.py
+│   │   │   ├── stage_types.py            # Endpoint para tipos de etapa
+│   │   │   ├── stages.py                 # Endpoint para etapas dinâmicas
+│   │   │   ├── tasks.py
 │   │   │   └── files.py
 │   │   │
 │   │   ├── services/                     # Business logic
@@ -120,13 +126,16 @@ crialt-system/
 │   │   │   ├── auth_service.py
 │   │   │   ├── client_service.py
 │   │   │   ├── project_service.py
-│   │   │   ├── stage_service.py
+│   │   │   ├── stage_type_service.py     # Serviço para tipos de etapa
+│   │   │   ├── stage_service.py          # Serviço para etapas dinâmicas
+│   │   │   ├── task_service.py
 │   │   │   └── file_service.py
 │   │   │
 │   │   ├── utils/                        # Utilitários
 │   │   │   ├── __init__.py
 │   │   │   ├── validators.py
 │   │   │   ├── formatters.py
+│   │   │   ├── cache.py
 │   │   │   └── constants.py
 │   │   │
 │   │   └── storage/                      # Storage local
@@ -142,7 +151,9 @@ crialt-system/
 │       ├── test_auth.py
 │       ├── test_clients.py
 │       ├── test_projects.py
-│       └── test_stages.py
+│       ├── test_stage_types.py           # Testes para tipos de etapa
+│       ├── test_stages.py                # Testes para etapas dinâmicas
+│       └── test_tasks.py
 │
 ├── frontend/                             # Angular SSR
 │   ├── Dockerfile
@@ -693,37 +704,76 @@ crialt-system/
 
 ### Backend (FastAPI)
 
-### Checklist de Implementação Backend
+#### Models e Schemas
+- **SQLAlchemy Models**: Estrutura completa de dados com relacionamentos
+- **Pydantic Schemas**: Validação e serialização de dados
+- **Type Safety**: Type hints completos em todo o código
+- **Validações Automáticas**: CPF/CNPJ, email, telefone, CEP
 
-**Já implementado:**
-- Estrutura de pastas e arquivos do backend (conforme monorepo)
-- Dockerfile, requirements.txt, pyproject.toml, alembic.ini, .env
-- Alembic configurado e pronto para migrações
-- Models SQLAlchemy: user, client, project, stage, file, task
-- Schemas Pydantic: user, client, project, stage, file, task
-- Serviços: auth_service, project_service, file_service
-- Utils: validators.py, constants.py
-- Rotas principais: auth, users, clients, projects, stages, files
-- Validações: CPF/CNPJ, email, telefone, CEP (ViaCEP), datas
-- Permissões e segurança: JWT, roles, troca/redefinição de senha
-- Criação automática de etapas ao criar projeto
-- Cálculo automático de progresso do projeto
-- Organização automática de arquivos por categoria
-- Versionamento básico de arquivos
-- Limite de tamanho e tipos permitidos de arquivo
-- Estrutura de storage local
-- Dependências e setup do ambiente
-- Testes: estrutura inicial criada
+#### Arquitetura de Serviços
+- **Service Layer**: Lógica de negócio separada dos endpoints
+- **Repository Pattern**: Abstração de acesso aos dados
+- **Dependency Injection**: Injeção de dependências com FastAPI
+- **Cache Inteligente**: Cache automático com invalidação baseada em eventos
 
-**Falta implementar (MVP):**
-- Notificações de prazo (alertas 3 dias antes do vencimento)
-- Backup automático de arquivos
-- Auditoria (logs de operações críticas)
-- Serviços e rotas para stage_service, client_service, task_service (separados)
-- Testes unitários e de integração completos
-- Exportação de dados (Excel/PDF)
-- Relatórios gerenciais e dashboards
-- Integração com email para envio de senha/redefinição
+#### Segurança e Autenticação
+- **JWT Tokens**: Autenticação stateless com refresh tokens
+- **Role-based Access**: Controle de acesso baseado em funções
+- **Password Hashing**: Bcrypt para hash de senhas
+- **Session Management**: Gerenciamento seguro de sessões
+
+#### API Design
+- **RESTful APIs**: Endpoints seguindo padrões REST
+- **OpenAPI/Swagger**: Documentação automática da API
+- **Error Handling**: Tratamento consistente de erros
+- **Response Formatting**: Padronização de respostas
+
+#### Banco de Dados
+- **PostgreSQL**: Banco principal com suporte a JSON
+- **Alembic**: Migrações versionadas do banco
+- **Connection Pooling**: Pool de conexões para performance
+- **Indexes**: Índices otimizados para consultas frequentes
+
+### Frontend (Angular SSR)
+
+#### Arquitetura Angular
+- **Server-Side Rendering**: Renderização no servidor para SEO
+- **Standalone Components**: Componentes independentes (Angular 17+)
+- **Reactive Forms**: Formulários reativos com validação
+- **RxJS**: Programação reativa para gerenciamento de estado
+
+#### UI/UX Design
+- **Component Library**: Biblioteca de componentes reutilizáveis
+- **Responsive Design**: Interface adaptável para diferentes telas
+- **Loading States**: Estados de carregamento consistentes
+- **Error Boundaries**: Tratamento de erros na interface
+
+#### Performance
+- **Lazy Loading**: Carregamento sob demanda de módulos
+- **Tree Shaking**: Otimização de bundle
+- **Caching Strategy**: Estratégia de cache no cliente
+- **PWA Ready**: Preparado para Progressive Web App
+
+### DevOps e Deploy
+
+#### Containerização
+- **Docker**: Containerização completa da aplicação
+- **Docker Compose**: Orquestração de serviços locais
+- **Multi-stage Builds**: Otimização de imagens Docker
+- **Health Checks**: Verificações de saúde dos containers
+
+#### CI/CD Pipeline
+- **Automated Testing**: Testes automatizados em pipeline
+- **Code Quality**: Análise de qualidade de código
+- **Security Scanning**: Verificação de vulnerabilidades
+- **Deployment Automation**: Deploy automatizado para produção
+
+#### Monitoramento
+- **Application Logs**: Logs estruturados da aplicação
+- **Performance Metrics**: Métricas de performance
+- **Error Tracking**: Rastreamento de erros em produção
+- **Health Monitoring**: Monitoramento de saúde dos serviços
+
 ---
 
 ## 🚀 Setup e Desenvolvimento
