@@ -1,7 +1,7 @@
-<section class="project-list-section">
+<section class="list-section">
   <h1>Projetos</h1>
-  <div class="project-list-actions">
-    <button class="btn-padrao" (click)="onNewProject()">
+  <div class="list-actions">
+    <button class="list-btn" (click)="onNewProject()">
       <span class="material-icons">add_circle</span> Novo Projeto
     </button>
     <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
@@ -17,7 +17,7 @@
       <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
     </select>
     <input type="number" [(ngModel)]="selectedValue" class="filter-select" placeholder="Valor mínimo" (input)="onFilterChange()" />
-    <button class="btn-padrao" (click)="export('pdf')">
+    <button class="list-btn" (click)="export('pdf')">
       <span class="material-icons">download</span> Exportar
     </button>
   </div>
@@ -32,7 +32,7 @@
   </div>
 
   <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="error" class="list-error">{{ error }}</div>
 
   <div *ngIf="viewMode==='grid' && !loading && projects.length" class="project-grid">
     <app-project-card
@@ -55,7 +55,7 @@
     </select>
     <button class="btn-padrao" (click)="updateSelectedProjectsStatus(batchStatus)" [disabled]="!batchStatus"><span class="material-icons">sync</span> Atualizar Status</button>
   </div>
-  <table class="project-table" *ngIf="viewMode==='list' && !loading && projects.length">
+  <table class="list-table" *ngIf="viewMode==='list' && !loading && projects.length">
     <thead>
       <tr>
         <th><input type="checkbox" (change)="toggleSelectAll($event)" /></th>

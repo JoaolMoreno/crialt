@@ -1,7 +1,7 @@
-<section class="client-list-section">
+<section class="list-section">
   <h1>Clientes</h1>
-  <div class="client-list-actions">
-    <button class="export-btn" style="margin-right:16px;" (click)="onNewClient()">
+  <div class="list-actions">
+    <button class="list-btn" style="margin-right:16px;" (click)="onNewClient()">
       <span class="material-icons">person_add</span> Novo Cliente
     </button>
     <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
@@ -11,12 +11,12 @@
       <option value="inactive">Inativo</option>
     </select>
     <input type="date" [(ngModel)]="selectedDate" class="filter-select" (change)="onFilterChange()" />
-    <button class="export-btn" (click)="onExport()">
+    <button class="list-btn" (click)="onExport()">
       <span class="material-icons">download</span> Exportar
     </button>
   </div>
 
-  <table class="client-table" *ngIf="!loading && clients.length">
+  <table class="list-table" *ngIf="!loading && clients.length">
     <thead>
       <tr>
         <th (click)="onSortChange('name')" style="cursor:pointer">Nome <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
@@ -39,10 +39,10 @@
         </td>
         <td>{{ client.created_at | date:'shortDate' }}</td>
         <td>
-          <button class="action-btn" (click)="onEditClient(client)" [disabled]="!isAdmin" title="Editar cliente"><span class="material-icons">edit</span></button>
+          <button class="action-btn" (click)="onEditClient(client)" title="Editar cliente"><span class="material-icons">edit</span></button>
           <button class="action-btn" (click)="onViewClient(client)" title="Visualizar cliente"><span class="material-icons">visibility</span></button>
           <button class="action-btn" (click)="onNewProject(client)" title="Novo projeto"><span class="material-icons">add_circle</span></button>
-          <button class="action-btn" (click)="onToggleStatus(client)" [disabled]="!isAdmin" [title]="client.is_active ? 'Inativar cliente' : 'Ativar cliente'">
+          <button class="action-btn" (click)="onToggleStatus(client)" [title]="client.is_active ? 'Inativar cliente' : 'Ativar cliente'">
             <span class="material-icons">{{ client.is_active ? 'block' : 'check_circle' }}</span>
           </button>
         </td>
@@ -51,7 +51,7 @@
   </table>
   <div *ngIf="!loading && !clients.length" class="empty-state">Nenhum cliente encontrado.</div>
   <app-loading-spinner *ngIf="loading" size="large" [overlay]="true"></app-loading-spinner>
-  <div *ngIf="error" class="client-list-error">{{ error }}</div>
+  <div *ngIf="error" class="list-error">{{ error }}</div>
   <!-- Paginação -->
   <div *ngIf="!loading && total > pageSize" class="pagination-controls">
     <button *ngIf="currentPage > 1" class="btn-padrao" (click)="onPageChange(currentPage-1)">Anterior</button>

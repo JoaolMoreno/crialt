@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ClientService } from '../../../core/services/client.service';
 import { Client } from '../../../core/models/client.model';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
@@ -41,7 +40,7 @@ export class ClientListComponent implements OnInit {
       order_by: this.sortColumn || 'created_at',
       order_dir: this.sortDirection,
       name: this.searchQuery || undefined,
-      is_active: this.selectedStatus || undefined,
+      is_active: this.selectedStatus === 'active' ? true : this.selectedStatus === 'inactive' ? false : undefined,
       created_at: this.selectedDate || undefined
     };
     this.clientService.getClients(params).subscribe({

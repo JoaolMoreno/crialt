@@ -107,3 +107,63 @@ Foram estabelecidas duas fontes para a marca, que devem ser usadas em conjunto p
 
 **Imagens e Renders**
 - As imagens devem ser de alta qualidade e apresentadas com destaque, ocupando áreas significativas da tela para replicar o impacto visual da proposta.
+
+---
+
+## Padrão de Listas, Tabelas e Paginação
+
+### Estrutura Geral
+- Utilize o container `.list-section` para envolver listas, tabelas e ações, garantindo espaçamento, fundo, borda e sombra padronizados.
+- Títulos de página (h1) sempre com fonte DIORE, 32px, alinhados à esquerda.
+- Ações de lista (filtros, busca, botões) agrupadas em `.list-actions`, com espaçamento horizontal e vertical consistente.
+- Tabelas de dados devem usar `.list-table`, com cabeçalhos destacados, bordas suaves e células com padding generoso.
+- Estados vazios devem ser exibidos com `.empty-state`, fonte Montserrat 16px, cor #666, estilo itálico e centralizado.
+
+### Paginação
+- Use o container `.pagination-controls` para os controles de navegação.
+- Botões de paginação devem seguir o padrão `.btn-padrao` (Montserrat, 16px, uppercase, fundo #35271C, texto #FFFFFF, borda-radius 6px).
+- O texto de página atual deve ser Montserrat, 15px, cor #35271C, peso 500.
+- Espaçamento entre botões e texto: 16px.
+- Em telas pequenas, os controles devem se alinhar em coluna, ocupando toda a largura disponível.
+
+### Botões
+- Botões de ação em listas usam `.list-btn` ou `.action-btn` conforme contexto.
+- Ícones Material Icons sempre alinhados à esquerda do texto, tamanho 20px.
+- Botões desabilitados com cor de fundo #CDC0A6 e texto #35271C, opacidade reduzida.
+
+### Responsividade
+- Em telas menores que 900px, ações e filtros devem se alinhar em coluna.
+- Tabelas e controles de paginação devem ajustar padding e fonte para melhor leitura.
+
+### Cores e Tipografia
+- Seguir rigorosamente a paleta e hierarquia tipográfica já descrita.
+- Elementos de destaque (valores, status) devem usar as cores de acento e estilos definidos.
+
+---
+
+## Exemplos de Uso
+
+```html
+<section class="list-section">
+  <h1>Título da Página</h1>
+  <div class="list-actions">
+    <button class="list-btn"><span class="material-icons">add_circle</span> Novo</button>
+    <input type="text" class="search-input" placeholder="Buscar..." />
+    <select class="filter-select"><option>Filtro</option></select>
+  </div>
+  <table class="list-table">
+    <thead>
+      <tr><th>Coluna</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dado</td></tr>
+    </tbody>
+  </table>
+  <div class="empty-state">Nenhum item encontrado.</div>
+  <div class="pagination-controls">
+    <button class="btn-padrao">Anterior</button>
+    <span>Página 1 de 10</span>
+    <button class="btn-padrao">Próxima</button>
+  </div>
+</section>
+```
