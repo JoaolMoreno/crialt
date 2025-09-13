@@ -4,13 +4,6 @@ from datetime import datetime, date
 from pydantic import BaseModel
 import enum
 
-class StageType(str, enum.Enum):
-    LEVANTAMENTO = 'levantamento'
-    BRIEFING = 'briefing'
-    ESTUDO_PRELIMINAR = 'estudo_preliminar'
-    PROJETO_EXECUTIVO = 'projeto_executivo'
-    ASSESSORIA_POS_PROJETO = 'assessoria_pos_projeto'
-
 class StageStatus(str, enum.Enum):
     pending = 'pending'
     in_progress = 'in_progress'
@@ -25,7 +18,6 @@ class PaymentStatus(str, enum.Enum):
 
 class StageBase(BaseModel):
     name: str
-    type: StageType
     description: Optional[str] = None
     order: int
     status: StageStatus = StageStatus.pending
@@ -41,12 +33,12 @@ class StageBase(BaseModel):
 
 class StageCreate(StageBase):
     project_id: UUID
+    stage_type_id: UUID
     created_by_id: UUID
     assigned_to_id: Optional[UUID] = None
 
 class StageUpdate(BaseModel):
     name: Optional[str] = None
-    type: Optional[StageType] = None
     description: Optional[str] = None
     order: Optional[int] = None
     status: Optional[StageStatus] = None
@@ -59,6 +51,7 @@ class StageUpdate(BaseModel):
     specific_data: Optional[dict] = None
     progress_percentage: Optional[int] = None
     notes: Optional[str] = None
+    stage_type_id: Optional[UUID] = None
     assigned_to_id: Optional[UUID] = None
 
 class StageRead(StageBase):
@@ -66,10 +59,13 @@ class StageRead(StageBase):
     created_at: datetime
     updated_at: datetime
     project_id: UUID
+    stage_type_id: UUID
     created_by_id: UUID
     assigned_to_id: Optional[UUID] = None
     files: Optional[List[UUID]] = None
     tasks: Optional[List[UUID]] = None
+
+    stage_type: Optional[dict] = None
 
     class Config:
         from_attributes = True

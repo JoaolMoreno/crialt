@@ -32,9 +32,51 @@ def serialize_project(project):
         "updated_at": project.updated_at,
         "created_by_id": project.created_by_id,
         "clients": [ClientBasicRead.model_validate(c) for c in getattr(project, "clients", [])],
-        "stages": [StageRead.model_validate(s) for s in getattr(project, "stages", [])],
+        "stages": [serialize_stage(s) for s in getattr(project, "stages", [])],
         "files": [FileRead.model_validate(f) for f in getattr(project, "files", [])] if hasattr(project, "files") else [],
     }
+
+def serialize_stage(stage):
+    stage_dict = {
+        "id": stage.id,
+        "name": stage.name,
+        "description": stage.description,
+        "order": stage.order,
+        "status": stage.status,
+        "planned_start_date": stage.planned_start_date,
+        "actual_start_date": stage.actual_start_date,
+        "planned_end_date": stage.planned_end_date,
+        "actual_end_date": stage.actual_end_date,
+        "value": stage.value,
+        "payment_status": stage.payment_status,
+        "specific_data": stage.specific_data,
+        "progress_percentage": stage.progress_percentage,
+        "notes": stage.notes,
+        "created_at": stage.created_at,
+        "updated_at": stage.updated_at,
+        "project_id": stage.project_id,
+        "stage_type_id": stage.stage_type_id,
+        "created_by_id": stage.created_by_id,
+        "assigned_to_id": stage.assigned_to_id,
+        "files": getattr(stage, "files", []),
+        "tasks": getattr(stage, "tasks", []),
+        "stage_type": None
+    }
+
+    # Se stage_type está disponível, serializar como dicionário
+    if hasattr(stage, "stage_type") and stage.stage_type:
+        stage_dict["stage_type"] = {
+            "id": str(stage.stage_type.id),
+            "name": stage.stage_type.name,
+            "description": stage.stage_type.description,
+            "scope": stage.stage_type.scope,
+            "default_duration_days": stage.stage_type.default_duration_days,
+            "is_active": stage.stage_type.is_active,
+            "created_at": stage.stage_type.created_at,
+            "updated_at": stage.stage_type.updated_at
+        }
+
+    return StageRead.model_validate(stage_dict)
 
 def list_projects_query(query, limit, offset, order_by, order_dir, name=None, status=None, start_date=None, client_id=None):
     if name:

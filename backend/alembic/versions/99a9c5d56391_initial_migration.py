@@ -44,6 +44,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_clients_document'), 'clients', ['document'], unique=True)
     op.create_index(op.f('ix_clients_email'), 'clients', ['email'], unique=True)
+
     op.create_table('users',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -58,6 +59,20 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+
+    op.create_table('stage_types',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('scope', sa.JSON(), nullable=True),
+    sa.Column('default_duration_days', sa.Integer(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
+
     op.create_table('projects',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -77,6 +92,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+
     op.create_table('project_clients',
     sa.Column('project_id', sa.UUID(), nullable=False),
     sa.Column('client_id', sa.UUID(), nullable=False),
@@ -84,10 +100,10 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
     sa.PrimaryKeyConstraint('project_id', 'client_id')
     )
+
     op.create_table('stages',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('type', sa.Enum('LEVANTAMENTO', 'BRIEFING', 'ESTUDO_PRELIMINAR', 'PROJETO_EXECUTIVO', 'ASSESSORIA_POS_PROJETO', name='stagetype'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('order', sa.Integer(), nullable=False),
     sa.Column('status', sa.Enum('pending', 'in_progress', 'completed', 'cancelled', 'on_hold', name='stagestatus'), nullable=False),
@@ -103,13 +119,16 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('project_id', sa.UUID(), nullable=False),
+    sa.Column('stage_type_id', sa.UUID(), nullable=False),
     sa.Column('created_by_id', sa.UUID(), nullable=False),
     sa.Column('assigned_to_id', sa.UUID(), nullable=True),
     sa.ForeignKeyConstraint(['assigned_to_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
+    sa.ForeignKeyConstraint(['stage_type_id'], ['stage_types.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+
     op.create_table('files',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('original_name', sa.String(), nullable=False),
@@ -132,6 +151,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('stored_name')
     )
+
     op.create_table('tasks',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
@@ -150,6 +170,106 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['stage_id'], ['stages.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+
+    # Inserir dados padrão para tipos de etapa
+    from sqlalchemy import text
+    import json
+
+    # Dados padrão dos tipos de etapa baseados no fluxo da Crialt Arquitetura
+    stage_types_data = [
+        {
+            'name': 'Levantamento',
+            'description': 'Levantamento do local e medições',
+            'scope': {
+                'local_visita': {'type': 'string', 'required': True, 'label': 'Local da Visita'},
+                'data_visita': {'type': 'date', 'required': True, 'label': 'Data da Visita'},
+                'responsavel': {'type': 'string', 'required': True, 'label': 'Responsável'},
+                'observacoes_local': {'type': 'text', 'required': False, 'label': 'Observações do Local'}
+            },
+            'default_duration_days': 3
+        },
+        {
+            'name': 'Briefing',
+            'description': 'Reunião para definição do briefing com o cliente',
+            'scope': {
+                'preferencias_cliente': {'type': 'text', 'required': True, 'label': 'Preferências do Cliente'},
+                'orcamento_cliente': {'type': 'number', 'required': False, 'label': 'Orçamento do Cliente'},
+                'prazo_desejado': {'type': 'date', 'required': False, 'label': 'Prazo Desejado'},
+                'estilo_preferido': {'type': 'string', 'required': False, 'label': 'Estilo Preferido'}
+            },
+            'default_duration_days': 2
+        },
+        {
+            'name': 'Estudo Preliminar',
+            'description': 'Desenvolvimento do estudo preliminar',
+            'scope': {
+                'numero_alternativas': {'type': 'number', 'required': True, 'label': 'Número de Alternativas'},
+                'tipo_apresentacao': {'type': 'string', 'required': True, 'label': 'Tipo de Apresentação'},
+                'revisoes_incluidas': {'type': 'number', 'required': True, 'label': 'Revisões Incluídas'},
+                'entrega_3d': {'type': 'boolean', 'required': False, 'label': 'Entrega de Imagens 3D'}
+            },
+            'default_duration_days': 14
+        },
+        {
+            'name': 'Projeto Executivo',
+            'description': 'Desenvolvimento do projeto executivo detalhado',
+            'scope': {
+                'plantas_incluidas': {'type': 'array', 'required': True, 'label': 'Plantas Incluídas'},
+                'especialidades': {'type': 'array', 'required': True, 'label': 'Especialidades (Elétrica, Hidráulica, etc.)'},
+                'detalhamentos': {'type': 'array', 'required': False, 'label': 'Detalhamentos Específicos'},
+                'memorial_descritivo': {'type': 'boolean', 'required': True, 'label': 'Memorial Descritivo'}
+            },
+            'default_duration_days': 30
+        },
+        {
+            'name': 'Assessoria Pós-Projeto',
+            'description': 'Acompanhamento e assessoria durante a execução',
+            'scope': {
+                'cronograma_visitas': {'type': 'array', 'required': True, 'label': 'Cronograma de Visitas'},
+                'tipo_acompanhamento': {'type': 'string', 'required': True, 'label': 'Tipo de Acompanhamento'},
+                'responsabilidades': {'type': 'text', 'required': True, 'label': 'Responsabilidades'},
+                'prazo_assessoria': {'type': 'number', 'required': True, 'label': 'Prazo da Assessoria (meses)'}
+            },
+            'default_duration_days': 90
+        }
+    ]
+
+    # Inserir os tipos de etapa padrão
+    connection = op.get_bind()
+    import time
+    from datetime import datetime
+
+    base_timestamp = time.time()
+
+    for i, stage_type in enumerate(stage_types_data):
+        scope_json = json.dumps(stage_type['scope'])
+        # Adiciona 1 segundo para cada stage_type para garantir ordem diferente
+        stage_created_at = datetime.fromtimestamp(base_timestamp + i)
+
+        connection.execute(
+            text("""
+                INSERT INTO stage_types (id, name, description, scope, default_duration_days, is_active, created_at, updated_at)
+                VALUES (
+                    gen_random_uuid(),
+                    :name,
+                    :description,
+                    :scope,
+                    :default_duration_days,
+                    true,
+                    :created_at,
+                    :updated_at
+                )
+            """),
+            {
+                'name': stage_type['name'],
+                'description': stage_type['description'],
+                'scope': scope_json,
+                'default_duration_days': stage_type['default_duration_days'],
+                'created_at': stage_created_at,
+                'updated_at': stage_created_at
+            }
+        )
+
     # ### end Alembic commands ###
 
 
@@ -161,6 +281,7 @@ def downgrade() -> None:
     op.drop_table('stages')
     op.drop_table('project_clients')
     op.drop_table('projects')
+    op.drop_table('stage_types')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
     op.drop_index(op.f('ix_clients_email'), table_name='clients')

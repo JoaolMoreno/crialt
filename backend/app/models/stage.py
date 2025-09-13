@@ -8,7 +8,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from ..schemas.stage import StageType, StageStatus, PaymentStatus
+from ..schemas.stage import StageStatus, PaymentStatus
 from ..models.base import Base
 
 
@@ -17,7 +17,6 @@ class Stage(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
-    type = Column(SQLAlchemyEnum(StageType), nullable=False)
     description = Column(String, nullable=True)
     order = Column(Integer, nullable=False)
     status = Column(SQLAlchemyEnum(StageStatus), default=StageStatus.pending, nullable=False)
@@ -33,15 +32,14 @@ class Stage(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Foreign Keys
     project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    stage_type_id = Column(UUID(as_uuid=True), ForeignKey("stage_types.id"), nullable=False)
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     assigned_to_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 
-    # Relationships
     project = relationship("Project", back_populates="stages")
+    stage_type = relationship("StageType", back_populates="stages")
     files = relationship("File", back_populates="stage")
     tasks = relationship("Task", back_populates="stage", cascade="all, delete-orphan")
     created_by = relationship("User", foreign_keys=[created_by_id], back_populates="created_stages")
     assigned_to = relationship("User", foreign_keys=[assigned_to_id], back_populates="assigned_stages")
-

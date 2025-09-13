@@ -3,9 +3,10 @@ from datetime import datetime, UTC
 from sqlalchemy.orm import Session
 
 from ..models import Project, Client, Stage
+from ..models.stage_type import StageType
 from ..models.project import project_clients
 from ..schemas.project import ProjectCreate
-from ..schemas.stage import StageType, StageStatus
+from ..schemas.stage import StageStatus
 
 
 class ProjectService:
@@ -39,18 +40,14 @@ class ProjectService:
             client = self.db.get(Client, client_id)
             if client:
                 self.db.execute(project_clients.insert().values(project_id=project.id, client_id=client.id))
-        # Criação automática de etapas padrão
-        etapas_padrao = [
-            StageType.LEVANTAMENTO,
-            StageType.BRIEFING,
-            StageType.ESTUDO_PRELIMINAR,
-            StageType.PROJETO_EXECUTIVO,
-            StageType.ASSESSORIA_POS_PROJETO
-        ]
-        for idx, tipo in enumerate(etapas_padrao, start=1):
+
+        # Criação automática de etapas padrão baseadas nos tipos cadastrados
+        stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.name).all()
+
+        for idx, stage_type in enumerate(stage_types, start=1):
             etapa = Stage(
-                name=tipo.value.capitalize(),
-                type=tipo,
+                name=stage_type.name,
+                description=stage_type.description,
                 order=idx,
                 status=StageStatus.pending,
                 planned_start_date=project.start_date,
@@ -58,6 +55,7 @@ class ProjectService:
                 value=0,
                 payment_status="pending",
                 project_id=project.id,
+                stage_type_id=stage_type.id,
                 created_by_id=user_id,
                 created_at=datetime.now(UTC),
                 updated_at=datetime.now(UTC)
@@ -101,21 +99,8 @@ class ProjectService:
                 if client:
                     project.clients.append(client)
 
-        if "stages" in update_data and update_data["stages"] is not None:
-            stage_ids = set(str(sid) for sid in update_data["stages"])
-            for stage in list(project.stages):
-                if str(stage.id) not in stage_ids:
-                    self.db.delete(stage)
-            self.db.flush()
-            existing_stage_ids = {str(stage.id) for stage in project.stages}
-            for stage_id in stage_ids:
-                if stage_id not in existing_stage_ids:
-                    stage = self.db.get(Stage, stage_id)
-                    if stage:
-                        stage.project_id = project.id
         project.updated_at = datetime.now(UTC)
         self.db.commit()
-        self.db.refresh(project)
         return project
 
     def delete_project(self, project_id: str) -> bool:
