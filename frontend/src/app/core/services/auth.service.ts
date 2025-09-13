@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, catchError, of } from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
@@ -59,5 +59,15 @@ export class AuthService {
 
   setCurrentUser(user: User): void {
     this.userSubject.next(user);
+  }
+
+  checkToken(): Observable<{ role: string; name: string; sub: string } | null> {
+    return this.http.get<{ role: string; name: string; sub: string }>(`${this.apiUrl}/check-token`, { withCredentials: true })
+      .pipe(
+        catchError(err => {
+          this.logout();
+          return of(null);
+        })
+      );
   }
 }

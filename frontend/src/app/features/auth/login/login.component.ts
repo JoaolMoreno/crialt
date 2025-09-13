@@ -33,7 +33,7 @@ export class LoginComponent {
     }).subscribe({
       next: (user) => {
         this.loading = false;
-        this.authService.setCurrentUser(user);
+        this.authService.setCurrentUser(user.user);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

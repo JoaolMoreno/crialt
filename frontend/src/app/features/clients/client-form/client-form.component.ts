@@ -31,7 +31,6 @@ export class ClientFormComponent implements OnInit {
 
   documents: File[] = [];
   generatedPassword: string = '';
-  isAdmin: boolean = false;
 
   ngOnInit(): void {
     this.clientId = this.route.snapshot.paramMap.get('id');

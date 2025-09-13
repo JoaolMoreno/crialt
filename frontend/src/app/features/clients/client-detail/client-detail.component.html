@@ -49,7 +49,7 @@
         <span class="info-value">{{ client?.created_at | date:'shortDate' }}</span>
       </div>
       <div class="info-actions">
-        <button class="edit-btn" *ngIf="canEdit && !editMode" (click)="enableEdit()">
+        <button class="edit-btn" (click)="enableEdit()">
           <span class="material-icons">edit</span> Editar
         </button>
         <button class="save-btn" *ngIf="editMode" (click)="saveEdit()" [disabled]="loading">
@@ -58,7 +58,7 @@
         <button class="cancel-btn" *ngIf="editMode" (click)="cancelEdit()">
           <span class="material-icons">close</span> Cancelar
         </button>
-        <button class="password-btn" *ngIf="canEdit && !editMode" (click)="togglePasswordCard()">
+        <button class="password-btn" (click)="togglePasswordCard()">
           <span class="material-icons">lock_reset</span> Trocar Senha
         </button>
       </div>

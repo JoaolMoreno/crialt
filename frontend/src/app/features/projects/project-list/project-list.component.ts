@@ -4,7 +4,6 @@ import { StageService } from '../../../core/services/stage.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
@@ -22,7 +21,6 @@ export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly stageService = inject(StageService);
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
 
   projects: Project[] = [];
   stages: Stage[] = [];
@@ -38,15 +36,11 @@ export class ProjectListComponent implements OnInit {
   selectedValue = '';
   loading = false;
   error = '';
-  isAdmin = false;
   selectedProjects: string[] = [];
   batchStatus: string = '';
   viewMode: 'list' | 'grid' = 'list';
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe(user => {
-      this.isAdmin = user?.role === 'admin';
-    });
     this.loadProjects();
     this.loadStages();
   }

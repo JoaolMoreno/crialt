@@ -15,7 +15,6 @@ import { SharedModule } from '../../../shared/shared.module';
 export class ClientListComponent implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
 
   clients: Client[] = [];
   total = 0;
@@ -28,12 +27,8 @@ export class ClientListComponent implements OnInit {
   selectedDate = '';
   loading = false;
   error = '';
-  isAdmin = false;
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe(user => {
-      this.isAdmin = user?.role === 'admin';
-    });
     this.loadClients();
   }
 
@@ -83,9 +78,7 @@ export class ClientListComponent implements OnInit {
   }
 
   onEditClient(client: Client): void {
-    if (this.isAdmin) {
-      this.router.navigate([`/clients/${client.id}/edit`]);
-    }
+    this.router.navigate([`/clients/${client.id}/edit`]);
   }
 
   onViewClient(client: Client): void {
@@ -93,7 +86,6 @@ export class ClientListComponent implements OnInit {
   }
 
   onToggleStatus(client: Client): void {
-    if (!this.isAdmin) return;
     this.loading = true;
     const updated = { ...client, is_active: !client.is_active };
     this.clientService.updateClient(client.id, updated).subscribe({

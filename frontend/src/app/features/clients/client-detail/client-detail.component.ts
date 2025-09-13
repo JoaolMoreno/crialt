@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../../../core/services/client.service';
 import { ProjectService } from '../../../core/services/project.service';
 import { FileService } from '../../../core/services/file.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { Client } from '../../../core/models/client.model';
 import { Project } from '../../../core/models/project.model';
 import { File } from '../../../core/models/file.model';
@@ -25,7 +24,6 @@ export class ClientDetailComponent implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly projectService = inject(ProjectService);
   private readonly fileService = inject(FileService);
-  private readonly authService = inject(AuthService);
 
   client: Client | null = null;
   projects: Project[] = [];
@@ -42,9 +40,6 @@ export class ClientDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const clientId = this.route.snapshot.paramMap.get('id');
-    this.authService.getCurrentUser().subscribe(user => {
-      this.canEdit = !!user && (user.role === 'admin' || user.role === 'architect');
-    });
     if (clientId) {
       this.loadClient(clientId);
     }
