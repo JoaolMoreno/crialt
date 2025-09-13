@@ -158,4 +158,26 @@
   .notification-badge {
     display: none !important;
   }
+
+  /* Destaque para itens favoritos no modo mobile */
+  .sidebar-menu li.favorite .menu-link {
+    background: #BFC5CA; /* cor mais escura para favorito */
+    border-radius: 14px; /* arredondamento maior */
+    padding: 8px 12px; /* área de toque maior */
+    min-width: 44px;
+    min-height: 44px;
+    font-size: initial; /* permite que o ícone mantenha seu tamanho */
+    box-shadow: 0 6px 14px rgba(16,24,40,0.07);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  .sidebar-menu li.favorite .menu-link:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 8px rgba(16,24,40,0.05);
+  }
+
+  .sidebar-menu li.favorite .menu-icon {
+    color: var(--color-dark); /* ícone mais escuro */
+    font-size: 28px; /* garante tamanho consistente */
+  }
 }
