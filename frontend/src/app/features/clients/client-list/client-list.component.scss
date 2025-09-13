@@ -49,15 +49,9 @@
 }
 
 @media (max-width: 900px) {
-  .client-list-section {
-    padding: 16px 4px;
-  }
   .client-list-actions {
     flex-direction: column;
     gap: 12px;
-    .search-input, .filter-select {
-      min-width: 100%;
-    }
   }
   .client-table th, .client-table td {
     padding: 8px 6px;
@@ -66,9 +60,6 @@
 }
 
 @media (max-width: 600px) {
-  .client-list-section {
-    padding: 8px 0;
-  }
   .client-table {
     font-size: 14px;
     th, td {

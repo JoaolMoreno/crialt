@@ -1,14 +1,5 @@
 @use "../../../../styles.scss" as *;
 
-.project-detail-section {
-  background: var(--color-bg);
-  padding: 32px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(53,39,28,0.06);
-  max-width: 900px;
-  margin: 32px auto;
-}
-
 .header {
   display: flex;
   justify-content: space-between;

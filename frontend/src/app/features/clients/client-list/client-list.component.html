@@ -1,16 +1,16 @@
-<section class="list-section">
+<section class="section-container">
   <h1>Clientes</h1>
   <div class="list-actions">
     <button class="list-btn" style="margin-right:16px;" (click)="onNewClient()">
       <span class="material-icons">person_add</span> Novo Cliente
     </button>
-    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
-    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilterChange()">
+    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onFilterChange()" />
+    <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="active">Ativo</option>
       <option value="inactive">Inativo</option>
     </select>
-    <input type="date" [(ngModel)]="selectedDate" class="filter-select" (change)="onFilterChange()" />
+    <input type="date" [(ngModel)]="selectedDate" class="input-filtro" (change)="onFilterChange()" />
     <button class="list-btn" (click)="onExport()">
       <span class="material-icons">download</span> Exportar
     </button>

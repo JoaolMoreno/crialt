@@ -1,14 +1,5 @@
 @use "../../../../styles.scss" as *;
 
-.project-form-section {
-  background: var(--color-bg);
-  padding: 32px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(53,39,28,0.06);
-  max-width: 700px;
-  margin: 32px auto;
-}
-
 .form-header {
   display: flex;
   align-items: center;
@@ -325,18 +316,6 @@ input[type="text"] {
 }
 
 @media (max-width: 700px) {
-  .project-form-section {
-    padding: 16px 8px;
-    max-width: 100%;
-  }
-  .form-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .form-row .form-group {
-    width: 100%;
-    min-width: 0;
-  }
   .client-modal, .stage-modal {
     min-width: 0;
     width: 98vw;

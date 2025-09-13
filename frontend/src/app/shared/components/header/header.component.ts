@@ -27,6 +27,7 @@ export class HeaderComponent {
   ];
 
   notificationsCount = 3;
+  isMobile = false;
 
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -40,6 +41,15 @@ export class HeaderComponent {
   breadcrumb: string[] = ['Dashboard'];
 
   searchQuery = '';
+
+  constructor() {
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile.bind(this));
+  }
+
+  checkMobile() {
+    this.isMobile = window.innerWidth <= 768;
+  }
 
   get user$() {
     return this.authService.user$;

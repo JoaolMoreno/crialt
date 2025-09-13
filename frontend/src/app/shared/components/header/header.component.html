@@ -1,6 +1,6 @@
 <header class="header">
   <div class="logo">CRIALT</div>
-  <nav class="main-nav">
+  <nav class="main-nav" *ngIf="!isMobile">
     <ul class="nav-menu">
       <li *ngFor="let item of menuItems">
         <a [routerLink]="item.route" class="nav-link">
@@ -11,26 +11,16 @@
     </ul>
   </nav>
   <div class="header-actions">
-<!--    <div class="search-wrapper">-->
-<!--      <input type="text" placeholder="Buscar..." [(ngModel)]="searchQuery" (keyup.enter)="onSearch(searchQuery)" class="search-input" />-->
-<!--      <span class="material-icons search-icon">search</span>-->
-<!--    </div>-->
     <div class="notifications">
       <span class="material-icons">notifications</span>
       <span class="notification-badge" *ngIf="notificationsCount > 0">{{ notificationsCount }}</span>
     </div>
     <div class="profile-menu" *ngIf="(user$ | async) as user">
       <img [src]="user.avatar || '/assets/images/avatar-default.png'" alt="Avatar" class="avatar" />
-      <span class="profile-name">{{ user.name }}</span>
+      <span class="profile-name" *ngIf="!isMobile">{{ user.name }}</span>
       <button class="logout-btn" (click)="onLogout()" title="Sair">
         <span class="material-icons">logout</span>
       </button>
     </div>
   </div>
-<!--  <div class="breadcrumb">-->
-<!--    <ng-container *ngFor="let crumb of breadcrumb; let last = last">-->
-<!--      <span class="breadcrumb-item">{{ crumb }}</span>-->
-<!--      <span *ngIf="!last" class="breadcrumb-separator">/</span>-->
-<!--    </ng-container>-->
-<!--  </div>-->
 </header>

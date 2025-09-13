@@ -19,6 +19,7 @@ interface SidebarMenuItem {
 })
 export class SidebarComponent {
   isCollapsed = false;
+  isMobile = false;
 
   menuItems: SidebarMenuItem[] = [
     {
@@ -63,6 +64,12 @@ export class SidebarComponent {
       }
     });
     this.updateFavorite(this.router.url);
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile.bind(this));
+  }
+
+  checkMobile() {
+    this.isMobile = window.innerWidth <= 768;
   }
 
   updateFavorite(currentRoute: string) {

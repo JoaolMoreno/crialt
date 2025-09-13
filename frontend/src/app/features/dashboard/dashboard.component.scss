@@ -1,13 +1,5 @@
 @use '../../../styles.scss' as *;
 
-.dashboard-section {
-  padding: calc(var(--spacing-base) * 4);
-  background: var(--color-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(53,39,28,0.08);
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-
 h1 {
   font-family: 'Diore', serif;
   font-size: 32px;
@@ -138,4 +130,3 @@ h2 {
   color: #212121;
   margin-bottom: 16px;
 }
-

@@ -1,22 +1,22 @@
-<section class="list-section">
+<section class="section-container">
   <h1>Projetos</h1>
   <div class="list-actions">
     <button class="list-btn" (click)="onNewProject()">
       <span class="material-icons">add_circle</span> Novo Projeto
     </button>
-    <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="search-input" (input)="onFilterChange()" />
-    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilterChange()">
+    <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onFilterChange()" />
+    <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="in_progress">Em andamento</option>
       <option value="paused">Pausado</option>
       <option value="completed">Concluído</option>
     </select>
-    <input type="month" [(ngModel)]="selectedPeriod" class="filter-select" (change)="onFilterChange()" />
-    <select [(ngModel)]="selectedStage" class="filter-select" (change)="onFilterChange()">
+    <input type="month" [(ngModel)]="selectedPeriod" class="input-filtro" (change)="onFilterChange()" />
+    <select [(ngModel)]="selectedStage" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todas as etapas</option>
       <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
     </select>
-    <input type="number" [(ngModel)]="selectedValue" class="filter-select" placeholder="Valor mínimo" (input)="onFilterChange()" />
+    <input type="number" [(ngModel)]="selectedValue" class="input-filtro" placeholder="Valor mínimo" (input)="onFilterChange()" />
     <button class="list-btn" (click)="export('pdf')">
       <span class="material-icons">download</span> Exportar
     </button>

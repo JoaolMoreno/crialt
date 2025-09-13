@@ -1,3 +1,5 @@
+@use "../../../styles" as *;
+
 .main-layout {
   display: flex;
   flex-direction: column;
@@ -25,7 +27,31 @@
   flex: 1 1 0%;
   min-width: 0;
   min-height: 0;
-  padding: 32px;
-  background: #FFFFFF;
+  background: var(--color-bg);
   overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    padding-bottom: 64px;
+  }
+  .main-content-wrapper {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+  .main-content {
+    min-height: calc(100vh - 56px - 64px);
+    box-sizing: border-box;
+  }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100vw;
+    height: 64px;
+    z-index: 100;
+  }
 }
