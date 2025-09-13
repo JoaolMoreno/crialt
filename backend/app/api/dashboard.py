@@ -5,11 +5,16 @@ from datetime import datetime, timedelta
 
 from ..models import Client, Project, Stage
 from ..api.dependencies import get_db
+from ..utils.cache import cache
 
 router = APIRouter()
 
 @router.get("")
 def get_dashboard(db: Session = Depends(get_db)):
+    cache_key = "dashboard"
+    cached = cache.get(cache_key, {})
+    if cached:
+        return cached
     now = datetime.utcnow()
     first_day_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     last_6_months = [(now.replace(day=1) - timedelta(days=30*i)) for i in range(6)]
@@ -92,7 +97,7 @@ def get_dashboard(db: Session = Depends(get_db)):
         Stage.planned_end_date <= near_deadline.date()
     ).scalar()
 
-    return {
+    result = {
         "total_clients": total_clients,
         "active_projects": active_projects,
         "completed_projects_this_month": completed_projects_this_month,
@@ -102,3 +107,5 @@ def get_dashboard(db: Session = Depends(get_db)):
         "revenue_by_month": revenue_by_month,
         "stages_near_deadline": stages_near_deadline
     }
+    cache.set(cache_key, {}, result)
+    return result

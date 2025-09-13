@@ -7,6 +7,7 @@ from ..api.dependencies import get_db, get_current_actor_factory, client_resourc
 from ..models.project import Project
 from ..models.stage import Stage
 from ..schemas.stage import StageRead, StageCreate, StageUpdate, PaginatedStages
+from ..utils.cache import cache
 
 router = APIRouter()
 
@@ -24,6 +25,20 @@ def get_stages(
     project_id: str = Query(None),
     planned_start_date: str = Query(None),
 ):
+    cache_params = {
+        "limit": limit,
+        "offset": offset,
+        "order_by": order_by,
+        "order_dir": order_dir,
+        "name": name,
+        "type": type,
+        "status": status,
+        "project_id": project_id,
+        "planned_start_date": planned_start_date
+    }
+    cached = cache.get("stages", cache_params)
+    if cached:
+        return cached
     query = db.query(Stage)
     if name:
         query = query.filter(Stage.name.ilike(f"%{name}%"))
@@ -45,13 +60,15 @@ def get_stages(
         query = query.order_by(order_col)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
-    return PaginatedStages(
+    result = PaginatedStages(
         total=total,
         count=len(items),
         offset=offset,
         limit=limit,
         items=items
     )
+    cache.set("stages", cache_params, result)
+    return result
 
 @router.get("/project/{project_id}", response_model=List[StageRead])
 def get_stages_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
@@ -80,12 +97,13 @@ def create_stage(stage_data: StageCreate, db: Session = Depends(get_db), admin_u
     project = db.get(Project, stage_data.project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Projeto não encontrado")
-
     stage_dict = stage_data.model_dump()
     stage = Stage(**stage_dict)
     db.add(stage)
     db.commit()
     db.refresh(stage)
+    cache.invalidate("stages")
+    cache.invalidate("dashboard")
     return stage
 
 @router.put("/{stage_id}", response_model=StageRead)
@@ -93,13 +111,13 @@ def update_stage(stage_id: str, stage_data: StageUpdate, db: Session = Depends(g
     stage = db.get(Stage, stage_id)
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa não encontrada")
-
     update_data = stage_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(stage, field, value)
-
     db.commit()
     db.refresh(stage)
+    cache.invalidate("stages")
+    cache.invalidate("dashboard")
     return stage
 
 @router.delete("/{stage_id}")
@@ -107,7 +125,8 @@ def delete_stage(stage_id: str, db: Session = Depends(get_db), admin_user = Depe
     stage = db.get(Stage, stage_id)
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa não encontrada")
-
     db.delete(stage)
     db.commit()
+    cache.invalidate("stages")
+    cache.invalidate("dashboard")
     return {"message": "Etapa removida com sucesso"}

@@ -9,6 +9,7 @@ from ..models.project import Project
 from ..models.user import User
 from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles
 from ..services.file_service import FileService
+from ..utils.cache import cache
 
 router = APIRouter()
 
@@ -27,6 +28,21 @@ def get_files(
     stage_id: str = Query(None),
     uploaded_by_id: str = Query(None),
 ):
+    cache_params = {
+        "limit": limit,
+        "offset": offset,
+        "order_by": order_by,
+        "order_dir": order_dir,
+        "original_name": original_name,
+        "category": category,
+        "project_id": project_id,
+        "client_id": client_id,
+        "stage_id": stage_id,
+        "uploaded_by_id": uploaded_by_id
+    }
+    cached = cache.get("files", cache_params)
+    if cached:
+        return cached
     query = db.query(File)
     if original_name:
         query = query.filter(File.original_name.ilike(f"%{original_name}%"))
@@ -50,13 +66,15 @@ def get_files(
         query = query.order_by(order_col)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
-    return PaginatedFiles(
+    result = PaginatedFiles(
         total=total,
         count=len(items),
         offset=offset,
         limit=limit,
         items=items
     )
+    cache.set("files", cache_params, result)
+    return result
 
 @router.get("/project/{project_id}", response_model=List[FileRead])
 def get_files_by_project(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
@@ -138,6 +156,8 @@ def upload_file(
     file_bytes = file.file.read()
     service = FileService(db)
     saved_file = service.save_file(file_data, file_bytes)
+    cache.invalidate("files")
+    cache.invalidate("dashboard")
     return FileRead.model_validate(saved_file)
 
 @router.put("/{file_id}", response_model=FileRead)
@@ -152,6 +172,8 @@ def update_file(file_id: str, file_data: FileUpdate, db: Session = Depends(get_d
 
     db.commit()
     db.refresh(file)
+    cache.invalidate("files")
+    cache.invalidate("dashboard")
     return file
 
 @router.delete("/{file_id}")
@@ -164,5 +186,6 @@ def delete_file(file_id: str, db: Session = Depends(get_db), admin_user: User = 
     success = service.delete_file(file_id)
     if not success:
         raise HTTPException(status_code=500, detail="Erro ao remover arquivo")
-
+    cache.invalidate("files")
+    cache.invalidate("dashboard")
     return {"message": "Arquivo removido com sucesso"}

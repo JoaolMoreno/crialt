@@ -9,6 +9,7 @@ from ..models.client import Client
 from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients
 from ..schemas.project import ProjectRead
 from ..services.auth_service import AuthService
+from ..utils.cache import cache
 
 router = APIRouter()
 
@@ -33,6 +34,19 @@ def get_clients(
     email: str = Query(None),
     is_active: bool = Query(None),
 ):
+    cache_params = {
+        "limit": limit,
+        "offset": offset,
+        "order_by": order_by,
+        "order_dir": order_dir,
+        "name": name,
+        "document": document,
+        "email": email,
+        "is_active": is_active
+    }
+    cached = cache.get("clients", cache_params)
+    if cached:
+        return cached
     query = db.query(Client)
     if name:
         query = query.filter(Client.name.ilike(f"%{name}%"))
@@ -53,13 +67,15 @@ def get_clients(
     total = query.count()
     items = query.offset(offset).limit(limit).all()
     result = [serialize_client(client) for client in items]
-    return PaginatedClients(
+    paginated = PaginatedClients(
         total=total,
         count=len(result),
         offset=offset,
         limit=limit,
         items=result
     )
+    cache.set("clients", cache_params, paginated)
+    return paginated
 
 @router.get("/{client_id}", response_model=ClientRead)
 def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
@@ -100,6 +116,8 @@ def create_client(client_data: ClientCreate, db: Session = Depends(get_db), admi
     db.add(client)
     db.commit()
     db.refresh(client)
+    cache.invalidate("clients")
+    cache.invalidate("dashboard")
     return serialize_client(client)
 
 @router.put("/{client_id}", response_model=ClientRead)
@@ -115,6 +133,8 @@ def update_client(client_id: str, client_data: ClientUpdate, db: Session = Depen
         setattr(client, field, value)
     db.commit()
     db.refresh(client)
+    cache.invalidate("clients")
+    cache.invalidate("dashboard")
     return serialize_client(client)
 
 @router.delete("/{client_id}")
@@ -124,6 +144,8 @@ def delete_client(client_id: str, db: Session = Depends(get_db), admin_user = De
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     client.is_active = False  # Soft delete
     db.commit()
+    cache.invalidate("clients")
+    cache.invalidate("dashboard")
     return {"message": "Cliente desativado com sucesso"}
 
 @router.post("/{client_id}/reset-password")

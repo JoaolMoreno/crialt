@@ -10,6 +10,7 @@ from ..schemas.file import FileRead
 from ..schemas.project import ProjectRead, ProjectCreate, ProjectUpdate, PaginatedProjects
 from ..schemas.stage import StageRead
 from ..services.project_service import ProjectService
+from ..utils.cache import cache
 
 router = APIRouter()
 
@@ -67,17 +68,32 @@ def get_projects(
     start_date: str = Query(None),
     client_id: str = Query(None),
 ):
+    cache_params = {
+        "limit": limit,
+        "offset": offset,
+        "order_by": order_by,
+        "order_dir": order_dir,
+        "name": name,
+        "status": status,
+        "start_date": start_date,
+        "client_id": client_id
+    }
+    cached = cache.get("projects", cache_params)
+    if cached:
+        return cached
     query = list_projects_query(db.query(Project), limit, offset, order_by, order_dir, name, status, start_date, client_id)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
     result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
-    return PaginatedProjects(
+    paginated = PaginatedProjects(
         total=total,
         count=len(result),
         offset=offset,
         limit=limit,
         items=result
     )
+    cache.set("projects", cache_params, paginated)
+    return paginated
 
 @router.get("/my", response_model=PaginatedProjects)
 def get_my_projects(
@@ -165,6 +181,8 @@ def get_project(project_id: str, db: Session = Depends(get_db), actor = Depends(
 def create_project(project_data: ProjectCreate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     service = ProjectService(db)
     project = service.create_project(project_data, admin_user.id)
+    cache.invalidate("projects")
+    cache.invalidate("dashboard")
     return ProjectRead.model_validate(serialize_project(project))
 
 @router.put("/{project_id}", response_model=ProjectRead)
@@ -173,6 +191,8 @@ def update_project(project_id: str, project_data: ProjectUpdate, db: Session = D
     project = service.update_project(project_id, project_data)
     if not project:
         raise HTTPException(status_code=404, detail="Projeto não encontrado")
+    cache.invalidate("projects")
+    cache.invalidate("dashboard")
     return ProjectRead.model_validate(serialize_project(project))
 
 @router.delete("/{project_id}")
@@ -181,6 +201,8 @@ def delete_project(project_id: str, db: Session = Depends(get_db), admin_user: U
     success = service.delete_project(project_id)
     if not success:
         raise HTTPException(status_code=404, detail="Projeto não encontrado")
+    cache.invalidate("projects")
+    cache.invalidate("dashboard")
     return {"message": "Projeto removido com sucesso"}
 
 @router.get("/{project_id}/progress")
