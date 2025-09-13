@@ -93,6 +93,36 @@ input[type="text"], input[type="password"] {
   color: var(--color-dark);
   outline: none;
 }
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-field input {
+  width: 100%;
+  padding-right: calc(var(--spacing-base) * 6);
+}
+.eye-btn {
+  position: absolute;
+  right: calc(var(--spacing-base) * 1);
+  background: transparent;
+  border: none;
+  padding: calc(var(--spacing-base) * 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-dark);
+}
+.eye-btn:focus {
+  outline: none;
+}
+.eye-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 input::placeholder {
   color: #8C7A70;
   opacity: 1;

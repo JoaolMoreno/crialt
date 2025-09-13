@@ -19,6 +19,11 @@ export class LoginComponent {
   password = '';
   loading = false;
   errorMessage = '';
+  passwordVisible = false;
+
+  togglePassword(): void {
+    this.passwordVisible = !this.passwordVisible;
+  }
 
   onSubmit(): void {
     if (!this.username || !this.password) {
