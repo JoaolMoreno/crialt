@@ -1,8 +1,15 @@
 <section class="section-container" *ngIf="project">
-  <button class="btn-padrao" (click)="onBack()" style="margin-bottom: 16px;">
-    <span class="material-icons">arrow_back</span> Voltar
-  </button>
   <div class="header">
+    <div class="header-actions">
+      <button class="btn-padrao" (click)="onBack()" style="margin-right: 16px; align-self: flex-start;">
+        <span class="material-icons">arrow_back</span> Voltar
+      </button>
+      <div class="actions">
+        <button class="btn-secundario" (click)="onEditProject()"><span class="material-icons">edit</span> Editar</button>
+        <button class="btn-secundario" (click)="onPauseProject()"><span class="material-icons">pause_circle</span> Pausar</button>
+        <button class="btn-secundario" (click)="onFinishProject()"><span class="material-icons">check_circle</span> Finalizar</button>
+      </div>
+    </div>
     <div class="info">
       <h1>{{ project.name }}</h1>
       <div class="client">Cliente(s):
@@ -21,11 +28,6 @@
         <span *ngIf="project.work_address.zip_code"> ({{ project.work_address.zip_code }})</span>
         <span *ngIf="project.work_address.reference"> - Ref: {{ project.work_address.reference }}</span>
       </div>
-    </div>
-    <div class="actions">
-      <button class="btn-secundario" (click)="onEditProject()"><span class="material-icons">edit</span> Editar</button>
-      <button class="btn-secundario" (click)="onPauseProject()"><span class="material-icons">pause_circle</span> Pausar</button>
-      <button class="btn-secundario" (click)="onFinishProject()"><span class="material-icons">check_circle</span> Finalizar</button>
     </div>
   </div>
   <div class="progress-bar-wrapper">

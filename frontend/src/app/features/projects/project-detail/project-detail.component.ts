@@ -4,8 +4,9 @@ import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
 import { getStatusBadge } from '../../../core/models/status.model';
-import {SharedModule} from "../../../shared/shared.module";
-import {ProgressBarComponent} from "../project-progress-bar/progress-bar.component";
+import { SharedModule } from "../../../shared/shared.module";
+import { ProgressBarComponent } from "../project-progress-bar/progress-bar.component";
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-project-detail',
@@ -18,6 +19,7 @@ export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly projectService = inject(ProjectService);
+  private readonly location = inject(Location);
 
   project: Project | null = null;
   loading = false;
@@ -72,7 +74,7 @@ export class ProjectDetailComponent implements OnInit {
     // Implementar chamada ao serviço para finalizar
   }
   onBack(): void {
-    this.router.navigate(['/projects']);
+    this.location.back();
   }
 
   statusLabel(status: string): string {
