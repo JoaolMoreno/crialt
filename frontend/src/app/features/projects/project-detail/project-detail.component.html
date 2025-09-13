@@ -68,46 +68,10 @@
     </div>
     <div *ngIf="activeTab==='timeline'">
       <h2>Timeline das Etapas</h2>
-      <table class="timeline-table">
-        <thead>
-          <tr>
-            <th>Etapa</th>
-            <th>Status</th>
-            <th>Início</th>
-            <th>Prazo</th>
-            <th>Valor</th>
-            <th>Escopo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let stage of project.stages">
-            <td>{{ stage.name }}</td>
-            <td>{{ stage.status }}</td>
-            <td>{{ (stage.actual_start_date || stage.planned_start_date) | date:'shortDate' }}</td>
-            <td>{{ (stage.actual_end_date || stage.planned_end_date) | date:'shortDate' }}</td>
-            <td class="price">{{ stage.value | currency:project.currency:'symbol':'1.0-0' }}</td>
-            <td>
-              <div *ngIf="stage.specific_data && (stage.specific_data | json) !== '{}'" class="escopo-tabela">
-                <table>
-                  <tbody>
-                    <tr *ngFor="let key of stage.specific_data | keyvalue; let i = index">
-                      <td><b>{{ key.key }}</b></td>
-                      <td>
-                        <ng-container *ngIf="key.value === null || key.value === undefined">-</ng-container>
-                        <ng-container *ngIf="key.value !== null && key.value !== undefined">
-                          <span *ngIf="key.value.constructor === String || key.value.constructor === Number || key.value.constructor === Boolean">{{ key.value }}</span>
-                          <span *ngIf="key.value.constructor === Object || key.value.constructor === Array"><pre>{{ key.value | json }}</pre></span>
-                        </ng-container>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <span *ngIf="!stage.specific_data || (stage.specific_data | json) === '{}'">Sem escopo definido</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <app-project-timeline
+        [projectId]="project.id"
+        [stages]="project.stages">
+      </app-project-timeline>
     </div>
     <div *ngIf="activeTab==='files'">
       <h2>Arquivos do Projeto</h2>

@@ -1,30 +1,139 @@
-<section class="section-container" *ngIf="project">
-  <h1>Timeline do Projeto</h1>
-  <div class="timeline-filters">
-    <label for="filterPeriod">Filtrar por período:</label>
-    <input id="filterPeriod" type="month" (change)="onPeriodChange($event)" />
+<div class="project-timeline-container">
+  <div class="timeline-header">
+    <h1 class="timeline-title">Etapas Projetuais</h1>
+    <div class="timeline-subtitle">Acompanhe o progresso das etapas</div>
   </div>
-  <div class="gantt-wrapper">
-    <div class="gantt-bar" *ngFor="let stage of stages" [class]="stage.status">
-      <div class="gantt-label">
-        <span>{{ stage.name }}</span>
-        <span class="status-badge" [ngClass]="statusBadgeClass(stage.status)">{{ statusLabel(stage.status) }}</span>
-        <span class="dates">{{ stage.actual_start_date || stage.planned_start_date | date:'shortDate' }} - {{ stage.actual_end_date || stage.planned_end_date | date:'shortDate' }}</span>
-        <span *ngIf="stage.specific_data?.important_date" class="important-date" title="Marco importante">
-          <span class="material-icons">flag</span> {{ stage.specific_data.important_date | date:'shortDate' }}
-        </span>
-        <span *ngIf="stage.specific_data?.dependency_id" class="dependency-info" title="Depende da etapa anterior">
-          <span class="material-icons">call_merge</span> Depende de #{{ stage.specific_data.dependency_id }}
-        </span>
+
+  <div class="timeline-wrapper">
+    <!-- Linha principal horizontal -->
+    <div class="timeline-main-line"></div>
+
+    <!-- Container das etapas -->
+    <div class="stages-timeline">
+      <div
+        *ngFor="let stage of getSortedStages(); let i = index; trackBy: trackByStageId"
+        class="stage-timeline-item"
+        [attr.data-stage]="i + 1"
+        [attr.data-total]="getSortedStages().length"
+      >
+        <!-- Nome acima da linha (apenas para índices ímpares) -->
+        <div class="stage-name-label above"
+             *ngIf="i % 2 !== 0"
+             (click)="openStageCard(stage, i)">
+          {{ i + 1 }}. {{ stage.name }}
+        </div>
+
+        <!-- Marcador vertical da etapa - sempre centralizado -->
+        <div class="stage-marker"
+             [class.stage-completed]="stage.status === 'completed'"
+             [class.stage-in-progress]="stage.status === 'in_progress'"
+             [class.stage-pending]="stage.status === 'pending'"
+             [class.stage-cancelled]="stage.status === 'cancelled'"
+             [class.stage-on-hold]="stage.status === 'on_hold'"
+             (click)="openStageCard(stage, i)">
+          <div class="stage-connector-line"></div>
+        </div>
+
+        <!-- Nome abaixo da linha (apenas para índices pares) -->
+        <div class="stage-name-label below"
+             *ngIf="i % 2 === 0"
+             (click)="openStageCard(stage, i)">
+          {{ i + 1 }}. {{ stage.name }}
+        </div>
       </div>
-      <div class="gantt-progress" [style.width.%]="stage.progress_percentage"></div>
-      <button class="btn-secundario" (click)="viewStageDetail(stage)">Detalhes</button>
     </div>
   </div>
-  <div class="timeline-actions">
-    <button class="btn-padrao" (click)="exportTimeline('pdf')"><span class="material-icons">download</span> Exportar PDF</button>
-    <button class="btn-padrao" (click)="exportTimeline('image')"><span class="material-icons">download</span> Exportar Imagem</button>
+
+  <!-- Overlay para modal -->
+  <div class="timeline-overlay" [class.show]="selectedStage !== null" (click)="closeStageCard()"></div>
+
+  <!-- Card modal da etapa -->
+  <div class="stage-card-timeline" [class.show]="selectedStage !== null" *ngIf="selectedStage">
+    <div class="stage-number">{{ selectedStageIndex + 1 }}</div>
+
+    <div class="stage-content">
+      <h3 class="stage-name">{{ selectedStage.name }}</h3>
+      <div class="stage-type">{{ selectedStage.stage_type?.name || 'Sem tipo' }}</div>
+
+      <div class="stage-status">
+        <span class="status-badge" [ngClass]="statusBadgeClass(selectedStage.status)">
+          {{ statusLabel(selectedStage.status) }}
+        </span>
+      </div>
+
+      <div class="stage-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="selectedStage.progress_percentage"></div>
+        </div>
+        <span class="progress-text">{{ selectedStage.progress_percentage }}%</span>
+      </div>
+
+      <div class="stage-dates">
+        <div class="date-item">
+          <span class="date-label">Início:</span>
+          <span class="date-value">
+            {{ (selectedStage.actual_start_date || selectedStage.planned_start_date) | date:'dd/MM/yy' }}
+          </span>
+        </div>
+        <div class="date-item">
+          <span class="date-label">Fim:</span>
+          <span class="date-value">
+            {{ (selectedStage.actual_end_date || selectedStage.planned_end_date) | date:'dd/MM/yy' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="stage-dates" *ngIf="selectedStage.value">
+        <div class="date-item">
+          <span class="date-label">Valor:</span>
+          <span class="date-value">{{ selectedStage.value | currency:'BRL':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="stage-dates" *ngIf="selectedStage.payment_status">
+        <div class="date-item">
+          <span class="date-label">Pagamento:</span>
+          <span class="date-value">{{ getPaymentStatusLabel(selectedStage.payment_status) }}</span>
+        </div>
+      </div>
+
+      <div class="stage-dates" *ngIf="selectedStage.notes">
+        <div class="date-item">
+          <span class="date-label">Notas:</span>
+          <span class="date-value">{{ selectedStage.notes }}</span>
+        </div>
+      </div>
+
+      <button class="close-btn" (click)="closeStageCard()">Fechar</button>
+    </div>
   </div>
-</section>
-<app-loading-spinner *ngIf="loading"></app-loading-spinner>
-<div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <!-- Legenda simplificada -->
+  <div class="timeline-legend">
+    <div class="legend-item">
+      <div class="legend-dot legend-pending"></div>
+      <span>Pendente</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-in-progress"></div>
+      <span>Em Andamento</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-completed"></div>
+      <span>Concluída</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-cancelled"></div>
+      <span>Cancelada</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-on-hold"></div>
+      <span>Em Espera</span>
+    </div>
+  </div>
+
+  <!-- Logo/ícone no canto inferior direito -->
+  <div class="timeline-brand">
+    <span class="brand-text">Crialt Arquitetura</span>
+  </div>
+</div>

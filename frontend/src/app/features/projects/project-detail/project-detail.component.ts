@@ -2,8 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
-import { Stage } from '../../../core/models/stage.model';
+import { Stage, PaymentStatus } from '../../../core/models/stage.model';
 import { getStatusBadge } from '../../../core/models/status.model';
+import { ProjectTimelineComponent } from "../project-timeline/project-timeline.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { ProgressBarComponent } from "../project-progress-bar/progress-bar.component";
 import { Location } from '@angular/common';
@@ -13,7 +14,7 @@ import { Location } from '@angular/common';
   standalone: true,
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss'],
-    imports: [SharedModule, ProgressBarComponent]
+    imports: [SharedModule, ProgressBarComponent, ProjectTimelineComponent]
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -51,9 +52,8 @@ export class ProjectDetailComponent implements OnInit {
 
   getProjectProgress(project: Project): number {
     if (!project.stages || project.stages.length === 0) return 0;
-    const total = project.stages.length;
-    const completed = project.stages.filter(s => s.status === 'completed').length;
-    return Math.round((completed / total) * 100);
+    const totalProgress = project.stages.reduce((sum, stage) => sum + stage.progress_percentage, 0);
+    return Math.round(totalProgress / project.stages.length);
   }
 
   getCurrentStage(project: Project): Stage | null {
@@ -84,9 +84,12 @@ export class ProjectDetailComponent implements OnInit {
     return 'status-badge ' + getStatusBadge(status).color;
   }
 
-    protected readonly String = String;
-    protected readonly Number = Number;
-    protected readonly Boolean = Boolean;
-    protected readonly Object = Object;
-    protected readonly Array = Array;
+  getPaymentStatusLabel(status: PaymentStatus): string {
+    const labels = {
+      pending: 'Pendente',
+      partial: 'Parcial',
+      paid: 'Pago'
+    };
+    return labels[status] || status;
+  }
 }

@@ -4,14 +4,18 @@ import { Task } from './task.model';
 import { User } from './user.model';
 import { StageStatus } from './status.model';
 
-export type StageType =
-  | 'levantamento'
-  | 'briefing'
-  | 'estudo_preliminar'
-  | 'projeto_executivo'
-  | 'assessoria_pos_projeto';
-
 export type PaymentStatus = 'pending' | 'partial' | 'paid';
+
+export interface StageType {
+  id: string;
+  name: string;
+  description?: string;
+  scope?: any;
+  default_duration_days?: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface StageSpecificData {
   // Tipos específicos podem ser detalhados depois
@@ -21,7 +25,6 @@ export interface StageSpecificData {
 export interface Stage {
   id: string;
   name: string;
-  type: StageType;
   description?: string;
   order: number;
   status: StageStatus;
@@ -31,14 +34,19 @@ export interface Stage {
   actual_end_date?: string;
   value: number;
   payment_status: PaymentStatus;
-  specific_data: StageSpecificData;
+  specific_data?: StageSpecificData;
   progress_percentage: number;
   notes?: string;
   created_at: string;
   updated_at: string;
-  project: Project;
-  files: File[];
-  tasks: Task[];
-  created_by: User;
+  project_id: string;
+  stage_type_id: string;
+  created_by_id: string;
+  assigned_to_id?: string;
+  project?: Project;
+  stage_type?: StageType;
+  files?: File[];
+  tasks?: Task[];
+  created_by?: User;
   assigned_to?: User;
 }

@@ -7,4 +7,3 @@ export interface PaginatedStage {
   limit: number;
   items: Stage[];
 }
-
