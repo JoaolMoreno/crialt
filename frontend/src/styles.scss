@@ -294,7 +294,6 @@ button.cta {
 .mb-2 { margin-bottom: calc(var(--spacing-base) * 2); }
 .mb-3 { margin-bottom: calc(var(--spacing-base) * 3); }
 
-// UTILITÁRIOS PADRÃO
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -318,6 +317,7 @@ button.cta {
   &.green   { background: #43a047; }
   &.red     { background: #e53935; }
 }
+
 .badge-draft    { background: #e0e0e0; color: #757575; }
 .badge-active   { background: #e3f2fd; color: #1976d2; }
 .badge-paused   { background: #fff3e0; color: #f57c00; }
@@ -352,7 +352,6 @@ button.cta {
   color: var(--color-dark);
 }
 
-// PADRÃO GLOBAL PARA CAMPOS DE FILTRO (input, select, etc.)
 .input-filtro, .select-filtro, input[type="number"].input-filtro, input[type="date"].input-filtro, input[type="month"].input-filtro {
   font-family: 'Montserrat', Arial, sans-serif;
   font-size: 16px;
@@ -384,7 +383,6 @@ button.cta {
   font-weight: 500;
 }
 
-/* --- LIST SECTION SHARED --- */
 .list-section {
   font-family: 'Montserrat', Arial, sans-serif;
   background: var(--color-bg);
@@ -505,7 +503,6 @@ button.cta {
   tr:last-child td {
     border-bottom: none;
   }
-  // Checkbox customizado
   input[type="checkbox"] {
     appearance: none;
     width: 22px;
@@ -535,6 +532,73 @@ button.cta {
     border: solid #fff;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
+  }
+
+  @media (max-width: 900px) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    th, td {
+      padding: 8px 6px;
+      font-size: 15px;
+      min-width: 120px;
+    }
+  }
+  @media (max-width: 600px) {
+    thead {
+      display: none;
+    }
+    tbody {
+      display: block;
+    }
+    tr {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(53,39,28,0.04);
+      padding: 8px;
+    }
+    td {
+      border-bottom: none;
+      text-align: left;
+      position: relative;
+      padding-left: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      width: 100%;
+    }
+    td[data-label="Ações"] {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-bottom: 8px;
+      width: auto;
+      &:before {
+        min-width: 48px;
+        width: auto;
+      }
+      .action-btn {
+        margin-right: 0;
+        margin-bottom: 8px;
+      }
+      .action-btn:last-child {
+        margin-right: 0;
+      }
+    }
+    td:before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: var(--color-accent);
+      font-size: 13px;
+      text-transform: uppercase;
+      min-width: 110px;
+      margin-right: 8px;
+      position: static;
+    }
   }
 }
 
@@ -662,12 +726,10 @@ button.cta {
   }
   .pagination-controls {
     flex-direction: column;
-    align-items: stretch;
     gap: 8px;
     button {
-      width: 100%;
       min-width: unset;
-      padding: 8px 0;
+      padding: 8px;
     }
     span {
       margin: 0;

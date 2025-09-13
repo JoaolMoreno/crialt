@@ -29,16 +29,16 @@
     </thead>
     <tbody>
       <tr *ngFor="let client of clients">
-        <td>{{ client.name }}</td>
-        <td>{{ client.document }}</td>
-        <td>{{ client.email }}</td>
-        <td>
+        <td data-label="Nome">{{ client.name }}</td>
+        <td data-label="CPF/CNPJ">{{ client.document }}</td>
+        <td data-label="Email">{{ client.email }}</td>
+        <td data-label="Status">
           <span [class.active]="client.is_active" [class.inactive]="!client.is_active">
             {{ client.is_active ? 'Ativo' : 'Inativo' }}
           </span>
         </td>
-        <td>{{ client.created_at | date:'shortDate' }}</td>
-        <td>
+        <td data-label="Data de Cadastro">{{ client.created_at | date:'shortDate' }}</td>
+        <td data-label="Ações">
           <button class="action-btn" (click)="onEditClient(client)" title="Editar cliente"><span class="material-icons">edit</span></button>
           <button class="action-btn" (click)="onViewClient(client)" title="Visualizar cliente"><span class="material-icons">visibility</span></button>
           <button class="action-btn" (click)="onNewProject(client)" title="Novo projeto"><span class="material-icons">add_circle</span></button>

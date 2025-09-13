@@ -70,18 +70,18 @@
     </thead>
     <tbody>
       <tr *ngFor="let project of projects">
-        <td><input type="checkbox" [checked]="selectedProjects.includes(project.id)" (change)="toggleProjectSelection(project.id)" /></td>
-        <td>{{ project.name }}</td>
-        <td>{{ project.clients[0]?.name }}</td>
-        <td>
+        <td data-label="Selecionar"><input type="checkbox" [checked]="selectedProjects.includes(project.id)" (change)="toggleProjectSelection(project.id)" /></td>
+        <td data-label="Projeto">{{ project.name }}</td>
+        <td data-label="Cliente">{{ project.clients[0]?.name }}</td>
+        <td data-label="Status">
           <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">
             {{ statusLabel(project.status) }}
           </span>
         </td>
-        <td>{{ getCurrentStage(project)?.name || '-' }}</td>
-        <td>{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
-        <td>{{ project.created_at | date:'shortDate' }}</td>
-        <td>
+        <td data-label="Etapa Atual">{{ getCurrentStage(project)?.name || '-' }}</td>
+        <td data-label="Valor">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
+        <td data-label="Data de Criação">{{ project.created_at | date:'shortDate' }}</td>
+        <td data-label="Ações">
           <button class="action-btn" (click)="onEditProject(project)"><span class="material-icons">edit</span></button>
           <button class="action-btn" (click)="onViewProject(project)"><span class="material-icons">visibility</span></button>
         </td>
