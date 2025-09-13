@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
 import logging
 
-from ..api.dependencies import get_db, get_current_user
-from ..core.security import create_access_token
+from ..api.dependencies import get_db, get_current_user, get_token
+from ..core.security import create_access_token, decode_jwt_token
 from ..models import User
 from ..schemas.client import ClientRead
 from ..schemas.user import UserRead
@@ -49,7 +49,10 @@ def login(
     if not user and email:
         user = auth.authenticate_user_by_email(email, password)
     if user:
-        token = create_access_token(subject=str(user.id))
+        token = create_access_token(
+            subject=str(user.id),
+            additional_claims={"role": user.role, "name": user.name}
+        )
         logger.info(f"Login bem-sucedido para usuário {user.id}. Token gerado: {token}")
         if response:
             response.set_cookie(
@@ -96,3 +99,7 @@ def change_password(password_data: ChangePasswordRequest, db: Session = Depends(
     if not auth.change_password(user, password_data.current_password, password_data.new_password):
         raise HTTPException(status_code=400, detail="Senha atual incorreta")
     return {"msg": "Senha alterada com sucesso"}
+
+@router.get("/check-token")
+def check_token(token: str = Depends(get_token)):
+    return decode_jwt_token(token)
