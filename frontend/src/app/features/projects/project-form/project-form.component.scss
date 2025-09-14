@@ -322,3 +322,26 @@ input[type="text"] {
     padding: 18px 8px 12px 8px;
   }
 }
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #B95830;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 8px;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  outline: none;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-btn:hover, .close-btn:focus {
+  background: #B95830;
+  color: #fff;
+  transform: scale(1.15);
+}

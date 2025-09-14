@@ -61,7 +61,7 @@
             <h2>Selecionar Cliente(s)</h2>
             <button type="button" class="close-btn" (click)="closeClientModal()">&times;</button>
           </div>
-          <input type="text" placeholder="Buscar por nome ou documento" [(ngModel)]="clientSearch" [ngModelOptions]="{standalone: true}" />
+          <input type="text" placeholder="Buscar por nome ou documento" [(ngModel)]="clientSearch" (input)="onClientSearchChange()" [ngModelOptions]="{standalone: true}" />
           <div class="client-list">
             <div *ngIf="loadingClients">Carregando...</div>
             <div *ngFor="let client of filteredClients" class="client-item">

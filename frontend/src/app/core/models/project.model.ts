@@ -36,4 +36,5 @@ export interface Project {
   stages: Stage[];
   files: File[];
   created_by: User;
+  current_stage_id?: string;
 }

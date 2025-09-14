@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ProjectService } from '../../../core/services/project.service';
-import { StageService } from '../../../core/services/stage.service';
+import { StageTypeService, StageType } from '../../../core/services/stage-type.service';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';
@@ -8,7 +8,6 @@ import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
 import { PaginatedProject } from '../../../core/models/paginated-project.model';
-import { PaginatedStage } from '../../../core/models/paginated-stage.model';
 
 @Component({
   selector: 'app-project-list',
@@ -19,11 +18,11 @@ import { PaginatedStage } from '../../../core/models/paginated-stage.model';
 })
 export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
-  private readonly stageService = inject(StageService);
+  private readonly stageTypeService = inject(StageTypeService);
   private readonly router = inject(Router);
 
   projects: Project[] = [];
-  stages: Stage[] = [];
+  stages: StageType[] = [];
   total = 0;
   pageSize = 10;
   currentPage = 1;
@@ -54,7 +53,7 @@ export class ProjectListComponent implements OnInit {
       order_by: this.sortColumn || 'created_at',
       order_dir: this.sortDirection,
       status: this.selectedStatus || undefined,
-      stage: this.selectedStage || undefined,
+      stage_type: this.selectedStage || undefined,
       value: this.selectedValue || undefined,
       search: this.searchQuery || undefined,
       period: this.selectedPeriod || undefined
@@ -73,8 +72,8 @@ export class ProjectListComponent implements OnInit {
   }
 
   loadStages(): void {
-    this.stageService.getStages().subscribe({
-      next: (res: PaginatedStage) => { this.stages = res.items; },
+    this.stageTypeService.getStageTypes({ is_active: true }).subscribe({
+      next: (res) => { this.stages = res.items; },
       error: () => { this.stages = []; }
     });
   }
@@ -104,7 +103,8 @@ export class ProjectListComponent implements OnInit {
   }
 
   getCurrentStage(project: Project): Stage | undefined {
-    return project.stages.find(s => s.status === 'in_progress');
+    if (!project.current_stage_id || !project.stages) return undefined;
+    return project.stages.find(s => s.id === project.current_stage_id);
   }
 
   getProjectProgress(project: Project): number {

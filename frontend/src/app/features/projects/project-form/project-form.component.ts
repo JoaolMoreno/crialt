@@ -4,10 +4,12 @@ import { ProjectService } from '../../../core/services/project.service';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ClientService } from '../../../core/services/client.service';
 import { Client } from '../../../core/models/client.model';
-import { StageService } from '../../../core/services/stage.service';
-import { Stage } from '../../../core/models/stage.model';
+import { StageTypeService, StageType } from '../../../core/services/stage-type.service';
 import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from "../../../shared/shared.module";
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import {Stage} from "../../../core/models/stage.model";
 
 @Component({
     selector: 'app-project-form',
@@ -34,20 +36,24 @@ export class ProjectFormComponent {
   clientSearch = '';
   loadingClients = false;
 
-  etapasDisponiveis: Stage[] = [];
+  etapasDisponiveis: StageType[] = [];
   etapasProjeto: Stage[] = [];
   showEtapaModal = false;
   etapaSearch = '';
   etapasSelecionadas: Stage[] = [];
 
   private readonly clientService = inject(ClientService);
-  private readonly stageService = inject(StageService);
+  private readonly stageTypeService = inject(StageTypeService);
 
   etapasVisuais: { id: string; active: boolean; expanded: boolean }[] = [];
 
   editProjectStatus = false;
   projectStatus: string = 'draft';
   editStageStatus: { [id: string]: boolean } = {};
+
+  private clientSearchSubject = new Subject<string>();
+  private clientSearchRequestId = 0;
+  private lastClientSearchRequestId = 0;
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -72,21 +78,18 @@ export class ProjectFormComponent {
     if (this.isEdit && id) {
       this.loadProject(id);
     }
-    this.loadClients();
     this.loadStages();
-  }
 
-  ngOnInit(): void {
-    // Se o status estiver no form, inicializa
-    if (this.form.get('status')) {
-      this.projectStatus = this.form.get('status')?.value || 'draft';
-    }
+    this.clientSearchSubject.pipe(debounceTime(3000)).subscribe(search => {
+      this.lastClientSearchRequestId++;
+      this.buscarClientes(search, this.lastClientSearchRequestId);
+    });
   }
 
   toggleEditProjectStatus(): void {
     this.editProjectStatus = !this.editProjectStatus;
     if (!this.editProjectStatus) {
-      // Cancela edição, restaura valor do form
+
       this.form.get('status')?.setValue(this.projectStatus);
     }
   }
@@ -109,22 +112,34 @@ export class ProjectFormComponent {
     // O status já está alterado no objeto stage
   }
 
-  loadClients(): void {
+  openClientModal(): void {
+    this.showClientModal = true;
+    this.clientSearch = '';
+    this.lastClientSearchRequestId++;
+    this.buscarClientes('', this.lastClientSearchRequestId);
+  }
+
+  buscarClientes(search: string, requestId?: number): void {
     this.loadingClients = true;
-    this.clientService.getClients().subscribe({
-      next: (clients) => {
-        this.clients = clients.items;
+    const currentRequestId = requestId ?? ++this.clientSearchRequestId;
+    this.clientService.getClients({ search }).subscribe({
+      next: (result) => {
+        if (currentRequestId === this.lastClientSearchRequestId) {
+          this.clients = result.items;
+        }
         this.loadingClients = false;
       },
       error: () => {
+        if (currentRequestId === this.lastClientSearchRequestId) {
+          this.clients = [];
+        }
         this.loadingClients = false;
       }
     });
   }
 
-  openClientModal(): void {
-    this.showClientModal = true;
-    this.clientSearch = '';
+  onClientSearchChange(): void {
+    this.clientSearchSubject.next(this.clientSearch);
   }
 
   closeClientModal(): void {
@@ -132,12 +147,7 @@ export class ProjectFormComponent {
   }
 
   get filteredClients(): Client[] {
-    if (!this.clientSearch) return this.clients;
-    const search = this.clientSearch.toLowerCase();
-    return this.clients.filter(c =>
-      c.name.toLowerCase().includes(search) ||
-      c.document.toLowerCase().includes(search)
-    );
+    return this.clients;
   }
 
   toggleClientSelection(client: Client): void {
@@ -158,9 +168,9 @@ export class ProjectFormComponent {
   loadingStages = false;
   loadStages(): void {
     this.loadingStages = true;
-    this.stageService.getStages().subscribe({
-      next: (stages) => {
-        this.etapasDisponiveis = stages.items;
+    this.stageTypeService.getStageTypes({ is_active: true }).subscribe({
+      next: (result) => {
+        this.etapasDisponiveis = result.items;
         this.loadingStages = false;
       },
       error: () => {

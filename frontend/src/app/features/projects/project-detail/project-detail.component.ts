@@ -57,7 +57,8 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   getCurrentStage(project: Project): Stage | null {
-    return project.stages.find(s => s.status === 'in_progress') || null;
+    if (!project.current_stage_id || !project.stages) return null;
+    return project.stages.find(s => s.id === project.current_stage_id) || null;
   }
 
   setTab(tab: 'overview' | 'timeline' | 'files' | 'finance' | 'history') {
