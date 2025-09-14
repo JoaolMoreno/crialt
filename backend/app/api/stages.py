@@ -60,12 +60,14 @@ def get_stages(
         query = query.order_by(order_col)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
+
+    read_items = [StageRead.model_validate(item) for item in items]
     result = PaginatedStages(
         total=total,
-        count=len(items),
+        count=len(read_items),
         offset=offset,
         limit=limit,
-        items=items
+        items=read_items
     )
     cache.set("stages", cache_params, result)
     return result
@@ -78,8 +80,7 @@ def get_stages_by_project(project_id: str, db: Session = Depends(get_db), actor 
     client_ids = [str(client.id) for client in project.clients]
     client_resource_permission(client_ids, actor)
     stages = db.query(Stage).filter(Stage.project_id == project_id).all()
-    return stages
-
+    return [StageRead.model_validate(stage) for stage in stages]
 @router.get("/{stage_id}", response_model=StageRead)
 def get_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     stage = db.get(Stage, stage_id)
@@ -90,7 +91,7 @@ def get_stage(stage_id: str, db: Session = Depends(get_db), actor = Depends(get_
         raise HTTPException(status_code=404, detail="Projeto não encontrado para a etapa")
     client_ids = [str(client.id) for client in project.clients]
     client_resource_permission(client_ids, actor)
-    return stage
+    return StageRead.model_validate(stage)
 
 @router.post("", response_model=StageRead)
 def create_stage(stage_data: StageCreate, db: Session = Depends(get_db), admin_user = Depends(get_current_actor_factory(["admin"]))):

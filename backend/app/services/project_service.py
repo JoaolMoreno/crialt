@@ -44,6 +44,7 @@ class ProjectService:
         # Criação automática de etapas padrão baseadas nos tipos cadastrados
         stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.name).all()
 
+        created_stages = []
         for idx, stage_type in enumerate(stage_types, start=1):
             etapa = Stage(
                 name=stage_type.name,
@@ -61,6 +62,14 @@ class ProjectService:
                 updated_at=datetime.now(UTC)
             )
             self.db.add(etapa)
+            self.db.flush()
+            created_stages.append(etapa)
+
+        etapa_ativa = next((e for e in created_stages if e.status in [StageStatus.in_progress, StageStatus.pending]), None)
+        if not etapa_ativa and created_stages:
+            etapa_ativa = created_stages[0]
+        if etapa_ativa:
+            project.current_stage_id = etapa_ativa.id
         self.db.commit()
         return project
 
@@ -85,22 +94,39 @@ class ProjectService:
     def update_project(self, project_id: str, project_data) -> Project:
         project = self.db.get(Project, project_id)
         if not project:
-            raise ValueError("Projeto não encontrado")
-        update_data = project_data.model_dump(exclude_unset=True)
+            return None
 
-        for field, value in update_data.items():
-            if field not in ["clients", "stages"]:
+        for field, value in project_data.model_dump(exclude_unset=True).items():
+            if field != "stages":
                 setattr(project, field, value)
+        project.updated_at = datetime.now()
 
-        if "clients" in update_data and update_data["clients"] is not None:
-            project.clients.clear()
-            for client_id in update_data["clients"]:
-                client = self.db.get(Client, client_id)
-                if client:
-                    project.clients.append(client)
+        if hasattr(project_data, "stages") and project_data.stages is not None:
+            stage_ids = []
+            for stage_data in project_data.stages:
+                stage_id = getattr(stage_data, "id", None)
+                if stage_id:
+                    stage = self.db.get(Stage, stage_id)
+                    if stage and stage.project_id == project.id:
+                        for field, value in stage_data.model_dump(exclude_unset=True).items():
+                            setattr(stage, field, value)
+                        stage.updated_at = datetime.now()
+                        stage_ids.append(stage.id)
+                else:
 
-        project.updated_at = datetime.now(UTC)
+                    new_stage = Stage(
+                        project_id=project.id,
+                        **stage_data.model_dump(exclude_unset=True)
+                    )
+                    self.db.add(new_stage)
+                    self.db.flush()
+                    stage_ids.append(new_stage.id)
+
+            for stage in list(project.stages):
+                if stage.id not in stage_ids:
+                    self.db.delete(stage)
         self.db.commit()
+        self.db.refresh(project)
         return project
 
     def delete_project(self, project_id: str) -> bool:

@@ -7,9 +7,10 @@ from alembic import op
 from sqlalchemy import text
 from faker import Faker
 import json
+import re
 
 revision = 'add_fake_clients_and_projects'
-down_revision = 'de8db172030b'
+down_revision = 'add_admin_user'
 branch_labels = None
 depends_on = None
 
@@ -35,7 +36,8 @@ def upgrade():
     fake_clients = []
     for i in range(50):
         email = fake.unique.email()
-        document = fake.unique.cpf()
+        document_raw = fake.unique.cpf()
+        document = re.sub(r'\D', '', document_raw)
         address = {
             "street": fake.street_name(),
             "number": fake.building_number(),
@@ -135,6 +137,7 @@ def upgrade():
 
         # Criar etapas para o projeto baseadas nos tipos de etapa disponíveis
         total_project_value = project["total_value"]
+        stage_ids = []
         for idx, stage_type in enumerate(stage_types, start=1):
             # Distribuir o valor do projeto entre as etapas
             stage_value = round(total_project_value / len(stage_types), 2)
@@ -212,9 +215,9 @@ def upgrade():
             conn.execute(
                 text("""
                 INSERT INTO stages (
-                    id, name, description, "order", status, planned_start_date, actual_start_date, 
-                    planned_end_date, actual_end_date, value, payment_status, specific_data, 
-                    progress_percentage, notes, created_at, updated_at, project_id, stage_type_id, 
+                    id, name, description, "order", status, planned_start_date, actual_start_date,
+                    planned_end_date, actual_end_date, value, payment_status, specific_data,
+                    progress_percentage, notes, created_at, updated_at, project_id, stage_type_id,
                     created_by_id, assigned_to_id
                 ) VALUES (
                     :id, :name, :description, :order, :status, :planned_start_date, :actual_start_date,
@@ -223,6 +226,14 @@ def upgrade():
                     :created_by_id, :assigned_to_id
                 )
                 """), stage
+            )
+            stage_ids.append(stage["id"])
+
+        if stage_ids:
+            conn.execute(
+                text("""
+                UPDATE projects SET current_stage_id = :stage_id WHERE id = :project_id
+                """), {"stage_id": stage_ids[0], "project_id": project["id"]}
             )
 
 def downgrade():

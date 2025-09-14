@@ -11,7 +11,7 @@ class StageType(Base):
     __tablename__ = "stage_types"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(100), nullable=False, unique=True)
+    name = Column(String(100), nullable=False, unique=True, index=True)
     description = Column(Text)
     scope = Column(JSON)
     default_duration_days = Column(Integer)

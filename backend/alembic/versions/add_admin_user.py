@@ -10,7 +10,7 @@ from sqlalchemy import text
 
 # Revisão e dependências
 revision = 'add_admin_user'
-down_revision = '92b25a1995e4'
+down_revision = '2c600628c868'
 branch_labels = None
 depends_on = None
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))

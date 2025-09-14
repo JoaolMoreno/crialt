@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .client import ClientBasicRead
+from .stage import StageUpdate  # Import antecipado
 
 
 class ProjectStatus(str, enum.Enum):
@@ -14,6 +15,7 @@ class ProjectStatus(str, enum.Enum):
     paused = "paused"
     completed = "completed"
     cancelled = "cancelled"
+
 
 class ProjectBase(BaseModel):
     name: str
@@ -28,8 +30,10 @@ class ProjectBase(BaseModel):
     scope: Optional[dict] = None
     notes: Optional[str] = None
 
+
 class ProjectCreate(ProjectBase):
     clients: List[UUID]
+
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
@@ -44,13 +48,15 @@ class ProjectUpdate(BaseModel):
     scope: Optional[dict] = None
     notes: Optional[str] = None
     clients: Optional[List[UUID]] = None
-    stages: Optional[List[UUID]] = None
+    stages: Optional[List[StageUpdate]] = None
+
 
 class ProjectRead(ProjectBase):
     id: UUID
     created_at: datetime
     updated_at: datetime
     created_by_id: UUID
+    current_stage_id: Optional[UUID] = None
     clients: List[ClientBasicRead]
     stages: Optional[List["StageRead"]] = None
     files: Optional[List["FileRead"]] = None
@@ -63,6 +69,7 @@ from .file import FileRead
 from .client import ClientRead
 
 ClientRead.model_rebuild()
+
 
 class PaginatedProjects(BaseModel):
     total: int

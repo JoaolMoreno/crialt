@@ -29,9 +29,7 @@ def get_clients(
     offset: int = Query(0, ge=0),
     order_by: str = Query("created_at"),
     order_dir: str = Query("desc", pattern="^(asc|desc)$"),
-    name: str = Query(None),
-    document: str = Query(None),
-    email: str = Query(None),
+    search: str = Query(None),
     is_active: bool = Query(None),
 ):
     cache_params = {
@@ -39,21 +37,20 @@ def get_clients(
         "offset": offset,
         "order_by": order_by,
         "order_dir": order_dir,
-        "name": name,
-        "document": document,
-        "email": email,
+        "search": search,
         "is_active": is_active
     }
     cached = cache.get("clients", cache_params)
     if cached:
         return cached
     query = db.query(Client)
-    if name:
-        query = query.filter(Client.name.ilike(f"%{name}%"))
-    if document:
-        query = query.filter(Client.document == document)
-    if email:
-        query = query.filter(Client.email == email)
+    if search:
+        like_pattern = f"%{search}%"
+        query = query.filter(
+            (Client.name.ilike(like_pattern)) |
+            (Client.document.ilike(like_pattern)) |
+            (Client.email.ilike(like_pattern))
+        )
     if is_active is not None:
         query = query.filter(Client.is_active == is_active)
     # Ordenação

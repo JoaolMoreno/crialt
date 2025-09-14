@@ -31,6 +31,7 @@ def serialize_project(project):
         "created_at": project.created_at,
         "updated_at": project.updated_at,
         "created_by_id": project.created_by_id,
+        "current_stage_id": project.current_stage_id,
         "clients": [ClientBasicRead.model_validate(c) for c in getattr(project, "clients", [])],
         "stages": [serialize_stage(s) for s in getattr(project, "stages", [])],
         "files": [FileRead.model_validate(f) for f in getattr(project, "files", [])] if hasattr(project, "files") else [],
@@ -78,7 +79,7 @@ def serialize_stage(stage):
 
     return StageRead.model_validate(stage_dict)
 
-def list_projects_query(query, limit, offset, order_by, order_dir, name=None, status=None, start_date=None, client_id=None):
+def list_projects_query(query, limit, offset, order_by, order_dir, name=None, status=None, start_date=None, client_id=None, stage_name=None, stage_type=None, stage=None):
     if name:
         query = query.filter(Project.name.ilike(f"%{name}%"))
     if status:
@@ -87,8 +88,39 @@ def list_projects_query(query, limit, offset, order_by, order_dir, name=None, st
         query = query.filter(Project.start_date == start_date)
     if client_id:
         query = query.join(Project.clients).filter(Client.id == client_id)
-    # Ordenação
-    if hasattr(Project, order_by):
+    if stage:
+        query = query.filter(Project.current_stage_id == stage)
+    if stage_name or stage_type or order_by in ["stage_type"]:
+        query = query.join(Stage, Project.current_stage_id == Stage.id)
+    if stage_name:
+        query = query.filter(Stage.name.ilike(f"%{stage_name}%"))
+    if stage_type:
+        query = query.filter(Stage.stage_type_id == stage_type)
+    if order_by == "client":
+        query = query.join(Project.clients)
+        order_col = Client.name
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    elif order_by == "stage":
+        order_col = Stage.name
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    elif order_by == "stage_type":
+        from ..models.stage_type import StageType
+        query = query.join(StageType, Stage.stage_type_id == StageType.id)
+        order_col = StageType.name
+        if order_dir == "desc":
+            order_col = order_col.desc()
+        else:
+            order_col = order_col.asc()
+        query = query.order_by(order_col)
+    elif hasattr(Project, order_by):
         order_col = getattr(Project, order_by)
         if order_dir == "desc":
             order_col = order_col.desc()
@@ -109,6 +141,9 @@ def get_projects(
     status: str = Query(None),
     start_date: str = Query(None),
     client_id: str = Query(None),
+    stage_name: str = Query(None),
+    stage_type: str = Query(None),
+    stage: str = Query(None),
 ):
     cache_params = {
         "limit": limit,
@@ -118,12 +153,15 @@ def get_projects(
         "name": name,
         "status": status,
         "start_date": start_date,
-        "client_id": client_id
+        "client_id": client_id,
+        "stage_name": stage_name,
+        "stage_type": stage_type,
+        "stage": stage
     }
     cached = cache.get("projects", cache_params)
     if cached:
         return cached
-    query = list_projects_query(db.query(Project), limit, offset, order_by, order_dir, name, status, start_date, client_id)
+    query = list_projects_query(db.query(Project), limit, offset, order_by, order_dir, name, status, start_date, client_id, stage_name, stage_type, stage)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
     result = [ProjectRead.model_validate(serialize_project(p)) for p in items]

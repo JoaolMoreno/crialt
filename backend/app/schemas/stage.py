@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime, date
 from pydantic import BaseModel
 import enum
+from .stage_type import StageTypeRead
 
 class StageStatus(str, enum.Enum):
     pending = 'pending'
@@ -65,7 +66,7 @@ class StageRead(StageBase):
     files: Optional[List[UUID]] = None
     tasks: Optional[List[UUID]] = None
 
-    stage_type: Optional[dict] = None
+    stage_type: Optional[StageTypeRead] = None
 
     class Config:
         from_attributes = True
