@@ -70,14 +70,14 @@ export const appRoutes: Routes = [
                 data: { allowedRoles: ['admin'] }
             },
             {
-                path: 'stages',
-                loadComponent: () => import('./features/stages/stage-form/stage-form.component').then(m => m.StageFormComponent),
+                path: 'files',
+                loadComponent: () => import('./features/files/file-list/file-list.component').then(m => m.FileListComponent),
                 canActivate: [RoleGuard],
                 data: { allowedRoles: ['admin'] }
             },
             {
-                path: 'files',
-                loadComponent: () => import('./features/files/file-list/file-list.component').then(m => m.FileListComponent),
+                path: 'stages',
+                loadChildren: () => import('./features/stage-types/stage-types.routes').then(m => m.stageTypesRoutes),
                 canActivate: [RoleGuard],
                 data: { allowedRoles: ['admin'] }
             },

@@ -1,0 +1,50 @@
+<section class="form-section">
+  <div class="detail-header">
+    <button type="button" class="action-btn" (click)="navigateToList()">
+      <span class="material-icons">arrow_back</span> Voltar
+    </button>
+    <h1>Detalhes da Etapa</h1>
+  </div>
+  <div *ngIf="loading" class="loading-container">
+    <span>Carregando detalhes da etapa...</span>
+  </div>
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+  <div *ngIf="!loading && !error && stageType">
+    <div class="stage-type-info-card">
+      <div class="info-row">
+        <span class="info-label">Nome:</span>
+        <span class="info-value">{{ stageType.name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Descrição:</span>
+        <span class="info-value">{{ stageType.description || '-' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status:</span>
+        <span class="info-value">
+          <span class="status-badge" [class.active]="stageType.is_active" [class.inactive]="!stageType.is_active">
+            {{ stageType.is_active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Data de Criação:</span>
+        <span class="info-value">{{ stageType.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Última Atualização:</span>
+        <span class="info-value">{{ stageType.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="info-actions">
+        <button class="action-btn" (click)="navigateToEdit()">
+          <span class="material-icons">edit</span> Editar
+        </button>
+        <button class="action-btn btn-danger" (click)="onDelete()">
+          <span class="material-icons">delete</span> Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

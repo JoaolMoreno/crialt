@@ -1,0 +1,57 @@
+@media (max-width: 768px) {
+  .list-table {
+    display: none;
+  }
+
+  .stage-type-cards {
+    display: block;
+  }
+}
+
+.stage-type-cards {
+  display: none;
+
+  .stage-type-card {
+    background: #FFFFFF;
+    border: 1px solid #CDC0A6;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+
+      h3 {
+        font-family: 'DIORE', serif;
+        font-size: 18px;
+        color: #35271C;
+        margin: 0;
+      }
+    }
+
+    .card-content {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      color: #35271C;
+      margin-bottom: 12px;
+
+      .field {
+        margin-bottom: 8px;
+
+        .label {
+          font-weight: 600;
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  }
+}

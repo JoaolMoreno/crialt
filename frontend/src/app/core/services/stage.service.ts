@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Stage } from '../models/stage.model';
 import { PaginatedStage } from '../models/paginated-stage.model';
 import { environment } from '../../environments/environment';
+import {Stage} from "../models/stage.model";
 
 @Injectable({ providedIn: 'root' })
 export class StageService {

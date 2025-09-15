@@ -3,19 +3,9 @@ import { File } from './file.model';
 import { Task } from './task.model';
 import { User } from './user.model';
 import { StageStatus } from './status.model';
+import {StageType} from "./stage-type.model";
 
 export type PaymentStatus = 'pending' | 'partial' | 'paid';
-
-export interface StageType {
-  id: string;
-  name: string;
-  description?: string;
-  scope?: any;
-  default_duration_days?: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface StageSpecificData {
   // Tipos específicos podem ser detalhados depois

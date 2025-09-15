@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ProjectService } from '../../../core/services/project.service';
-import { StageTypeService, StageType } from '../../../core/services/stage-type.service';
+import { StageTypeService } from '../../../core/services/stage-type.service';
+import { StageType } from '../../../core/models/stage-type.model';
 import { Project } from '../../../core/models/project.model';
 import { Stage } from '../../../core/models/stage.model';
 import { Router } from '@angular/router';

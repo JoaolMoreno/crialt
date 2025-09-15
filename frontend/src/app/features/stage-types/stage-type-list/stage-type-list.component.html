@@ -1,0 +1,111 @@
+<section class="list-section">
+  <h1>Etapas</h1>
+
+  <div class="list-actions">
+    <button class="list-btn" (click)="navigateToNew()">
+      <span class="material-icons">add_circle</span> Nova Etapa
+    </button>
+    <input
+      type="text"
+      placeholder="Buscar por nome..."
+      [(ngModel)]="searchQuery"
+      class="search-input"
+      (input)="onSearch()"
+    />
+    <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilter()">
+      <option value="">Todos os status</option>
+      <option value="active">Ativo</option>
+      <option value="inactive">Inativo</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <span>Carregando etapas...</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Table -->
+  <table class="list-table" *ngIf="!loading && !error && stageTypes.length">
+    <thead>
+      <tr>
+        <th (click)="onSort('name')" class="sortable">
+          Nome
+          <span *ngIf="sortColumn === 'name'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
+        <th>Descrição</th>
+        <th (click)="onSort('is_active')" class="sortable">
+          Status
+          <span *ngIf="sortColumn === 'is_active'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
+        <th (click)="onSort('created_at')" class="sortable">
+          Data de Criação
+          <span *ngIf="sortColumn === 'created_at'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stageType of stageTypes">
+        <td>{{ stageType.name }}</td>
+        <td>{{ stageType.description || '-' }}</td>
+        <td>
+          <span [class]="stageType.is_active ? 'status-active' : 'status-inactive'">
+            {{ stageType.is_active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+        <td>{{ stageType.created_at | date:'dd/MM/yyyy' }}</td>
+        <td class="actions">
+          <button (click)="navigateToDetail(stageType.id)" class="action-btn" title="Ver detalhes">
+            <span class="material-icons">visibility</span>
+          </button>
+          <button (click)="navigateToEdit(stageType.id)" class="action-btn" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button (click)="onDelete(stageType)" class="action-btn btn-danger" title="Excluir">
+            <span class="material-icons">delete</span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && !stageTypes.length" class="empty-state">
+    <h3>Nenhuma etapa encontrada</h3>
+    <p>Clique em "Nova Etapa" para criar sua primeira etapa.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="getTotalPages() > 1" class="pagination">
+    <button
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage <= 1"
+      class="pagination-btn"
+    >
+      Anterior
+    </button>
+
+    <span class="pagination-info">
+      Página {{ currentPage }} de {{ getTotalPages() }}
+    </span>
+
+    <button
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="currentPage >= getTotalPages()"
+      class="pagination-btn"
+    >
+      Próxima
+    </button>
+  </div>
+</section>

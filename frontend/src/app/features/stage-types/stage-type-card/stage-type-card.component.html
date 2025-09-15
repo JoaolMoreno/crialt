@@ -1,0 +1,35 @@
+<div class="stage-type-card">
+  <div class="card-header">
+    <h3>{{ stageType.name }}</h3>
+    <div class="status-badge" [class.active]="stageType.is_active" [class.inactive]="!stageType.is_active">
+      {{ stageType.is_active ? 'Ativo' : 'Inativo' }}
+    </div>
+  </div>
+
+  <div class="card-content">
+    <div class="field" *ngIf="stageType.description">
+      <span class="label">Descrição:</span>
+      <span>{{ stageType.description }}</span>
+    </div>
+    <div class="field" *ngIf="!stageType.description">
+      <span class="empty-description">Nenhuma descrição fornecida</span>
+    </div>
+    <div class="field">
+      <span class="label">Criado em:</span>
+      <span>{{ stageType.created_at | date:'dd/MM/yyyy' }}</span>
+    </div>
+  </div>
+
+  <div class="card-actions">
+    <button class="action-btn" (click)="onView()" title="Visualizar detalhes">
+      <span class="material-icons">visibility</span>
+    </button>
+    <button class="action-btn" (click)="onEdit()" title="Editar tipo de etapa">
+      <span class="material-icons">edit</span>
+    </button>
+    <button class="action-btn delete-btn" (click)="onDelete()" title="Excluir tipo de etapa">
+      <span class="material-icons">delete</span>
+    </button>
+  </div>
+</div>
+

@@ -1,0 +1,91 @@
+<section class="form-section">
+  <div class="form-header">
+    <h1>{{ isEdit ? 'Editar Etapa' : 'Nova Etapa' }}</h1>
+    <button class="action-btn" (click)="onCancel()">
+      <span class="material-icons">arrow_back</span>
+      Voltar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <span>Carregando dados da etapa...</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-grid">
+      <!-- Nome -->
+      <div class="form-group">
+        <label for="name" class="form-label required">Nome da Etapa</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="form-input"
+          [class.invalid]="isFieldInvalid('name')"
+          placeholder="Ex: Levantamento, Briefing, Estudo Preliminar..."
+        />
+        <div *ngIf="getFieldError('name')" class="field-error">
+          {{ getFieldError('name') }}
+        </div>
+      </div>
+
+      <!-- Descrição -->
+      <div class="form-group full-width">
+        <label for="description" class="form-label">Descrição</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-textarea"
+          [class.invalid]="isFieldInvalid('description')"
+          placeholder="Descreva brevemente esta etapa..."
+          rows="4"
+        ></textarea>
+        <div *ngIf="getFieldError('description')" class="field-error">
+          {{ getFieldError('description') }}
+        </div>
+      </div>
+
+      <!-- Status Ativo -->
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              formControlName="is_active"
+              class="form-checkbox"
+            />
+            <span class="checkmark"></span>
+            Etapa ativa
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="action-btn"
+        (click)="onCancel()"
+        [disabled]="saving"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="action-btn"
+        [disabled]="form.invalid || saving"
+      >
+        <span *ngIf="saving" class="material-icons spinning">refresh</span>
+        {{ isEdit ? 'Atualizar' : 'Criar' }} Etapa
+      </button>
+    </div>
+  </form>
+</section>
