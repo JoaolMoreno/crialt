@@ -2,9 +2,9 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #CDC0A6;
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -148,9 +148,7 @@
   box-shadow: 0 2px 4px rgba(53, 39, 28, 0.1);
   padding: 24px;
   max-width: 800px;
-  margin: 0 auto;
-  margin-top: 24px;
-
+  margin: 24px auto 0;
   @media (max-width: 900px) {
     padding: 16px;
     max-width: 100%;

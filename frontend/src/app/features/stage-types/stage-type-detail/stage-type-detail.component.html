@@ -1,10 +1,4 @@
 <section class="form-section">
-  <div class="detail-header">
-    <button type="button" class="action-btn" (click)="navigateToList()">
-      <span class="material-icons">arrow_back</span> Voltar
-    </button>
-    <h1>Detalhes da Etapa</h1>
-  </div>
   <div *ngIf="loading" class="loading-container">
     <span>Carregando detalhes da etapa...</span>
   </div>
@@ -13,6 +7,12 @@
   </div>
   <div *ngIf="!loading && !error && stageType">
     <div class="stage-type-info-card">
+      <div class="detail-header">
+        <button type="button" class="action-btn" (click)="navigateToList()">
+          <span class="material-icons">arrow_back</span> Voltar
+        </button>
+        <h1>Detalhes da Etapa</h1>
+      </div>
       <div class="info-row">
         <span class="info-label">Nome:</span>
         <span class="info-value">{{ stageType.name }}</span>
