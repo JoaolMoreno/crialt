@@ -38,7 +38,9 @@ def get_stage_types(
         skip=offset,
         limit=limit,
         name=name,
-        is_active=is_active
+        is_active=is_active,
+        order_by=order_by,
+        order_dir=order_dir
     )
 
     result = PaginatedStageTypes(

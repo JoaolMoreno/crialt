@@ -79,7 +79,8 @@ def serialize_stage(stage):
 
     return StageRead.model_validate(stage_dict)
 
-def list_projects_query(query, limit, offset, order_by, order_dir, name=None, status=None, start_date=None, client_id=None, stage_name=None, stage_type=None, stage=None):
+def list_projects_query(query, order_by, order_dir, name=None, status=None, start_date=None, client_id=None, stage_name=None, stage_type=None, stage=None, search=None):
+    from ..models.stage_type import StageType
     if name:
         query = query.filter(Project.name.ilike(f"%{name}%"))
     if status:
@@ -90,14 +91,34 @@ def list_projects_query(query, limit, offset, order_by, order_dir, name=None, st
         query = query.join(Project.clients).filter(Client.id == client_id)
     if stage:
         query = query.filter(Project.current_stage_id == stage)
-    if stage_name or stage_type or order_by in ["stage_type"]:
+    if stage_name or stage_type or order_by in ["stage_type", "stage"] or search:
         query = query.join(Stage, Project.current_stage_id == Stage.id)
     if stage_name:
         query = query.filter(Stage.name.ilike(f"%{stage_name}%"))
     if stage_type:
         query = query.filter(Stage.stage_type_id == stage_type)
-    if order_by == "client":
+
+    if order_by == "stage_type" or search:
+        query = query.join(StageType, Stage.stage_type_id == StageType.id)
+
+    if order_by == "client" or search:
         query = query.join(Project.clients)
+
+    if search:
+        search_pattern = f"%{search}%"
+
+        from sqlalchemy import cast, String
+        query = query.filter(
+            or_(
+                Project.name.ilike(search_pattern),
+                Project.description.ilike(search_pattern),
+                cast(Project.work_address, String).ilike(search_pattern),
+                Client.name.ilike(search_pattern),
+                StageType.name.ilike(search_pattern)
+            )
+        )
+
+    if order_by == "client":
         order_col = Client.name
         if order_dir == "desc":
             order_col = order_col.desc()
@@ -112,8 +133,6 @@ def list_projects_query(query, limit, offset, order_by, order_dir, name=None, st
             order_col = order_col.asc()
         query = query.order_by(order_col)
     elif order_by == "stage_type":
-        from ..models.stage_type import StageType
-        query = query.join(StageType, Stage.stage_type_id == StageType.id)
         order_col = StageType.name
         if order_dir == "desc":
             order_col = order_col.desc()
@@ -144,6 +163,7 @@ def get_projects(
     stage_name: str = Query(None),
     stage_type: str = Query(None),
     stage: str = Query(None),
+    search: str = Query(None),
 ):
     cache_params = {
         "limit": limit,
@@ -156,12 +176,13 @@ def get_projects(
         "client_id": client_id,
         "stage_name": stage_name,
         "stage_type": stage_type,
-        "stage": stage
+        "stage": stage,
+        "search": search
     }
     cached = cache.get("projects", cache_params)
     if cached:
         return cached
-    query = list_projects_query(db.query(Project), limit, offset, order_by, order_dir, name, status, start_date, client_id, stage_name, stage_type, stage)
+    query = list_projects_query(db.query(Project), order_by, order_dir, name, status, start_date, client_id, stage_name, stage_type, stage, search)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
     result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
@@ -187,6 +208,7 @@ def get_my_projects(
     status: str = Query(None),
     start_date: str = Query(None),
     client_id: str = Query(None),
+    search: str = Query(None),
 ):
     query = None
     # Admin: retorna todos os projetos
@@ -200,7 +222,7 @@ def get_my_projects(
         query = db.query(Project).join(Project.clients).filter(Client.id == actor.client_id)
 
     if query is not None:
-        query = list_projects_query(query, limit, offset, order_by, order_dir, name, status, start_date, client_id)
+        query = list_projects_query(query, order_by, order_dir, name, status, start_date, client_id, search=search)
         total = query.count()
         items = query.offset(offset).limit(limit).all()
         result = [ProjectRead.model_validate(serialize_project(p)) for p in items]
@@ -232,10 +254,11 @@ def get_projects_by_client(
     name: str = Query(None),
     status: str = Query(None),
     start_date: str = Query(None),
+    search: str = Query(None),
 ):
     client_resource_permission([client_id], actor)
     query = db.query(Project).join(Project.clients).filter(Client.id == client_id)
-    query = list_projects_query(query, limit, offset, order_by, order_dir, name, status, start_date, client_id)
+    query = list_projects_query(query, limit, offset, order_by, order_dir, name, status, start_date, client_id, search=search)
     total = query.count()
     items = query.offset(offset).limit(limit).all()
     result = [ProjectRead.model_validate(serialize_project(p)) for p in items]

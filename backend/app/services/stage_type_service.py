@@ -18,7 +18,9 @@ class StageTypeService:
         skip: int = 0,
         limit: int = 100,
         name: Optional[str] = None,
-        is_active: Optional[bool] = None
+        is_active: Optional[bool] = None,
+        order_by: str = "name",
+        order_dir: str = "asc"
     ) -> tuple[List[StageType], int]:
         query = self.db.query(StageType)
 
@@ -26,6 +28,13 @@ class StageTypeService:
             query = query.filter(StageType.name.ilike(f"%{name}%"))
         if is_active is not None:
             query = query.filter(StageType.is_active == is_active)
+
+        allowed_order_fields = {"name": StageType.name, "is_active": StageType.is_active, "created_at": StageType.created_at}
+        order_column = allowed_order_fields.get(order_by, StageType.name)
+        if order_dir == "desc":
+            query = query.order_by(order_column.desc())
+        else:
+            query = query.order_by(order_column.asc())
 
         total = query.count()
         stage_types = query.offset(skip).limit(limit).all()
