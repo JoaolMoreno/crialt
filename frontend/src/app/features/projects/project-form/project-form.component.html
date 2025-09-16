@@ -96,7 +96,7 @@
 
       <div class="escopo-card">
         <h2 class="escopo-title">Escopo do Projeto</h2>
-        <div *ngIf="form.get('scope')" [formGroup]="form.get('scope')" class="escopo-grid">
+        <div [formGroup]="$any(form.get('scope'))" class="escopo-grid">
           <div class="escopo-col-esquerda">
             <div class="form-group">
               <label for="total_area">Área total (m²)</label>
@@ -122,8 +122,8 @@
           <span class="material-icons">add</span> Adicionar etapa
         </button>
         <div class="etapas-list">
-          <div *ngFor="let stage of stages" class="etapa-card etapa-row">
-            <div class="etapa-header">
+          <div *ngFor="let stage of stages; let i = index" class="etapa-card etapa-row">
+            <div class="etapa-header" (click)="toggleEtapaExpanded(stage.id)">
               <div class="etapa-main">
                 <span class="etapa-title">{{ stage.name }}</span>
                 <ng-container *ngIf="!editStageStatus[stage.id]; else editStageStatusBlock">
@@ -149,6 +149,12 @@
                 </ng-template>
               </div>
               <div class="etapa-icons">
+                <button type="button" class="btn-icon" (click)="$event.stopPropagation(); reordenarEtapas(stage.id, 'up')" [disabled]="i === 0" title="Mover para cima">
+                  <span class="material-icons">keyboard_arrow_up</span>
+                </button>
+                <button type="button" class="btn-icon" (click)="$event.stopPropagation(); reordenarEtapas(stage.id, 'down')" [disabled]="i === stages.length - 1" title="Mover para baixo">
+                  <span class="material-icons">keyboard_arrow_down</span>
+                </button>
                 <span class="etapa-toggle" style="cursor:pointer;">{{ getVisual(stage.id)?.expanded ? '▲' : '▼' }}</span>
                 <button type="button" class="remove-etapa-btn" (click)="$event.stopPropagation(); removerEtapa(stage.id)" title="Remover etapa">
                   <span class="material-icons">delete</span>
@@ -202,7 +208,28 @@
           </div>
         </div>
       </div>
-      <!-- RESUMO DAS ETAPAS ATIVAS -->
+
+      <div class="client-modal-overlay" *ngIf="showEtapaModal">
+        <div class="client-modal">
+          <div class="modal-header">
+            <h2>Adicionar Etapa(s)</h2>
+            <button type="button" class="close-btn" (click)="closeEtapaModal()">&times;</button>
+          </div>
+          <input type="text" placeholder="Buscar por nome da etapa" [(ngModel)]="etapaSearch" [ngModelOptions]="{standalone: true}" />
+          <div class="client-list">
+            <div *ngIf="loadingStages">Carregando...</div>
+            <div *ngFor="let etapa of filteredEtapas" class="client-item">
+              <label>
+                <input type="checkbox" [checked]="isEtapaSelected(etapa)" (change)="toggleEtapaSelection(etapa)" />
+                {{ etapa.name }}
+                <small *ngIf="etapa.description">{{ etapa.description }}</small>
+              </label>
+            </div>
+            <div *ngIf="!filteredEtapas.length && !loadingStages">Nenhuma etapa encontrada.</div>
+          </div>
+          <button type="button" class="btn-padrao" (click)="confirmarEtapas()">Confirmar seleção</button>
+        </div>
+      </div>
       <div class="etapas-resumo" *ngIf="etapasAtivas().length">
         <h3>Resumo das Etapas</h3>
         <table class="etapas-tabela">
