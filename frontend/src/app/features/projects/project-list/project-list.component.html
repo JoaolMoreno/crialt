@@ -4,7 +4,7 @@
     <button class="list-btn" (click)="onNewProject()">
       <span class="material-icons">add_circle</span> Novo Projeto
     </button>
-    <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onFilterChange()" />
+    <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onSearchInput($any($event.target).value)" />
     <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="in_progress">Em andamento</option>
@@ -16,7 +16,6 @@
       <option value="">Todas as etapas</option>
       <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
     </select>
-    <input type="number" [(ngModel)]="selectedValue" class="input-filtro" placeholder="Valor mínimo" (input)="onFilterChange()" />
     <button class="list-btn" (click)="export('pdf')">
       <span class="material-icons">download</span> Exportar
     </button>
@@ -63,7 +62,7 @@
         <th (click)="onSortChange('client')" style="cursor:pointer">Cliente <span *ngIf="sortColumn==='client'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th (click)="onSortChange('status')" style="cursor:pointer">Status <span *ngIf="sortColumn==='status'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th (click)="onSortChange('stage')" style="cursor:pointer">Etapa Atual <span *ngIf="sortColumn==='stage'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('value')" style="cursor:pointer">Valor <span *ngIf="sortColumn==='value'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+        <th (click)="onSortChange('value')" style="cursor:pointer">Valor <span *ngIf="sortColumn==='total_value'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th (click)="onSortChange('created_at')" style="cursor:pointer">Data de Criação <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
         <th>Ações</th>
       </tr>

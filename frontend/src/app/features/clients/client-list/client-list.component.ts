@@ -3,6 +3,8 @@ import { ClientService } from '../../../core/services/client.service';
 import { Client } from '../../../core/models/client.model';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-client-list',
@@ -26,8 +28,16 @@ export class ClientListComponent implements OnInit {
   selectedDate = '';
   loading = false;
   error = '';
+  searchLoading = false;
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
+    this.searchSubject.pipe(debounceTime(3000)).subscribe((value) => {
+      this.searchQuery = value;
+      this.currentPage = 1;
+      this.searchLoading = false;
+      this.loadClients();
+    });
     this.loadClients();
   }
 
@@ -74,6 +84,11 @@ export class ClientListComponent implements OnInit {
   onFilterChange(): void {
     this.currentPage = 1;
     this.loadClients();
+  }
+
+  onSearchInput(value: string): void {
+    this.searchLoading = true;
+    this.searchSubject.next(value);
   }
 
   onEditClient(client: Client): void {

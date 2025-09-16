@@ -10,7 +10,7 @@
       placeholder="Buscar por nome..."
       [(ngModel)]="searchQuery"
       class="search-input"
-      (input)="onSearch()"
+      (input)="onSearchInput($any($event.target).value)"
     />
     <select [(ngModel)]="selectedStatus" class="filter-select" (change)="onFilter()">
       <option value="">Todos os status</option>

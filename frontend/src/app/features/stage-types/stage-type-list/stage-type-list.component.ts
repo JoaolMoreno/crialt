@@ -4,6 +4,8 @@ import { StageType } from '../../../core/models/stage-type.model';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import {StageTypeCardComponent} from "../stage-type-card/stage-type-card.component";
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-stage-type-list',
@@ -26,8 +28,16 @@ export class StageTypeListComponent implements OnInit {
   selectedStatus = '';
   loading = false;
   error = '';
+  searchLoading = false;
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
+    this.searchSubject.pipe(debounceTime(3000)).subscribe((value) => {
+      this.searchQuery = value;
+      this.currentPage = 1;
+      this.searchLoading = false;
+      this.loadStageTypes();
+    });
     this.loadStageTypes();
   }
 
@@ -68,9 +78,9 @@ export class StageTypeListComponent implements OnInit {
     this.loadStageTypes();
   }
 
-  onSearch(): void {
-    this.currentPage = 1;
-    this.loadStageTypes();
+  onSearchInput(value: string): void {
+    this.searchLoading = true;
+    this.searchSubject.next(value);
   }
 
   onFilter(): void {

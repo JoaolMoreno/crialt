@@ -9,6 +9,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
 import { PaginatedProject } from '../../../core/models/paginated-project.model';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-project-list',
@@ -39,10 +41,18 @@ export class ProjectListComponent implements OnInit {
   selectedProjects: string[] = [];
   batchStatus: string = '';
   viewMode: 'list' | 'grid' = 'list';
+  searchLoading = false;
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
     this.loadProjects();
     this.loadStages();
+    this.searchSubject.pipe(debounceTime(3000)).subscribe((value) => {
+      this.searchQuery = value;
+      this.currentPage = 1;
+      this.searchLoading = false;
+      this.loadProjects();
+    });
   }
 
   loadProjects(): void {
@@ -85,6 +95,8 @@ export class ProjectListComponent implements OnInit {
   }
 
   onSortChange(column: string): void {
+    // Corrige para enviar 'total_value' ao backend
+    if (column === 'value') column = 'total_value';
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -92,6 +104,11 @@ export class ProjectListComponent implements OnInit {
       this.sortDirection = 'asc';
     }
     this.loadProjects();
+  }
+
+  onSearchInput(value: string): void {
+    this.searchLoading = true;
+    this.searchSubject.next(value);
   }
 
   onFilterChange(): void {

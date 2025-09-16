@@ -4,7 +4,7 @@
     <button class="list-btn" style="margin-right:16px;" (click)="onNewClient()">
       <span class="material-icons">person_add</span> Novo Cliente
     </button>
-    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onFilterChange()" />
+    <input type="text" placeholder="Buscar por nome ou CPF/CNPJ..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onSearchInput($event.target.value)" />
     <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todos os status</option>
       <option value="active">Ativo</option>
