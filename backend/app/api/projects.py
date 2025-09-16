@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract, and_, or_
-from datetime import datetime, timedelta
+from sqlalchemy import or_
 
 from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
 from ..models import User, Client, Project, Stage
@@ -15,6 +14,10 @@ from ..utils.cache import cache
 router = APIRouter()
 
 def serialize_project(project):
+    stages = getattr(project, "stages", [])
+    if stages:
+        stages = sorted(stages, key=lambda s: s.order)
+
     return {
         "id": project.id,
         "name": project.name,
@@ -33,7 +36,7 @@ def serialize_project(project):
         "created_by_id": project.created_by_id,
         "current_stage_id": project.current_stage_id,
         "clients": [ClientBasicRead.model_validate(c) for c in getattr(project, "clients", [])],
-        "stages": [serialize_stage(s) for s in getattr(project, "stages", [])],
+        "stages": [serialize_stage(s) for s in stages],
         "files": [FileRead.model_validate(f) for f in getattr(project, "files", [])] if hasattr(project, "files") else [],
     }
 
@@ -64,7 +67,6 @@ def serialize_stage(stage):
         "stage_type": None
     }
 
-    # Se stage_type está disponível, serializar como dicionário
     if hasattr(stage, "stage_type") and stage.stage_type:
         stage_dict["stage_type"] = {
             "id": str(stage.stage_type.id),
@@ -211,13 +213,10 @@ def get_my_projects(
     search: str = Query(None),
 ):
     query = None
-    # Admin: retorna todos os projetos
     if hasattr(actor, "role") and getattr(actor, "role", None) == "admin":
         query = db.query(Project)
-    # Cliente: retorna projetos vinculados ao cliente
     elif isinstance(actor, Client):
         query = db.query(Project).join(Project.clients).filter(Client.id == actor.id)
-    # Usuário comum: retorna projetos do seu client_id
     elif hasattr(actor, "client_id"):
         query = db.query(Project).join(Project.clients).filter(Client.id == actor.client_id)
 
@@ -318,3 +317,19 @@ def get_project_progress(project_id: str, db: Session = Depends(get_db), actor =
     client_resource_permission(client_ids, actor)
     progress = service.calculate_progress(project_id)
     return {"progress": progress}
+
+@router.put("/{project_id}/current-stage/{stage_id}")
+def update_current_stage(
+    project_id: str,
+    stage_id: str,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_actor_factory(["admin"]))
+):
+    service = ProjectService(db)
+    try:
+        project = service.update_current_stage(project_id, stage_id)
+        cache.invalidate("projects")
+        cache.invalidate("dashboard")
+        return ProjectRead.model_validate(serialize_project(project))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

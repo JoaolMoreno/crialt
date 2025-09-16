@@ -6,7 +6,6 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .client import ClientBasicRead
-from .stage import StageUpdate  # Import antecipado
 
 
 class ProjectStatus(str, enum.Enum):
@@ -31,8 +30,40 @@ class ProjectBase(BaseModel):
     notes: Optional[str] = None
 
 
+class StageCreateForProject(BaseModel):
+    stage_type_id: UUID
+    name: Optional[str] = None  # Se não fornecido, usará o nome do stage_type
+    description: Optional[str] = None  # Se não fornecido, usará a descrição do stage_type
+    order: int
+    planned_start_date: Optional[date] = None
+    planned_end_date: Optional[date] = None
+    value: Optional[float] = 0
+    payment_status: Optional[str] = "pending"
+    progress_percentage: Optional[int] = 0
+    notes: Optional[str] = None
+
+
+class StageUpdateForProject(BaseModel):
+    id: Optional[UUID] = None  # Se fornecido, atualiza stage existente
+    stage_type_id: UUID
+    name: Optional[str] = None
+    description: Optional[str] = None
+    order: int
+    status: Optional[str] = "pending"
+    planned_start_date: Optional[date] = None
+    actual_start_date: Optional[date] = None
+    planned_end_date: Optional[date] = None
+    actual_end_date: Optional[date] = None
+    value: Optional[float] = 0
+    payment_status: Optional[str] = "pending"
+    progress_percentage: Optional[int] = 0
+    notes: Optional[str] = None
+    assigned_to_id: Optional[UUID] = None
+
+
 class ProjectCreate(ProjectBase):
     clients: List[UUID]
+    stages: Optional[List[StageCreateForProject]] = None
 
 
 class ProjectUpdate(BaseModel):
@@ -48,7 +79,7 @@ class ProjectUpdate(BaseModel):
     scope: Optional[dict] = None
     notes: Optional[str] = None
     clients: Optional[List[UUID]] = None
-    stages: Optional[List[StageUpdate]] = None
+    stages: Optional[List[StageUpdateForProject]] = None
 
 
 class ProjectRead(ProjectBase):
