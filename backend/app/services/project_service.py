@@ -1,18 +1,22 @@
 from datetime import datetime, UTC
+import logging
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException
 
 from ..models import Project, Client, Stage
 from ..models.stage_type import StageType
 from ..models.project import project_clients
-from ..schemas.project import ProjectCreate, ProjectUpdate
+from ..schemas.project import ProjectCreate, ProjectUpdate, PaginatedProjects, ProjectRead
 from ..schemas.stage import StageStatus
+from ..utils.cache import cache
 
 
 class ProjectService:
     def __init__(self, db: Session) -> None:
         self.db = db
+        self.logger = logging.getLogger(__name__)
 
     def create_project(self, project_data: ProjectCreate, user_id: str) -> Project:
         self._validate_project_data(project_data)
@@ -52,6 +56,9 @@ class ProjectService:
 
             self.db.commit()
             self.db.refresh(project)
+            # Invalida cache de listagem e dashboard após criar
+            cache.invalidate('get_projects')
+            cache.invalidate('dashboard')
             return project
 
         except IntegrityError as e:
@@ -146,11 +153,116 @@ class ProjectService:
         concluido = sum(1 for s in project.stages if s.status == StageStatus.completed)
         return round((concluido / total) * 100, 2) if total else 0.0
 
-    def get_project(self, project_id: str) -> Project:
+    def get_project(self, project_id, actor=None, client_resource_permission=None):
+        self.logger.info(f"[DB] get_project: project_id={project_id}, actor={actor}, client_resource_permission={client_resource_permission}")
         project = self.db.get(Project, project_id)
         if not project:
-            raise ValueError("Projeto não encontrado")
-        return project
+            raise HTTPException(status_code=404, detail="Projeto não encontrado")
+        if client_resource_permission and actor:
+            client_ids = [str(client.id) for client in project.clients]
+            client_resource_permission(client_ids, actor)
+        return ProjectRead.model_validate(project, from_attributes=True)
+
+    def get_project_progress(self, project_id, actor=None, client_resource_permission=None):
+        project = self.db.get(Project, project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Projeto não encontrado")
+        if client_resource_permission and actor:
+            client_ids = [str(client.id) for client in project.clients]
+            client_resource_permission(client_ids, actor)
+        if not project.stages:
+            return {"progress": 0.0}
+        total = len(project.stages)
+        concluido = sum(1 for s in project.stages if s.status == StageStatus.completed)
+        return {"progress": round((concluido / total) * 100, 2) if total else 0.0}
+
+    def get_projects(self, limit, offset, order_by, order_dir, name, status, start_date, client_id, stage_name, stage_type, stage, search):
+        cache_params = {
+            'limit': limit,
+            'offset': offset,
+            'order_by': order_by,
+            'order_dir': order_dir,
+            'name': name,
+            'status': status,
+            'start_date': str(start_date) if start_date else None,
+            'client_id': client_id,
+            'stage_name': stage_name,
+            'stage_type': stage_type,
+            'stage': stage,
+            'search': search
+        }
+        cached_result = cache.get('get_projects', cache_params)
+        if cached_result:
+            self.logger.info(f"[CACHE] get_projects: {cache_params}")
+            return cached_result
+        self.logger.info(f"[DB] get_projects: {cache_params}")
+        query = self.db.query(Project)
+        if name:
+            query = query.filter(Project.name.ilike(f"%{name}%"))
+        if status:
+            query = query.filter(Project.status == status)
+        if start_date:
+            query = query.filter(Project.start_date >= start_date)
+        if client_id:
+            query = query.join(Project.clients).filter(Client.id == client_id)
+        if stage_name:
+            query = query.join(Project.stages).filter(Stage.name.ilike(f"%{stage_name}%"))
+        if stage_type:
+            query = query.join(Project.stages).filter(Stage.stage_type_id == stage_type)
+        if stage:
+            query = query.join(Project.stages).filter(Stage.id == stage)
+        if search:
+            query = query.filter(Project.name.ilike(f"%{search}%"))
+        if hasattr(Project, order_by):
+            order_col = getattr(Project, order_by)
+            if order_dir == "desc":
+                order_col = order_col.desc()
+            else:
+                order_col = order_col.asc()
+            query = query.order_by(order_col)
+        total = query.count()
+        items = query.offset(offset).limit(limit).all()
+        result = PaginatedProjects(
+            total=total,
+            count=len(items),
+            offset=offset,
+            limit=limit,
+            items=[ProjectRead.model_validate(p, from_attributes=True) for p in items]
+        )
+        cache.set('get_projects', cache_params, result)
+        return result
+
+    def get_my_projects(self, actor, limit, offset, order_by, order_dir, name, status, start_date, client_id, search):
+        self.logger.info(f"[DB] get_my_projects: actor={actor}, limit={limit}, offset={offset}, order_by={order_by}, order_dir={order_dir}, name={name}, status={status}, start_date={start_date}, client_id={client_id}, search={search}")
+        query = self.db.query(Project)
+        if hasattr(actor, "id"):
+            query = query.join(Project.clients).filter(Client.id == actor.id)
+        if name:
+            query = query.filter(Project.name.ilike(f"%{name}%"))
+        if status:
+            query = query.filter(Project.status == status)
+        if start_date:
+            query = query.filter(Project.start_date >= start_date)
+        if client_id:
+            query = query.join(Project.clients).filter(Client.id == client_id)
+        if search:
+            query = query.filter(Project.name.ilike(f"%{search}%"))
+        if hasattr(Project, order_by):
+            order_col = getattr(Project, order_by)
+            if order_dir == "desc":
+                order_col = order_col.desc()
+            else:
+                order_col = order_col.asc()
+            query = query.order_by(order_col)
+        total = query.count()
+        items = query.offset(offset).limit(limit).all()
+        return PaginatedProjects(
+            total=total,
+            count=len(items),
+            offset=offset,
+            limit=limit,
+            items=[ProjectRead.model_validate(p, from_attributes=True) for p in items]
+        )
 
     def update_project(self, project_id: str, project_data: ProjectUpdate) -> Project:
         project = self.db.get(Project, project_id)
@@ -179,6 +291,9 @@ class ProjectService:
 
             self.db.commit()
             self.db.refresh(project)
+
+            cache.invalidate('get_projects')
+            cache.invalidate('dashboard')
             return project
 
         except IntegrityError as e:
@@ -324,6 +439,8 @@ class ProjectService:
         try:
             self.db.delete(project)
             self.db.commit()
+            cache.invalidate('get_projects')
+            cache.invalidate('dashboard')
             return True
         except IntegrityError:
             self.db.rollback()

@@ -1,82 +1,47 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
+from starlette.concurrency import run_in_threadpool
 
 from ..api.dependencies import get_db, get_current_user, get_current_actor_factory
 from ..models import User
 from ..schemas.user import UserRead, UserCreate, UserUpdate
-from ..core.security import get_password_hash
+from ..services.user_service import UserService
 
 router = APIRouter()
 
 
 @router.get("/me", response_model=UserRead)
-def get_me(user: User = Depends(get_current_user)):
-    return user
+async def get_me(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    service = UserService(db)
+    return await run_in_threadpool(service.get_me, user)
 
 
 @router.get("", response_model=List[UserRead])
-def get_users(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    users = db.query(User).all()
-    return users
+async def get_users(db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
+    service = UserService(db)
+    return await run_in_threadpool(service.get_users)
 
 
 @router.get("/{user_id}", response_model=UserRead)
-def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    return user
+async def get_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
+    service = UserService(db)
+    return await run_in_threadpool(service.get_user, user_id)
 
 
 @router.post("", response_model=UserRead)
-def create_user(user_data: UserCreate,
-                db: Session = Depends(get_db),
-                admin_user: User = Depends(get_current_actor_factory(["admin"]))
-                ):
-    existing = db.query(User).filter(User.email == user_data.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
-
-    user = User(
-        name=user_data.name,
-        username=user_data.username,
-        email=str(user_data.email),
-        password_hash=get_password_hash(user_data.password),
-        role=user_data.role,
-        avatar=user_data.avatar,
-        is_active=True
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+async def create_user(user_data: UserCreate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
+    service = UserService(db)
+    return await run_in_threadpool(service.create_user, user_data)
 
 
 @router.put("/{user_id}", response_model=UserRead)
-def update_user(user_id: str, user_data: UserUpdate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    update_data = user_data.model_dump(exclude_unset=True)
-    if "password" in update_data:
-        update_data["password"] = get_password_hash(update_data["password"])
-
-    for field, value in update_data.items():
-        setattr(user, field, value)
-
-    db.commit()
-    db.refresh(user)
-    return user
+async def update_user(user_id: str, user_data: UserUpdate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
+    service = UserService(db)
+    return await run_in_threadpool(service.update_user, user_id, user_data)
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    user.is_active = False  # Soft delete
-    db.commit()
-    return {"message": "Usuário desativado com sucesso"}
+async def delete_user(user_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
+    service = UserService(db)
+    return await run_in_threadpool(service.delete_user, user_id)
