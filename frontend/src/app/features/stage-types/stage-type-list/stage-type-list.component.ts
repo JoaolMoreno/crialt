@@ -2,9 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { StageTypeService } from '../../../core/services/stage-type.service';
 import { StageType } from '../../../core/models/stage-type.model';
 import { Router } from '@angular/router';
-import { SharedModule } from '../../../shared/shared.module';
-import {StageTypeCardComponent} from "../stage-type-card/stage-type-card.component";
-import { Subject } from 'rxjs';
+import { SharedModule } from '../../../shared/shared.module';import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 @Component({

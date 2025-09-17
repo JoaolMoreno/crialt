@@ -1,99 +1,101 @@
 <section class="section-container">
   <h1>Projetos</h1>
-  <div class="list-actions">
-    <button class="list-btn" (click)="onNewProject()">
-      <span class="material-icons">add_circle</span> Novo Projeto
-    </button>
-    <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onSearchInput($any($event.target).value)" />
-    <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
-      <option value="">Todos os status</option>
-      <option value="draft">Rascunho</option>
-      <option value="active">Ativo</option>
-      <option value="paused">Pausado</option>
-      <option value="completed">Concluído</option>
-      <option value="cancelled">Cancelado</option>
-    </select>
-    <input type="month" [(ngModel)]="selectedPeriod" class="input-filtro" (change)="onFilterChange()" />
-    <select [(ngModel)]="selectedStage" class="select-filtro" (change)="onFilterChange()">
-      <option value="">Todas as etapas</option>
-      <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
-    </select>
-    <button class="list-btn" (click)="export('pdf')">
-      <span class="material-icons">download</span> Exportar
-    </button>
-  </div>
+  <fieldset [disabled]="loading" style="border:0;padding:0;margin:0;min-width:0;">
+    <div class="list-actions">
+      <button class="list-btn" (click)="onNewProject()">
+        <span class="material-icons">add_circle</span> Novo Projeto
+      </button>
+      <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onSearchInput($any($event.target).value)" />
+      <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
+        <option value="">Todos os status</option>
+        <option value="draft">Rascunho</option>
+        <option value="active">Ativo</option>
+        <option value="paused">Pausado</option>
+        <option value="completed">Concluído</option>
+        <option value="cancelled">Cancelado</option>
+      </select>
+      <input type="month" [(ngModel)]="selectedPeriod" class="input-filtro" (change)="onFilterChange()" />
+      <select [(ngModel)]="selectedStage" class="select-filtro" (change)="onFilterChange()">
+        <option value="">Todas as etapas</option>
+        <option *ngFor="let stage of stages" [value]="stage.id">{{ stage.name }}</option>
+      </select>
+      <button class="list-btn" (click)="export('pdf')">
+        <span class="material-icons">download</span> Exportar
+      </button>
+    </div>
 
-  <div class="view-toggle">
-    <button class="btn-padrao" [class.active]="viewMode==='list'" (click)="setViewMode('list')">
-      <span class="material-icons">table_rows</span> Lista
-    </button>
-    <button class="btn-padrao" [class.active]="viewMode==='grid'" (click)="setViewMode('grid')">
-      <span class="material-icons">grid_view</span> Grid
-    </button>
-  </div>
+    <div class="view-toggle">
+      <button class="btn-padrao" [class.active]="viewMode==='list'" (click)="setViewMode('list')">
+        <span class="material-icons">table_rows</span> Lista
+      </button>
+      <button class="btn-padrao" [class.active]="viewMode==='grid'" (click)="setViewMode('grid')">
+        <span class="material-icons">grid_view</span> Grid
+      </button>
+    </div>
 
-  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-  <div *ngIf="error" class="list-error">{{ error }}</div>
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    <div *ngIf="error" class="list-error">{{ error }}</div>
 
-  <div *ngIf="viewMode==='grid' && !loading && projects.length" class="project-grid">
-    <app-project-card
-      *ngFor="let project of projects"
-      [project]="project"
-      [progress]="getProjectProgress(project)"
-      (edit)="onEditProject(project)"
-      (view)="onViewProject(project)"
-    ></app-project-card>
-  </div>
+    <div *ngIf="viewMode==='grid' && !loading && projects.length" class="project-grid">
+      <app-project-card
+        *ngFor="let project of projects"
+        [project]="project"
+        [progress]="getProjectProgress(project)"
+        (edit)="onEditProject(project)"
+        (view)="onViewProject(project)"
+      ></app-project-card>
+    </div>
 
-  <div class="batch-actions" *ngIf="selectedProjects.length">
-    <button class="btn-padrao" (click)="export('pdf')"><span class="material-icons">download</span> Exportar Selecionados (PDF)</button>
-    <button class="btn-padrao" (click)="export('excel')"><span class="material-icons">download</span> Exportar Selecionados (Excel)</button>
-    <select [(ngModel)]="batchStatus" class="filter-select">
-      <option value="">Alterar status para...</option>
-      <option value="in_progress">Em andamento</option>
-      <option value="paused">Pausado</option>
-      <option value="completed">Concluído</option>
-    </select>
-    <button class="btn-padrao" (click)="updateSelectedProjectsStatus(batchStatus)" [disabled]="!batchStatus"><span class="material-icons">sync</span> Atualizar Status</button>
-  </div>
-  <table class="list-table" *ngIf="viewMode==='list' && !loading && projects.length">
-    <thead>
-      <tr>
-        <th><input type="checkbox" (change)="toggleSelectAll($event)" /></th>
-        <th (click)="onSortChange('name')" style="cursor:pointer">Projeto <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('client')" style="cursor:pointer">Cliente <span *ngIf="sortColumn==='client'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('status')" style="cursor:pointer">Status <span *ngIf="sortColumn==='status'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('stage')" style="cursor:pointer">Etapa Atual <span *ngIf="sortColumn==='stage'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('value')" style="cursor:pointer">Valor <span *ngIf="sortColumn==='total_value'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th (click)="onSortChange('created_at')" style="cursor:pointer">Data de Criação <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let project of projects">
-        <td data-label="Selecionar"><input type="checkbox" [checked]="selectedProjects.includes(project.id)" (change)="toggleProjectSelection(project.id)" /></td>
-        <td data-label="Projeto">{{ project.name }}</td>
-        <td data-label="Cliente">{{ project.clients[0]?.name }}</td>
-        <td data-label="Status">
-          <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">
-            {{ statusLabel(project.status) }}
-          </span>
-        </td>
-        <td data-label="Etapa Atual">{{ getCurrentStage(project)?.name || '-' }}</td>
-        <td data-label="Valor">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
-        <td data-label="Data de Criação">{{ project.created_at | date:'shortDate' }}</td>
-        <td data-label="Ações">
-          <button class="action-btn" (click)="onEditProject(project)"><span class="material-icons">edit</span></button>
-          <button class="action-btn" (click)="onViewProject(project)"><span class="material-icons">visibility</span></button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div *ngIf="!loading && !projects.length" class="empty-state">Nenhum projeto encontrado.</div>
-  <!-- Paginação -->
-  <div *ngIf="!loading && total > pageSize" class="pagination-controls">
-    <button *ngIf="currentPage > 1" class="btn-padrao" (click)="onPageChange(currentPage-1)">Anterior</button>
-    <span>Página {{currentPage}} de {{totalPages}}</span>
-    <button *ngIf="currentPage < totalPages" class="btn-padrao" (click)="onPageChange(currentPage+1)">Próxima</button>
-  </div>
+    <div class="batch-actions" *ngIf="selectedProjects.length">
+      <button class="btn-padrao" (click)="export('pdf')"><span class="material-icons">download</span> Exportar Selecionados (PDF)</button>
+      <button class="btn-padrao" (click)="export('excel')"><span class="material-icons">download</span> Exportar Selecionados (Excel)</button>
+      <select [(ngModel)]="batchStatus" class="filter-select">
+        <option value="">Alterar status para...</option>
+        <option value="in_progress">Em andamento</option>
+        <option value="paused">Pausado</option>
+        <option value="completed">Concluído</option>
+      </select>
+      <button class="btn-padrao" (click)="updateSelectedProjectsStatus(batchStatus)" [disabled]="!batchStatus"><span class="material-icons">sync</span> Atualizar Status</button>
+    </div>
+    <table class="list-table" *ngIf="viewMode==='list' && !loading && projects.length">
+      <thead>
+        <tr>
+          <th><input type="checkbox" (change)="toggleSelectAll($event)" /></th>
+          <th (click)="onSortChange('name')" style="cursor:pointer">Projeto <span *ngIf="sortColumn==='name'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th (click)="onSortChange('client')" style="cursor:pointer">Cliente <span *ngIf="sortColumn==='client'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th (click)="onSortChange('status')" style="cursor:pointer">Status <span *ngIf="sortColumn==='status'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th (click)="onSortChange('stage')" style="cursor:pointer">Etapa Atual <span *ngIf="sortColumn==='stage'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th (click)="onSortChange('value')" style="cursor:pointer">Valor <span *ngIf="sortColumn==='total_value'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th (click)="onSortChange('created_at')" style="cursor:pointer">Data de Criação <span *ngIf="sortColumn==='created_at'">{{sortDirection==='asc'?'▲':'▼'}}</span></th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let project of projects">
+          <td data-label="Selecionar"><input type="checkbox" [checked]="selectedProjects.includes(project.id)" (change)="toggleProjectSelection(project.id)" /></td>
+          <td data-label="Projeto">{{ project.name }}</td>
+          <td data-label="Cliente">{{ project.clients[0]?.name }}</td>
+          <td data-label="Status">
+            <span class="status-badge" [ngClass]="statusBadgeClass(project.status)">
+              {{ statusLabel(project.status) }}
+            </span>
+          </td>
+          <td data-label="Etapa Atual">{{ getCurrentStage(project)?.name || '-' }}</td>
+          <td data-label="Valor">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
+          <td data-label="Data de Criação">{{ project.created_at | date:'shortDate' }}</td>
+          <td data-label="Ações">
+            <button class="action-btn" (click)="onEditProject(project)"><span class="material-icons">edit</span></button>
+            <button class="action-btn" (click)="onViewProject(project)"><span class="material-icons">visibility</span></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && !projects.length" class="empty-state">Nenhum projeto encontrado.</div>
+    <!-- Paginação -->
+    <div *ngIf="!loading && total > pageSize" class="pagination-controls">
+      <button *ngIf="currentPage > 1" class="btn-padrao" (click)="onPageChange(currentPage-1)">Anterior</button>
+      <span>Página {{currentPage}} de {{totalPages}}</span>
+      <button *ngIf="currentPage < totalPages" class="btn-padrao" (click)="onPageChange(currentPage+1)">Próxima</button>
+    </div>
+  </fieldset>
 </section>
