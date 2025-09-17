@@ -7,9 +7,11 @@
     <input type="text" placeholder="Buscar por nome ou etapa..." [(ngModel)]="searchQuery" class="input-filtro" (input)="onSearchInput($any($event.target).value)" />
     <select [(ngModel)]="selectedStatus" class="select-filtro" (change)="onFilterChange()">
       <option value="">Todos os status</option>
-      <option value="in_progress">Em andamento</option>
+      <option value="draft">Rascunho</option>
+      <option value="active">Ativo</option>
       <option value="paused">Pausado</option>
       <option value="completed">Concluído</option>
+      <option value="cancelled">Cancelado</option>
     </select>
     <input type="month" [(ngModel)]="selectedPeriod" class="input-filtro" (change)="onFilterChange()" />
     <select [(ngModel)]="selectedStage" class="select-filtro" (change)="onFilterChange()">
