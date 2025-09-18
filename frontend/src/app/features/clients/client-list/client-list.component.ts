@@ -49,7 +49,7 @@ export class ClientListComponent implements OnInit {
       offset: (this.currentPage - 1) * this.pageSize,
       order_by: this.sortColumn || 'created_at',
       order_dir: this.sortDirection,
-      name: this.searchQuery || undefined,
+      search: this.searchQuery || undefined,
       is_active: this.selectedStatus === 'active' ? true : this.selectedStatus === 'inactive' ? false : undefined,
       created_at: this.selectedDate || undefined
     };
@@ -86,9 +86,9 @@ export class ClientListComponent implements OnInit {
     this.loadClients();
   }
 
-  onSearchInput(value: string): void {
+  onSearchInput(): void {
     this.searchLoading = true;
-    this.searchSubject.next(value);
+    this.searchSubject.next(this.searchQuery);
   }
 
   onEditClient(client: Client): void {
