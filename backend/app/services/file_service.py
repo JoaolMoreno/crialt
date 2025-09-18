@@ -168,9 +168,18 @@ class FileService:
             client_resource_permission(client_ids, actor)
         elif file_data.client_id:
             client_resource_permission([str(file_data.client_id)], actor)
-        if hasattr(actor, "role"):
+
+        if hasattr(actor, "id"):
             file_data.uploaded_by_id = actor.id
+
+        # Criar FileCreate com dados do arquivo real
         file_bytes = file.file.read()
+
+        # Atualizar file_data com informações do arquivo real
+        file_data.original_name = file.filename or "unnamed"
+        file_data.size = len(file_bytes)
+        file_data.mime_type = file.content_type or "application/octet-stream"
+
         saved_file = self.save_file(file_data, file_bytes)
         cache.invalidate("files")
         cache.invalidate("dashboard")
