@@ -23,9 +23,9 @@ export class SidebarComponent {
 
   menuItems: SidebarMenuItem[] = [
     {
-      label: 'Dashboard',
+      label: 'Home',
       icon: 'dashboard',
-      route: '/dashboard',
+      route: '/home',
       favorite: true
     },
     {

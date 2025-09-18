@@ -39,7 +39,7 @@ export class LoginComponent {
       next: (user) => {
         this.loading = false;
         this.authService.setCurrentUser(user.user);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         this.loading = false;

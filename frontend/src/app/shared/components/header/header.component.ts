@@ -38,7 +38,7 @@ export class HeaderComponent {
     role: 'admin'
   };
 
-  breadcrumb: string[] = ['Dashboard'];
+  breadcrumb: string[] = ['Home'];
 
   searchQuery = '';
 
