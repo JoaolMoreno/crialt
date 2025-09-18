@@ -75,20 +75,43 @@
     </div>
     <div *ngIf="activeTab==='files'">
       <h2>Arquivos do Projeto</h2>
-      <div *ngFor="let stage of project.stages">
-        <h3>{{ stage.name }}</h3>
-        <ul *ngIf="stage.files?.length">
-          <li *ngFor="let file of stage.files">{{ file.original_name }} <button class="btn-secundario">Download</button></li>
-        </ul>
-        <span *ngIf="!stage.files || stage.files.length === 0">Nenhum arquivo nesta etapa.</span>
-        <!-- <app-file-upload></app-file-upload> -->
+      <div class="files-display" *ngIf="projectFiles.length > 0; else noFiles">
+        <div class="file-item" *ngFor="let file of projectFiles">
+          <div class="file-info">
+            <div class="file-icon">
+              <span class="material-icons">
+                {{ getFileIcon(file.category, file.mime_type) }}
+              </span>
+            </div>
+            <div class="file-details">
+              <div class="file-name">{{ file.original_name }}</div>
+              <div class="file-meta">
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
+                <span class="file-date">{{ file.created_at | date:'short' }}</span>
+              </div>
+              <div class="file-description" *ngIf="file.description">
+                {{ file.description }}
+              </div>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button type="button"
+                    class="btn-icon download-btn"
+                    (click)="downloadFile(file)"
+                    title="Baixar arquivo">
+              <span class="material-icons">download</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div *ngIf="project.files?.length">
-        <h3>Arquivos Gerais do Projeto</h3>
-        <ul>
-          <li *ngFor="let file of project.files">{{ file.original_name }} <button class="btn-secundario">Download</button></li>
-        </ul>
-      </div>
+      <ng-template #noFiles>
+        <div class="no-files-message">
+          <span class="material-icons">folder_open</span>
+          <p>Nenhum arquivo encontrado para este projeto.</p>
+          <p>Use o formulário de edição para adicionar arquivos.</p>
+        </div>
+      </ng-template>
     </div>
     <div *ngIf="activeTab==='finance'">
       <h2>Financeiro</h2>

@@ -345,3 +345,19 @@ input[type="text"] {
   color: #fff;
   transform: scale(1.15);
 }
+
+.arquivos-section {
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+
+  label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    display: block;
+  }
+}

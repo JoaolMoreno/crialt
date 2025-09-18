@@ -10,13 +10,15 @@ import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from "../../../shared/shared.module";
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import {Stage} from "../../../core/models/stage.model";
+import { Stage } from "../../../core/models/stage.model";
+import { FileUploadComponent } from "../../../shared/components/file-upload/file-upload.component";
+import { FileUpload } from '../../../core/services/file.service';
 
 @Component({
     selector: 'app-project-form',
     standalone: true,
     templateUrl: './project-form.component.html',
-    imports: [SharedModule],
+    imports: [SharedModule, FileUploadComponent],
     styleUrls: ['./project-form.component.scss']
 })
 export class ProjectFormComponent {
@@ -447,6 +449,11 @@ export class ProjectFormComponent {
     this.etapasProjeto.forEach((etapa, idx) => {
       etapa.order = idx + 1;
     });
+  }
+
+  onFilesChanged(files: FileUpload[]): void {
+    // Pode ser usado para atualizar a UI ou validar arquivos
+    console.log('Arquivos atualizados:', files);
   }
 }
 

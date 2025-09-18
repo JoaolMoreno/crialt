@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FileService } from '../../../core/services/file.service';
-import { File } from '../../../core/models/file.model';
+import { FileService, FileUpload, PaginatedFiles } from '../../../core/services/file.service';
 import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
@@ -13,7 +12,7 @@ import { SharedModule } from '../../../shared/shared.module';
 export class FileListComponent implements OnInit {
   private readonly fileService = inject(FileService);
 
-  files: File[] = [];
+  files: FileUpload[] = [];
   total = 0;
   pageSize = 10;
   currentPage = 1;
@@ -38,7 +37,7 @@ export class FileListComponent implements OnInit {
       search: this.searchQuery || undefined
     };
     this.fileService.getFiles(params).subscribe({
-      next: (res) => {
+      next: (res: PaginatedFiles) => {
         this.files = res.items;
         this.total = res.total;
         this.loading = false;
@@ -73,11 +72,11 @@ export class FileListComponent implements OnInit {
     // Abrir modal de upload (a implementar)
   }
 
-  onDownload(file: File): void {
+  onDownload(file: FileUpload): void {
     window.open(`/api/files/${file.id}/download`, '_blank');
   }
 
-  onDelete(file: File): void {
+  onDelete(file: FileUpload): void {
     if (confirm(`Deseja realmente excluir o arquivo "${file.original_name}"?`)) {
       this.loading = true;
       this.fileService.deleteFile(file.id).subscribe({

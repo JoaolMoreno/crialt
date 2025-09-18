@@ -2,14 +2,12 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../../../core/services/client.service';
 import { ProjectService } from '../../../core/services/project.service';
-import { FileService } from '../../../core/services/file.service';
+import { FileService, FileUpload, PaginatedFiles } from '../../../core/services/file.service';
 import { Client } from '../../../core/models/client.model';
 import { Project } from '../../../core/models/project.model';
-import { File } from '../../../core/models/file.model';
 import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from '../../../shared/shared.module';
 import { PaginatedProject } from '../../../core/models/paginated-project.model';
-import { PaginatedFile } from '../../../core/models/paginated-file.model';
 
 @Component({
   selector: 'app-client-detail',
@@ -27,7 +25,7 @@ export class ClientDetailComponent implements OnInit {
 
   client: Client | null = null;
   projects: Project[] = [];
-  documents: File[] = [];
+  documents: FileUpload[] = [];
   loading = false;
   error = '';
   editMode = false;
@@ -76,7 +74,7 @@ export class ClientDetailComponent implements OnInit {
 
   loadDocuments(clientId: string): void {
     this.fileService.getFiles({ client_id: clientId }).subscribe({
-      next: (files: PaginatedFile) => {
+      next: (files: PaginatedFiles) => {
         this.documents = files.items;
       },
       error: () => {

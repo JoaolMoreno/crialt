@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
-import { Stage, PaymentStatus } from '../../../core/models/stage.model';
-import { getStatusBadge } from '../../../core/models/status.model';
+import {PaymentStatus, Stage} from '../../../core/models/stage.model';
 import { ProjectTimelineComponent } from "../project-timeline/project-timeline.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { ProgressBarComponent } from "../project-progress-bar/progress-bar.component";
+import {FileCategory, FileService, FileUpload} from '../../../core/services/file.service';
 import { Location } from '@angular/common';
+import {getStatusBadge} from "../../../core/models/status.model";
 
 @Component({
   selector: 'app-project-detail',
@@ -19,9 +20,11 @@ import { Location } from '@angular/common';
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly fileService = inject(FileService);
   private readonly projectService = inject(ProjectService);
   private readonly location = inject(Location);
 
+  projectFiles: FileUpload[] = [];
   project: Project | null = null;
   loading = false;
   error = '';
@@ -41,11 +44,23 @@ export class ProjectDetailComponent implements OnInit {
         this.project = project;
         this.progress = this.getProjectProgress(project);
         this.currentStage = this.getCurrentStage(project);
+        this.loadProjectFiles(id);
         this.loading = false;
       },
       error: () => {
         this.error = 'Erro ao carregar projeto.';
         this.loading = false;
+      }
+    });
+  }
+
+  loadProjectFiles(projectId: string): void {
+    this.fileService.getFilesByProject(projectId).subscribe({
+      next: (files) => {
+        this.projectFiles = files;
+      },
+      error: () => {
+        this.projectFiles = [];
       }
     });
   }
@@ -58,6 +73,7 @@ export class ProjectDetailComponent implements OnInit {
 
   getCurrentStage(project: Project): Stage | null {
     if (!project.current_stage_id || !project.stages) return null;
+    // Implementar chamada ao serviço para pausar
     return project.stages.find(s => s.id === project.current_stage_id) || null;
   }
 
@@ -92,5 +108,56 @@ export class ProjectDetailComponent implements OnInit {
       paid: 'Pago'
     };
     return labels[status] || status;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getCategoryLabel(category: FileCategory): string {
+    const labels = {
+      [FileCategory.DOCUMENT]: 'Documento',
+      [FileCategory.IMAGE]: 'Imagem',
+      [FileCategory.PLAN]: 'Planta',
+      [FileCategory.RENDER]: 'Render',
+      [FileCategory.CONTRACT]: 'Contrato'
+    };
+    return labels[category] || category;
+  }
+
+  getFileIcon(category: FileCategory, mimeType: string): string {
+    if (category === FileCategory.IMAGE || mimeType.startsWith('image/')) {
+      return 'image';
+    }
+
+    if (category === FileCategory.PLAN) {
+      return 'architecture';
+    }
+
+    if (category === FileCategory.RENDER) {
+      return 'view_in_ar';
+    }
+
+    if (category === FileCategory.CONTRACT) {
+      return 'description';
+    }
+
+    if (mimeType === 'application/pdf') {
+      return 'picture_as_pdf';
+    }
+
+    if (mimeType.includes('word') || mimeType.includes('document')) {
+      return 'description';
+    }
+
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) {
+      return 'table_chart';
+    }
+
+    return 'insert_drive_file';
   }
 }

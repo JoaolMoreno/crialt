@@ -255,6 +255,16 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Seção de Upload de Arquivos -->
+      <div class="form-group arquivos-section">
+        <label>Arquivos do Projeto</label>
+        <app-file-upload
+          [projectId]="projectId"
+          (filesChanged)="onFilesChanged($event)">
+        </app-file-upload>
+      </div>
+
       <div *ngIf="error" class="error-message">{{ error }}</div>
       <button type="submit" class="btn-padrao" [disabled]="loading">
         <span class="material-icons">save</span> Salvar
