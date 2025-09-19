@@ -5,6 +5,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { CeilPipe } from 'src/app/shared/utils/ceil.pipe';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
 
 @NgModule({
   imports: [
@@ -17,7 +20,10 @@ import { CeilPipe } from 'src/app/shared/utils/ceil.pipe';
     BaseChartDirective,
     LoadingSpinnerComponent,
     CeilPipe,
-    FormsModule
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    ClientTimezoneDatePipe
   ],
   exports: [
     CommonModule,
@@ -29,7 +35,10 @@ import { CeilPipe } from 'src/app/shared/utils/ceil.pipe';
     NgForOf,
     BaseChartDirective,
     LoadingSpinnerComponent,
-    CeilPipe
+    CeilPipe,
+    MatButtonModule,
+    MatIconModule,
+    ClientTimezoneDatePipe
   ]
 })
 export class SharedModule {}

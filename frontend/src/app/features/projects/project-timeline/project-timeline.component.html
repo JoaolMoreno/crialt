@@ -72,13 +72,13 @@
         <div class="date-item">
           <span class="date-label">Início:</span>
           <span class="date-value">
-            {{ (selectedStage.actual_start_date || selectedStage.planned_start_date) | date:'dd/MM/yy' }}
+            {{ (selectedStage.actual_start_date || selectedStage.planned_start_date) | clientTimezoneDate:'dd/MM/yy' }}
           </span>
         </div>
         <div class="date-item">
           <span class="date-label">Fim:</span>
           <span class="date-value">
-            {{ (selectedStage.actual_end_date || selectedStage.planned_end_date) | date:'dd/MM/yy' }}
+            {{ (selectedStage.actual_end_date || selectedStage.planned_end_date) | clientTimezoneDate:'dd/MM/yy' }}
           </span>
         </div>
       </div>

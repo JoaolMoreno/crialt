@@ -38,7 +38,7 @@
           <td>{{ file.size | number }} bytes</td>
           <td>{{ file.project_id || '-' }}</td>
           <td>{{ file.stage_id || '-' }}</td>
-          <td>{{ file.created_at | date:'short' }}</td>
+          <td>{{ file.created_at | clientTimezoneDate:'short' }}</td>
           <td>
             <button class="action-btn" (click)="onDownload(file)"><span class="material-icons">download</span></button>
             <button class="action-btn" (click)="onDelete(file)"><span class="material-icons">delete</span></button>

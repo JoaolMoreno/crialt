@@ -38,7 +38,7 @@
               {{ client.is_active ? 'Ativo' : 'Inativo' }}
             </span>
           </td>
-          <td data-label="Data de Cadastro">{{ client.created_at | date:'shortDate' }}</td>
+          <td data-label="Data de Cadastro">{{ client.created_at | clientTimezoneDate:'shortDate' }}</td>
           <td data-label="Ações">
             <button class="action-btn" (click)="onEditClient(client)" title="Editar cliente"><span class="material-icons">edit</span></button>
             <button class="action-btn" (click)="onViewClient(client)" title="Visualizar cliente"><span class="material-icons">visibility</span></button>

@@ -39,8 +39,8 @@
     <div class="stage-name">{{ currentStage.name }}</div>
     <div class="stage-status">Status: <span class="status-badge" [ngClass]="statusBadgeClass(currentStage.status)">{{ statusLabel(currentStage.status) }}</span></div>
     <div class="stage-dates">
-      Início: {{ (currentStage.actual_start_date || currentStage.planned_start_date) | date:'shortDate' }} |
-      Prazo: {{ (currentStage.actual_end_date || currentStage.planned_end_date) | date:'shortDate' }}
+      Início: {{ (currentStage.actual_start_date || currentStage.planned_start_date) | clientTimezoneDate:'shortDate' }} |
+      Prazo: {{ (currentStage.actual_end_date || currentStage.planned_end_date) | clientTimezoneDate:'shortDate' }}
     </div>
   </div>
   <nav class="tabs">
@@ -55,9 +55,9 @@
       <h2>Resumo do Projeto</h2>
       <p>{{ project.description }}</p>
       <div class="dates">
-        Início: {{ project.start_date | date:'shortDate' }} |
-        Prazo estimado: {{ project.estimated_end_date | date:'shortDate' }}
-        <span *ngIf="project.actual_end_date">| Finalizado: {{ project.actual_end_date | date:'shortDate' }}</span>
+        Início: {{ project.start_date | clientTimezoneDate:'shortDate' }} |
+        Prazo estimado: {{ project.estimated_end_date | clientTimezoneDate:'shortDate' }}
+        <span *ngIf="project.actual_end_date">| Finalizado: {{ project.actual_end_date | clientTimezoneDate:'shortDate' }}</span>
       </div>
       <div class="scope">
         <span *ngIf="project.scope.total_area">Área: {{ project.scope.total_area }} m²</span>
@@ -75,43 +75,7 @@
     </div>
     <div *ngIf="activeTab==='files'">
       <h2>Arquivos do Projeto</h2>
-      <div class="files-display" *ngIf="projectFiles.length > 0; else noFiles">
-        <div class="file-item" *ngFor="let file of projectFiles">
-          <div class="file-info">
-            <div class="file-icon">
-              <span class="material-icons">
-                {{ getFileIcon(file.category, file.mime_type) }}
-              </span>
-            </div>
-            <div class="file-details">
-              <div class="file-name">{{ file.original_name }}</div>
-              <div class="file-meta">
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
-                <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
-                <span class="file-date">{{ file.created_at | date:'short' }}</span>
-              </div>
-              <div class="file-description" *ngIf="file.description">
-                {{ file.description }}
-              </div>
-            </div>
-          </div>
-          <div class="file-actions">
-            <button type="button"
-                    class="btn-icon download-btn"
-                    (click)="downloadFile(file)"
-                    title="Baixar arquivo">
-              <span class="material-icons">download</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <ng-template #noFiles>
-        <div class="no-files-message">
-          <span class="material-icons">folder_open</span>
-          <p>Nenhum arquivo encontrado para este projeto.</p>
-          <p>Use o formulário de edição para adicionar arquivos.</p>
-        </div>
-      </ng-template>
+      <app-file-upload [projectId]="project.id" [readonly]="true"></app-file-upload>
     </div>
     <div *ngIf="activeTab==='finance'">
       <h2>Financeiro</h2>

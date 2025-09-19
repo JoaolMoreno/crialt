@@ -1,5 +1,6 @@
 <div class="file-upload-container">
   <div class="upload-area"
+       *ngIf="!readonly"
        [class.drag-over]="dragOver"
        [class.disabled]="!projectId"
        (dragover)="onDragOver($event)"
@@ -35,39 +36,88 @@
   </div>
 
   <div class="files-list" *ngIf="files.length > 0">
-    <h4>Arquivos do Projeto</h4>
+    <div *ngIf="files.length > 1" class="files-list-toolbar" style="display:flex;align-items:center;margin-bottom:8px;gap:16px;">
+      <mat-checkbox [checked]="allFilesSelected" (change)="selectAllFiles($event.checked)">
+        Selecionar todos
+      </mat-checkbox>
+      <button class="btn-padrao" (click)="downloadSelectedFiles()" [disabled]="!anyFileSelected">
+        BAIXAR SELECIONADOS
+      </button>
+      <span *ngIf="anyFileSelected">({{ selectedFiles.size }} selecionado{{ selectedFiles.size > 1 ? 's' : '' }})</span>
+    </div>
     <div class="file-item" *ngFor="let file of files">
-      <div class="file-info">
-        <div class="file-icon">
-          <span class="material-icons">
-            {{ getFileIcon(file.category, file.mime_type) }}
-          </span>
+      <div style="display:flex;align-items:flex-start;">
+        <div *ngIf="files.length > 1" style="margin-right:8px;">
+          <mat-checkbox [checked]="isFileSelected(file)" (change)="toggleFileSelection(file, $event.checked)"></mat-checkbox>
         </div>
-        <div class="file-details">
-          <div class="file-name">{{ file.original_name }}</div>
-          <div class="file-meta">
-            <span class="file-size">{{ formatFileSize(file.size) }}</span>
-            <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
-            <span class="file-date">{{ file.created_at | date:'short' }}</span>
+        <div class="file-info">
+          <div class="file-icon">
+            <span class="material-icons">
+              {{ getFileIcon(file.category, file.mime_type) }}
+            </span>
           </div>
-          <div class="file-description" *ngIf="file.description">
-            {{ file.description }}
+          <div class="file-details">
+            <div class="file-name">
+              <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileName">
+                <input [(ngModel)]="editFileName" name="editFileName" required style="width:320px; max-width:100%; margin-right:8px;" />
+              </ng-container>
+              <ng-template #showFileName>{{ file.original_name }}</ng-template>
+            </div>
+            <div class="file-meta">
+              <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileCategory">
+                <select [(ngModel)]="editFileCategory" name="editFileCategory" required style="margin-right:8px;">
+                  <option *ngFor="let cat of FileCategory | keyvalue" [value]="cat.value">{{ getCategoryLabel(cat.value) }}</option>
+                </select>
+              </ng-container>
+              <ng-template #showFileCategory>
+                <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
+              </ng-template>
+              <span class="file-date">{{ file.created_at | clientTimezoneDate:'short' }}</span>
+            </div>
+            <div class="file-description" *ngIf="file.description">
+              {{ file.description }}
+            </div>
           </div>
         </div>
       </div>
-      <div class="file-actions">
-        <button type="button"
-                class="btn-icon download-btn"
+      <div class="file-actions" *ngIf="!(editingFile && editingFile.id === file.id) && !readonly">
+        <button mat-icon-button
+                type="button"
+                color="accent"
+                (click)="startEditFile(file)"
+                title="Editar arquivo">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button
+                type="button"
+                color="primary"
                 (click)="downloadFile(file)"
                 title="Baixar arquivo">
-          <span class="material-icons">download</span>
+          <mat-icon>download</mat-icon>
         </button>
-        <button type="button"
-                class="btn-icon delete-btn"
+        <button mat-icon-button
+                type="button"
+                color="warn"
                 (click)="deleteFile(file)"
                 title="Excluir arquivo">
-          <span class="material-icons">delete</span>
+          <mat-icon>delete</mat-icon>
         </button>
+      </div>
+      <div class="file-actions" *ngIf="readonly">
+        <button mat-icon-button
+                type="button"
+                color="primary"
+                (click)="downloadFile(file)"
+                title="Baixar arquivo">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="editingFile && editingFile.id === file.id && !readonly" class="file-edit-form">
+        <form (ngSubmit)="saveEditFile()" class="file-edit-inline-form">
+          <button mat-icon-button color="primary" type="submit" title="Salvar"><mat-icon>check</mat-icon></button>
+          <button mat-icon-button color="warn" type="button" (click)="cancelEditFile()" title="Cancelar"><mat-icon>close</mat-icon></button>
+        </form>
       </div>
     </div>
   </div>

@@ -23,6 +23,7 @@ export interface FileUpload {
 export enum FileCategory {
   DOCUMENT = 'document',
   IMAGE = 'image',
+  VIDEO = 'video',
   PLAN = 'plan',
   RENDER = 'render',
   CONTRACT = 'contract'
@@ -120,6 +121,17 @@ export class FileService {
       error: (error) => {
         console.error('Erro ao baixar arquivo:', error);
       }
+    });
+  }
+
+  updateFile(fileId: string, data: Partial<FileUpload>): Observable<FileUpload> {
+    return this.http.put<FileUpload>(`${this.baseUrl}/${fileId}`, data, { withCredentials: true });
+  }
+
+  downloadFilesByIds(fileIds: string[]): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/download`, { file_ids: fileIds }, {
+      responseType: 'blob',
+      withCredentials: true
     });
   }
 }
