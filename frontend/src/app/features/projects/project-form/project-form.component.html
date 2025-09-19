@@ -182,14 +182,6 @@
                   <input type="number" [(ngModel)]="stage.value" [ngModelOptions]="{standalone: true}" placeholder="Valor" />
                 </div>
                 <div class="form-group">
-                  <label>Status de Pagamento</label>
-                  <select [(ngModel)]="stage.payment_status" [ngModelOptions]="{standalone: true}">
-                    <option value="pending">Pendente</option>
-                    <option value="partial">Parcial</option>
-                    <option value="paid">Pago</option>
-                  </select>
-                </div>
-                <div class="form-group">
                   <label>Status da Etapa</label>
                   <select [(ngModel)]="stage.status" [ngModelOptions]="{standalone: true}">
                     <option value="pending">Pendente</option>
@@ -240,7 +232,6 @@
               <th>Fim</th>
               <th>Progresso</th>
               <th>Status</th>
-              <th>Pagamento</th>
             </tr>
           </thead>
           <tbody>
@@ -249,8 +240,7 @@
               <td>{{ stage.planned_start_date }}</td>
               <td>{{ stage.planned_end_date }}</td>
               <td>{{ stage.progress_percentage || 0 }}%</td>
-              <td>{{ stage.status }}</td>
-              <td>{{ stage.payment_status }}</td>
+              <td>{{ statusLabel(stage.status) }}</td>
             </tr>
           </tbody>
         </table>

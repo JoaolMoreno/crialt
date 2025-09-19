@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
-import {PaymentStatus, Stage} from '../../../core/models/stage.model';
+import { Stage } from '../../../core/models/stage.model'; // Removido PaymentStatus
 import { ProjectTimelineComponent } from "../project-timeline/project-timeline.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { ProgressBarComponent } from "../project-progress-bar/progress-bar.component";
@@ -99,15 +99,6 @@ export class ProjectDetailComponent implements OnInit {
   }
   statusBadgeClass(status: string): string {
     return 'status-badge ' + getStatusBadge(status).color;
-  }
-
-  getPaymentStatusLabel(status: PaymentStatus): string {
-    const labels = {
-      pending: 'Pendente',
-      partial: 'Parcial',
-      paid: 'Pago'
-    };
-    return labels[status] || status;
   }
 
   formatFileSize(bytes: number): string {

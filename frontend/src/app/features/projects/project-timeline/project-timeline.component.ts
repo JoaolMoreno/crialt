@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Stage, PaymentStatus } from '../../../core/models/stage.model';
+import { Stage } from '../../../core/models/stage.model';
 import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from '../../../shared/shared.module';
 
@@ -23,15 +23,6 @@ export class ProjectTimelineComponent {
 
   statusBadgeClass(status: string): string {
     return 'status-badge ' + getStatusBadge(status).color;
-  }
-
-  getPaymentStatusLabel(status: PaymentStatus): string {
-    const labels = {
-      pending: 'Pendente',
-      partial: 'Parcial',
-      paid: 'Pago'
-    };
-    return labels[status] || status;
   }
 
   getSortedStages(): Stage[] {
