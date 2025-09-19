@@ -67,6 +67,4 @@ Thumbs.db
 *.rej
 
 # Ignore uploads/backups
-backend/storage/uploads/
-backend/storage/backups/
-
+storage/
