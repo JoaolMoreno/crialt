@@ -7,6 +7,7 @@ import enum
 class FileCategory(str, enum.Enum):
     document = 'document'
     image = 'image'
+    video = 'video'
     plan = 'plan'
     render = 'render'
     contract = 'contract'
@@ -27,6 +28,8 @@ class FileCreate(FileBase):
     uploaded_by_id: UUID
 
 class FileUpdate(BaseModel):
+    original_name: Optional[str] = None
+    category: Optional[FileCategory] = None
     description: Optional[str] = None
 
 class FileRead(FileBase):

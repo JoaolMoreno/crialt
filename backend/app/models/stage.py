@@ -8,7 +8,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from ..schemas.stage import StageStatus, PaymentStatus
+from ..schemas.stage import StageStatus
 from ..models.base import Base
 
 
@@ -25,7 +25,6 @@ class Stage(Base):
     planned_end_date = Column(Date, nullable=False)
     actual_end_date = Column(Date, nullable=True)
     value = Column(Numeric(10, 2), nullable=False)
-    payment_status = Column(SQLAlchemyEnum(PaymentStatus), default=PaymentStatus.pending, nullable=False)
     specific_data = Column(JSON, nullable=True)
     progress_percentage = Column(Integer, default=0)
     notes = Column(String, nullable=True)

@@ -23,7 +23,7 @@ class FileService:
         if file_data.size > settings.MAX_FILE_SIZE:
             raise ValueError("Arquivo excede o tamanho máximo permitido.")
         ext = os.path.splitext(file_data.original_name)[1].lower()
-        if ext not in settings.ALLOWED_EXTENSIONS:
+        if len(settings.ALLOWED_EXTENSIONS) >0 and ext not in settings.ALLOWED_EXTENSIONS:
             raise ValueError("Extensão de arquivo não permitida.")
         folder = os.path.join(settings.UPLOAD_DIR, file_data.category.value)
         os.makedirs(folder, exist_ok=True)

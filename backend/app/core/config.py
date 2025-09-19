@@ -29,8 +29,16 @@ class Settings(BaseSettings):
 
     # File Storage
     UPLOAD_DIR: str = "app/storage/uploads"
-    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
-    ALLOWED_EXTENSIONS: List[str] = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".dxf", ".txt", ".zip", ".rar"]
+    MAX_FILE_SIZE: int = 1 * 1024 * 1024 * 1024  # 1GB
+    ALLOWED_EXTENSIONS: List[str] = [
+        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".dxf", ".txt", ".zip", ".rar",
+        # Vídeo
+        ".mp4", ".mov", ".avi", ".mkv", ".webm",
+        # Renders/3D
+        ".blend", ".fbx", ".obj", ".gltf", ".glb", ".3ds", ".stl", ".dae", ".max", ".c4d",
+        # Outros
+        ".ppt", ".pptx", ".csv", ".svg", ".heic", ".tif", ".tiff"
+    ]
 
     class Config:
         case_sensitive = True

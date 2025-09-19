@@ -12,7 +12,7 @@ from .project import ProjectStatus, ProjectBase, ProjectCreate, ProjectUpdate, P
 # Stage Type schemas
 from .stage_type import StageTypeBase, StageTypeCreate, StageTypeUpdate, StageTypeRead
 # Stage schemas
-from .stage import StageStatus, PaymentStatus, StageBase, StageCreate, StageUpdate
+from .stage import StageStatus, StageBase, StageCreate, StageUpdate
 # Task schemas
 from .task import TaskStatus, TaskPriority, TaskBase, TaskCreate, TaskUpdate, TaskRead
 # File schemas
@@ -28,7 +28,7 @@ __all__ = [
     # Stage Type
     "StageTypeBase", "StageTypeCreate", "StageTypeUpdate", "StageTypeRead",
     # Stage
-    "StageStatus", "PaymentStatus", "StageBase", "StageCreate", "StageUpdate",
+    "StageStatus", "StageBase", "StageCreate", "StageUpdate",
     # Task
     "TaskStatus", "TaskPriority", "TaskBase", "TaskCreate", "TaskUpdate", "TaskRead",
     # File

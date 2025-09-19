@@ -16,7 +16,7 @@ async def get_stage_types(
     actor = Depends(get_current_actor_factory()),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    order_by: str = Query("name"),
+    order_by: str = Query("created_at"),
     order_dir: str = Query("asc", pattern="^(asc|desc)$"),
     name: str = Query(None),
     is_active: bool = Query(None),

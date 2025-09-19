@@ -54,7 +54,7 @@ class StageTypeService:
         return result
 
     def get_active_stage_types(self, actor: Any) -> List[StageTypeRead]:
-        stage_types = self.db.query(StageType).filter(StageType.is_active == True).all()
+        stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.created_at).all()
         return [StageTypeRead.model_validate(st) for st in stage_types]
 
     def get_stage_type(self, stage_type_id: str, actor: Any) -> StageTypeRead:
