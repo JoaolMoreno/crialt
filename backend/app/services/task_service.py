@@ -70,7 +70,7 @@ class TaskService:
     def get_tasks_by_stage(self, stage_id: str, actor, client_resource_permission) -> List[TaskRead]:
         stage = self.db.get(Stage, stage_id)
         if not stage:
-            raise HTTPException(status_code=404, detail="Etapa não encontrada")
+            raise HTTPException(status_code=404, detail="Etapa não foi encontrada.")
         client_ids = [str(client.id) for client in stage.project.clients]
         client_resource_permission(client_ids, actor)
         tasks = self.db.query(Task).filter(Task.stage_id == stage_id).all()
@@ -80,7 +80,7 @@ class TaskService:
         from ..models.project import Project
         project = self.db.get(Project, project_id)
         if not project:
-            raise HTTPException(status_code=404, detail="Projeto não encontrado")
+            raise HTTPException(status_code=404, detail="Projeto não foi encontrado.")
         client_ids = [str(client.id) for client in project.clients]
         client_resource_permission(client_ids, actor)
         tasks = self.db.query(Task).join(Stage).filter(Stage.project_id == project_id).all()
@@ -89,7 +89,7 @@ class TaskService:
     def get_task(self, task_id: str, actor, client_resource_permission) -> TaskRead:
         task = self.db.get(Task, task_id)
         if not task:
-            raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+            raise HTTPException(status_code=404, detail="Tarefa não foi encontrada.")
         client_ids = [str(client.id) for client in task.stage.project.clients]
         client_resource_permission(client_ids, actor)
         return TaskRead.model_validate(task, from_attributes=True)

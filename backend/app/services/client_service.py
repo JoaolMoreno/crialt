@@ -70,20 +70,20 @@ class ClientService:
     def get_client(self, client_id: str, actor: Any) -> ClientRead:
         client = self.db.get(Client, client_id)
         if not client:
-            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            raise HTTPException(status_code=404, detail="Cliente não foi encontrado.")
         if hasattr(actor, "role") and getattr(actor, "role", None) == "admin":
             return self.serialize_client(client)
         if hasattr(actor, "id") and str(actor.id) == str(client.id):
             return self.serialize_client(client)
-        raise HTTPException(status_code=403, detail="Acesso negado")
+        raise HTTPException(status_code=403, detail="Você não tem permissão para acessar este recurso.")
 
     def create_client(self, client_data: ClientCreate) -> ClientRead:
         existing_email = self.db.query(Client).filter(Client.email == client_data.email).first()
         if existing_email:
-            raise HTTPException(status_code=400, detail="Email já cadastrado")
+            raise HTTPException(status_code=400, detail="Já existe um cliente com este e-mail.")
         existing_doc = self.db.query(Client).filter(Client.document == client_data.document).first()
         if existing_doc:
-            raise HTTPException(status_code=400, detail="Documento já cadastrado")
+            raise HTTPException(status_code=400, detail="Já existe um cliente com este documento.")
         client = Client(
             name=client_data.name,
             document=client_data.document,
@@ -111,7 +111,7 @@ class ClientService:
     def update_client(self, client_id: str, client_data: ClientUpdate) -> ClientRead:
         client = self.db.get(Client, client_id)
         if not client:
-            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            raise HTTPException(status_code=404, detail="Cliente não foi encontrado.")
         update_data = client_data.model_dump(exclude_unset=True)
         if "password" in update_data and update_data["password"]:
             client.password_hash = get_password_hash(update_data["password"])
@@ -127,7 +127,7 @@ class ClientService:
     def delete_client(self, client_id: str) -> Dict[str, str]:
         client = self.db.get(Client, client_id)
         if not client:
-            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            raise HTTPException(status_code=404, detail="Cliente não foi encontrado")
         client.is_active = False  # Soft delete
         self.db.commit()
         cache.invalidate("clients")

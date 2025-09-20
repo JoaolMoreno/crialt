@@ -24,7 +24,7 @@ class ProjectService:
         for client_id in project_data.clients:
             client = self.db.get(Client, client_id)
             if not client:
-                raise ValueError(f"Cliente com ID {client_id} não encontrado.")
+                raise HTTPException(status_code=400, detail="Cliente não foi encontrado.")
 
         project = Project(
             name=project_data.name,
@@ -61,9 +61,9 @@ class ProjectService:
             cache.invalidate('dashboard')
             return project
 
-        except IntegrityError as e:
+        except IntegrityError:
             self.db.rollback()
-            raise ValueError(f"Erro ao criar projeto: {str(e)}")
+            raise HTTPException(status_code=400, detail="Não foi possível criar o projeto.")
 
     def _create_default_stages(self, project: Project, user_id: str) -> None:
         stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.name).all()
@@ -96,7 +96,7 @@ class ProjectService:
         for stage_data in stages_data:
             stage_type = self.db.get(StageType, stage_data.stage_type_id)
             if not stage_type:
-                raise ValueError(f"Tipo de etapa com ID {stage_data.stage_type_id} não encontrado.")
+                raise HTTPException(status_code=400, detail="Tipo de etapa não foi encontrado.")
 
             stage = Stage(
                 name=stage_data.name or str(stage_type.name),
@@ -267,7 +267,7 @@ class ProjectService:
     def update_project(self, project_id: str, project_data: ProjectUpdate) -> Project:
         project = self.db.get(Project, project_id)
         if not project:
-            raise ValueError("Projeto não encontrado")
+            raise HTTPException(status_code=404, detail="Projeto não foi encontrado")
 
         try:
             updated_fields = project_data.model_dump(exclude_unset=True, exclude={"stages", "clients"})
@@ -276,7 +276,7 @@ class ProjectService:
                 start_date = updated_fields.get("start_date", project.start_date)
                 end_date = updated_fields.get("estimated_end_date", project.estimated_end_date)
                 if end_date <= start_date:
-                    raise ValueError("Data de término deve ser posterior à data de início.")
+                    raise HTTPException(status_code=400, detail="Data de término deve ser posterior à data de início.")
 
             for field, value in updated_fields.items():
                 setattr(project, field, value)
@@ -296,15 +296,15 @@ class ProjectService:
             cache.invalidate('dashboard')
             return project
 
-        except IntegrityError as e:
+        except IntegrityError:
             self.db.rollback()
-            raise ValueError(f"Erro ao atualizar projeto: {str(e)}")
+            raise HTTPException(status_code=400, detail="Não foi possível atualizar o projeto.")
 
     def _update_project_clients(self, project: Project, new_client_ids: list) -> None:
         for client_id in new_client_ids:
             client = self.db.get(Client, client_id)
             if not client:
-                raise ValueError(f"Cliente com ID {client_id} não encontrado.")
+                raise HTTPException(status_code=400, detail="Cliente não foi encontrado.")
 
         self.db.execute(project_clients.delete().where(project_clients.c.project_id == project.id))
 
@@ -325,7 +325,7 @@ class ProjectService:
                     if project.current_stage_id == stage.id:
                         current_stage_still_exists = True
                 else:
-                    raise ValueError(f"Etapa com ID {stage_data.id} não encontrada ou não pertence ao projeto.")
+                    raise HTTPException(status_code=400, detail="Etapa não foi encontrada ou não pertence ao projeto.")
             else:
                 new_stage = self._create_new_stage(project, stage_data)
                 stage_ids_to_keep.append(new_stage.id)
@@ -375,7 +375,7 @@ class ProjectService:
         if "stage_type_id" in updated_fields:
             stage_type = self.db.get(StageType, updated_fields["stage_type_id"])
             if not stage_type:
-                raise ValueError(f"Tipo de etapa com ID {updated_fields['stage_type_id']} não encontrado.")
+                raise HTTPException(status_code=400, detail="Tipo de etapa não foi encontrado.")
 
         for field, value in updated_fields.items():
             setattr(stage, field, value)
@@ -385,7 +385,7 @@ class ProjectService:
     def _create_new_stage(self, project: Project, stage_data) -> Stage:
         stage_type = self.db.get(StageType, stage_data.stage_type_id)
         if not stage_type:
-            raise ValueError(f"Tipo de etapa com ID {stage_data.stage_type_id} não encontrado.")
+            raise HTTPException(status_code=400, detail="Tipo de etapa não foi encontrado.")
 
         stage = Stage(
             name=stage_data.name or str(stage_type.name),
@@ -415,11 +415,11 @@ class ProjectService:
     def update_current_stage(self, project_id: str, stage_id: str) -> Project:
         project = self.db.get(Project, project_id)
         if not project:
-            raise ValueError("Projeto não encontrado")
+            raise HTTPException(status_code=404, detail="Projeto não foi encontrado")
 
         stage = self.db.get(Stage, stage_id)
         if not stage or stage.project_id != project.id:
-            raise ValueError("Etapa não encontrada ou não pertence ao projeto")
+            raise HTTPException(status_code=400, detail="Etapa não foi encontrada ou não pertence ao projeto")
 
         try:
             project.current_stage_id = stage_id
@@ -429,7 +429,7 @@ class ProjectService:
             return project
         except IntegrityError as e:
             self.db.rollback()
-            raise ValueError(f"Erro ao atualizar etapa atual: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Erro ao atualizar etapa atual: {str(e)}")
 
     def delete_project(self, project_id: str) -> bool:
         project = self.db.get(Project, project_id)
@@ -448,13 +448,13 @@ class ProjectService:
 
     def _validate_project_data(self, project_data) -> None:
         if project_data.estimated_end_date <= project_data.start_date:
-            raise ValueError("Data de término deve ser posterior à data de início.")
+            raise HTTPException(status_code=400, detail="Data de término deve ser posterior à data de início.")
 
         if not project_data.name or not project_data.name.strip():
-            raise ValueError("Nome do projeto é obrigatório.")
+            raise HTTPException(status_code=400, detail="Nome do projeto é obrigatório.")
 
         if project_data.total_value < 0:
-            raise ValueError("Valor total do projeto não pode ser negativo.")
+            raise HTTPException(status_code=400, detail="Valor total do projeto não pode ser negativo.")
 
         if not project_data.clients:
-            raise ValueError("Pelo menos um cliente deve ser vinculado ao projeto.")
+            raise HTTPException(status_code=400, detail="Pelo menos um cliente deve ser vinculado ao projeto.")

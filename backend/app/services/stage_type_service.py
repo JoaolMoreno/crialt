@@ -61,15 +61,14 @@ class StageTypeService:
         uuid = UUID(stage_type_id)
         stage_type = self.db.query(StageType).get(uuid)
         if not stage_type:
-            raise HTTPException(status_code=404, detail="Tipo de etapa não encontrado")
+            raise HTTPException(status_code=404, detail="Tipo de etapa não foi encontrado.")
         return StageTypeRead.model_validate(stage_type)
 
     def create_stage_type(self, stage_type_data: StageTypeCreate, admin_user: User) -> StageTypeRead:
         if self.stage_type_exists(stage_type_data.name):
             raise HTTPException(
                 status_code=400,
-                detail="Já existe um tipo de etapa com este nome"
-            )
+                detail="Já existe um tipo de etapa com este nome.")
         stage_type = StageType(**stage_type_data.model_dump())
         self.db.add(stage_type)
         self.db.commit()
@@ -83,11 +82,10 @@ class StageTypeService:
         if stage_type_data.name and self.stage_type_exists(stage_type_data.name, uuid):
             raise HTTPException(
                 status_code=400,
-                detail="Já existe um tipo de etapa com este nome"
-            )
+                detail="Já existe um tipo de etapa com este nome.")
         stage_type = self.db.query(StageType).get(uuid)
         if not stage_type:
-            raise HTTPException(status_code=404, detail="Tipo de etapa não encontrado")
+            raise HTTPException(status_code=404, detail="Tipo de etapa não foi encontrado.")
         for field, value in stage_type_data.model_dump(exclude_unset=True).items():
             setattr(stage_type, field, value)
         self.db.commit()

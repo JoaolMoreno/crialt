@@ -29,13 +29,13 @@ class UserService:
     def get_user(self, user_id: str) -> UserRead:
         user = self.db.get(User, user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            raise HTTPException(status_code=404, detail="Usuário não foi encontrado.")
         return UserRead.model_validate(user)
 
     def create_user(self, user_data: UserCreate) -> UserRead:
         existing = self.db.query(User).filter(User.email == user_data.email).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Email já cadastrado")
+            raise HTTPException(status_code=400, detail="Já existe um usuário com este e-mail.")
         user = User(
             name=user_data.name,
             username=user_data.username,
@@ -55,7 +55,7 @@ class UserService:
     def update_user(self, user_id: str, user_data: UserUpdate) -> UserRead:
         user = self.db.get(User, user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            raise HTTPException(status_code=404, detail="Usuário não foi encontrado.")
         update_data = user_data.model_dump(exclude_unset=True)
         if "password" in update_data:
             update_data["password_hash"] = get_password_hash(update_data.pop("password"))
@@ -70,7 +70,7 @@ class UserService:
     def delete_user(self, user_id: str) -> dict:
         user = self.db.get(User, user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            raise HTTPException(status_code=404, detail="Usuário não foi encontrado")
         user.is_active = False
         self.db.commit()
         cache.invalidate("users")

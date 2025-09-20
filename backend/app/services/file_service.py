@@ -19,12 +19,12 @@ class FileService:
 
     def save_file(self, file_data: FileCreate, file_bytes: bytes) -> File:
         if file_data.category not in FileCategory:
-            raise ValueError("Categoria de arquivo inválida.")
+            raise HTTPException(status_code=400, detail="Categoria de arquivo não é válida.")
         if file_data.size > settings.MAX_FILE_SIZE:
-            raise ValueError("Arquivo excede o tamanho máximo permitido.")
+            raise HTTPException(status_code=400, detail="O arquivo é muito grande.")
         ext = os.path.splitext(file_data.original_name)[1].lower()
         if ext not in settings.ALLOWED_EXTENSIONS:
-            raise ValueError("Extensão de arquivo não permitida.")
+            raise HTTPException(status_code=400, detail="Tipo de arquivo não permitido.")
         folder = os.path.join(settings.UPLOAD_DIR, file_data.category.value)
         os.makedirs(folder, exist_ok=True)
         stored_name = f"{datetime.now(timezone.utc).timestamp()}_{file_data.original_name}"
