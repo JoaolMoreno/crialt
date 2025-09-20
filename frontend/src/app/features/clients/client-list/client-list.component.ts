@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-client-list',
@@ -16,6 +17,7 @@ import { debounceTime } from 'rxjs/operators';
 export class ClientListComponent implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   clients: Client[] = [];
   total = 0;
@@ -49,9 +51,8 @@ export class ClientListComponent implements OnInit {
       offset: (this.currentPage - 1) * this.pageSize,
       order_by: this.sortColumn || 'created_at',
       order_dir: this.sortDirection,
-      search: this.searchQuery || undefined,
-      is_active: this.selectedStatus === 'active' ? true : this.selectedStatus === 'inactive' ? false : undefined,
-      created_at: this.selectedDate || undefined
+      status: this.selectedStatus || undefined,
+      search: this.searchQuery || undefined
     };
     this.clientService.getClients(params).subscribe({
       next: (res) => {
@@ -59,9 +60,10 @@ export class ClientListComponent implements OnInit {
         this.total = res.total;
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'Erro ao carregar clientes.';
+        this.notification.error(err);
         this.loading = false;
-        this.error = 'Erro ao buscar clientes.';
       }
     });
   }

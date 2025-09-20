@@ -4,6 +4,7 @@ import { StageType } from '../../../core/models/stage-type.model';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-stage-type-list',
@@ -15,6 +16,7 @@ import { debounceTime } from 'rxjs/operators';
 export class StageTypeListComponent implements OnInit {
   private readonly stageTypeService = inject(StageTypeService);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   stageTypes: StageType[] = [];
   total = 0;
@@ -48,18 +50,17 @@ export class StageTypeListComponent implements OnInit {
       order_by: this.sortColumn,
       order_dir: this.sortDirection,
       name: this.searchQuery || undefined,
-      is_active: this.selectedStatus === 'active' ? true : this.selectedStatus === 'inactive' ? false : undefined
+      is_active: this.selectedStatus || undefined
     };
-
     this.stageTypeService.getStageTypes(params).subscribe({
       next: (res) => {
         this.stageTypes = res.items;
         this.total = res.total;
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Erro ao carregar tipos de etapa:', error);
-        this.error = 'Erro ao carregar tipos de etapa. Tente novamente.';
+      error: (err) => {
+        this.error = 'Erro ao carregar tipos de etapa.';
+        this.notification.error(err);
         this.loading = false;
       }
     });

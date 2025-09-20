@@ -4,6 +4,7 @@ import { StageTypeService } from '../../../core/services/stage-type.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { StageType } from '../../../core/models/stage-type.model';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-stage-type-form',
@@ -17,6 +18,7 @@ export class StageTypeFormComponent implements OnInit {
   private readonly stageTypeService = inject(StageTypeService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   form!: FormGroup;
   loading = false;
@@ -54,54 +56,53 @@ export class StageTypeFormComponent implements OnInit {
     this.stageTypeService.getStageTypeById(this.stageTypeId).subscribe({
       next: (stageType) => {
         this.stageType = stageType;
-        this.form.patchValue({
-          name: stageType.name,
-          description: stageType.description || '',
-          is_active: stageType.is_active
-        });
+        this.form.patchValue(stageType);
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Erro ao carregar tipo de etapa:', error);
-        this.error = 'Erro ao carregar tipo de etapa. Tente novamente.';
+      error: (err) => {
+        this.error = 'Erro ao carregar tipo de etapa.';
+        this.notification.error(err);
         this.loading = false;
       }
     });
   }
 
-  onSubmit(): void {
+  saveStageType(): void {
     if (this.form.invalid) {
-      this.markFormGroupTouched();
+      this.notification.error('Formulário inválido.');
       return;
     }
 
     this.saving = true;
-    this.error = '';
-    const formValue = this.form.value;
+    const data = this.form.value;
 
     if (this.isEdit && this.stageTypeId) {
-      this.stageTypeService.updateStageType(this.stageTypeId, formValue).subscribe({
+      this.stageTypeService.updateStageType(this.stageTypeId, data).subscribe({
         next: () => {
-          this.router.navigate(['/stages']);
+          this.notification.success('Tipo de etapa atualizado com sucesso!');
+          this.router.navigate(['/stage-types']);
         },
-        error: (error) => {
-          console.error('Erro ao atualizar tipo de etapa:', error);
-          this.error = error.error?.detail || 'Erro ao atualizar tipo de etapa. Tente novamente.';
+        error: (err) => {
+          this.notification.error(err);
           this.saving = false;
         }
       });
     } else {
-      this.stageTypeService.createStageType(formValue).subscribe({
+      this.stageTypeService.createStageType(data).subscribe({
         next: () => {
-          this.router.navigate(['/stages']);
+          this.notification.success('Tipo de etapa criado com sucesso!');
+          this.router.navigate(['/stage-types']);
         },
-        error: (error) => {
-          console.error('Erro ao criar tipo de etapa:', error);
-          this.error = error.error?.detail || 'Erro ao criar tipo de etapa. Tente novamente.';
+        error: (err) => {
+          this.notification.error(err);
           this.saving = false;
         }
       });
     }
+  }
+
+  onSubmit(): void {
+    this.saveStageType();
   }
 
   onCancel(): void {

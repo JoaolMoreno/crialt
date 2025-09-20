@@ -8,6 +8,7 @@ import { Project } from '../../../core/models/project.model';
 import { getStatusBadge } from '../../../core/models/status.model';
 import { SharedModule } from '../../../shared/shared.module';
 import { PaginatedProject } from '../../../core/models/paginated-project.model';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-client-detail',
@@ -22,6 +23,7 @@ export class ClientDetailComponent implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly projectService = inject(ProjectService);
   private readonly fileService = inject(FileService);
+  private readonly notification = inject(NotificationService);
 
   client: Client | null = null;
   projects: Project[] = [];
@@ -54,9 +56,10 @@ export class ClientDetailComponent implements OnInit {
         this.loadDocuments(client.id);
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'Erro ao carregar cliente.';
+        this.notification.error(err);
         this.loading = false;
-        this.error = 'Erro ao buscar cliente.';
       }
     });
   }

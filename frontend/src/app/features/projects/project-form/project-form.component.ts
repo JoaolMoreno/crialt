@@ -13,6 +13,7 @@ import { debounceTime } from 'rxjs/operators';
 import { Stage } from "../../../core/models/stage.model";
 import { FileUploadComponent } from "../../../shared/components/file-upload/file-upload.component";
 import { FileUpload } from '../../../core/services/file.service';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
     selector: 'app-project-form',
@@ -27,10 +28,10 @@ export class ProjectFormComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly projectService = inject(ProjectService);
   private readonly fb = inject(FormBuilder);
+  private readonly notification = inject(NotificationService);
 
   form: FormGroup;
   loading = false;
-  error = '';
   projectId: string | null = null;
 
   clients: Client[] = [];
@@ -126,11 +127,12 @@ export class ProjectFormComponent {
         }
         this.loadingClients = false;
       },
-      error: () => {
+      error: (err) => {
         if (currentRequestId === this.lastClientSearchRequestId) {
           this.clients = [];
         }
         this.loadingClients = false;
+        this.notification.error(err);
       }
     });
   }
@@ -170,8 +172,9 @@ export class ProjectFormComponent {
         this.etapasDisponiveis = result.items;
         this.loadingStages = false;
       },
-      error: () => {
+      error: (err) => {
         this.loadingStages = false;
+        this.notification.error(err);
       }
     });
   }
@@ -240,8 +243,8 @@ export class ProjectFormComponent {
         this.etapasVisuais = this.etapasProjeto.map(e => ({ id: e.id, active: true, expanded: false }));
         this.loading = false;
       },
-      error: () => {
-        this.error = 'Erro ao carregar projeto.';
+      error: (err) => {
+        this.notification.error(err);
         this.loading = false;
       }
     });
@@ -340,8 +343,8 @@ export class ProjectFormComponent {
         next: () => {
           this.router.navigate(['/projects']);
         },
-        error: () => {
-          this.error = 'Erro ao atualizar projeto.';
+        error: (err) => {
+          this.notification.error(err);
           this.loading = false;
         }
       });
@@ -350,8 +353,8 @@ export class ProjectFormComponent {
         next: () => {
           this.router.navigate(['/projects']);
         },
-        error: () => {
-          this.error = 'Erro ao criar projeto.';
+        error: (err) => {
+          this.notification.error(err);
           this.loading = false;
         }
       });

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { User } from '../../../core/models/user.model';
 import { UserService } from '../../../core/services/user.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-user-list',
@@ -14,6 +15,7 @@ import { SharedModule } from '../../../shared/shared.module';
 export class UserListComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   users: User[] = [];
   total = 0;
@@ -47,7 +49,8 @@ export class UserListComponent implements OnInit {
         this.total = res.total;
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        this.notification.error(err);
         this.loading = false;
       }
     });

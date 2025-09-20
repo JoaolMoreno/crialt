@@ -3,6 +3,7 @@ import { StageTypeService } from '../../../core/services/stage-type.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { StageType } from '../../../core/models/stage-type.model';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-stage-type-detail',
@@ -15,6 +16,7 @@ export class StageTypeDetailComponent implements OnInit {
   private readonly stageTypeService = inject(StageTypeService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   stageType: StageType | null = null;
   loading = false;
@@ -40,8 +42,8 @@ export class StageTypeDetailComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Erro ao carregar tipo de etapa:', error);
         this.error = 'Erro ao carregar tipo de etapa. Tente novamente.';
+        this.notification.error(error);
         this.loading = false;
       }
     });

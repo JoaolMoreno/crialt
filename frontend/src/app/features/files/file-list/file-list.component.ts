@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FileService, FileUpload, PaginatedFiles } from '../../../core/services/file.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-file-list',
@@ -11,6 +12,7 @@ import { SharedModule } from '../../../shared/shared.module';
 })
 export class FileListComponent implements OnInit {
   private readonly fileService = inject(FileService);
+  private readonly notification = inject(NotificationService);
 
   files: FileUpload[] = [];
   total = 0;
@@ -42,8 +44,9 @@ export class FileListComponent implements OnInit {
         this.total = res.total;
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
+        this.notification.error(err);
       }
     });
   }
@@ -83,8 +86,9 @@ export class FileListComponent implements OnInit {
         next: () => {
           this.loadFiles();
         },
-        error: () => {
+        error: (err) => {
           this.loading = false;
+          this.notification.error(err);
         }
       });
     }

@@ -6,6 +6,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { ViaCepService, ViaCepResponse } from '../../../shared/services/via-cep.service';
 import { cpfValidator, cnpjValidator } from '../../../shared/utils/validators';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
   selector: 'app-client-form',
@@ -20,6 +21,7 @@ export class ClientFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly viaCepService = inject(ViaCepService);
+  private readonly notification = inject(NotificationService);
 
   form!: FormGroup;
   loading = false;
@@ -140,31 +142,33 @@ export class ClientFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.notification.error('Formulário inválido.');
+      return;
+    }
     this.loading = true;
-    const data = { ...this.form.value };
+    this.error = '';
+    const data = this.form.value;
     if (this.isEdit && this.clientId) {
       this.clientService.updateClient(this.clientId, data).subscribe({
         next: () => {
-          this.loading = false;
-          localStorage.removeItem('clientFormDraft');
+          this.notification.success('Cliente atualizado com sucesso!');
           this.router.navigate(['/clients']);
         },
-        error: () => {
+        error: (err) => {
+          this.notification.error(err);
           this.loading = false;
-          this.error = 'Erro ao salvar cliente.';
         }
       });
     } else {
       this.clientService.createClient(data).subscribe({
         next: () => {
-          this.loading = false;
-          localStorage.removeItem('clientFormDraft');
+          this.notification.success('Cliente criado com sucesso!');
           this.router.navigate(['/clients']);
         },
-        error: () => {
+        error: (err) => {
+          this.notification.error(err);
           this.loading = false;
-          this.error = 'Erro ao salvar cliente.';
         }
       });
     }

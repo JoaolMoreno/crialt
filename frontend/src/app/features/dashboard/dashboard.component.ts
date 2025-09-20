@@ -3,7 +3,8 @@ import { DashboardService, DashboardData } from '../../core/services/dashboard.s
 import { DashboardProject } from '../../core/models/dashboard-project.model';
 import { ChartConfiguration } from 'chart.js';
 import { SharedModule } from '../../shared/shared.module';
-import {getStatusBadge} from "../../core/models/status.model";
+import { getStatusBadge } from '../../core/models/status.model';
+import { NotificationService } from '../../shared/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,6 +15,7 @@ import {getStatusBadge} from "../../core/models/status.model";
 })
 export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+  private readonly notification = inject(NotificationService);
 
   loading = false;
   error = '';
@@ -65,10 +67,10 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.loadDashboard();
   }
 
-  loadDashboardData(): void {
+  loadDashboard(): void {
     this.loading = true;
     this.error = '';
     this.dashboardService.getDashboardData().subscribe({
@@ -90,9 +92,10 @@ export class DashboardComponent implements OnInit {
         this.revenueChartData.data.datasets[0].data = data.revenue_by_month.map(m => m.value);
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'Erro ao carregar dados do dashboard.';
+        this.notification.error(err);
         this.loading = false;
-        this.error = 'Erro ao buscar dados do dashboard.';
       }
     });
   }
