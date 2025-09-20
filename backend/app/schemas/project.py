@@ -46,7 +46,6 @@ def serialize_stage(stage):
         "planned_end_date": stage.planned_end_date,
         "actual_end_date": stage.actual_end_date,
         "value": stage.value,
-        "payment_status": stage.payment_status,
         "specific_data": stage.specific_data,
         "progress_percentage": stage.progress_percentage,
         "notes": stage.notes,

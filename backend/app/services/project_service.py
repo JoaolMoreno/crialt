@@ -66,7 +66,7 @@ class ProjectService:
             raise HTTPException(status_code=400, detail="Não foi possível criar o projeto.")
 
     def _create_default_stages(self, project: Project, user_id: str) -> None:
-        stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.name).all()
+        stage_types = self.db.query(StageType).filter(StageType.is_active == True).order_by(StageType.created_at).all()
 
         created_stages = []
         for idx, stage_type in enumerate(stage_types, start=1):
@@ -78,7 +78,6 @@ class ProjectService:
                 planned_start_date=project.start_date,
                 planned_end_date=project.estimated_end_date,
                 value=0,
-                payment_status="pending",
                 project_id=project.id,
                 stage_type_id=stage_type.id,
                 created_by_id=user_id,
@@ -106,7 +105,6 @@ class ProjectService:
                 planned_start_date=stage_data.planned_start_date or project.start_date,
                 planned_end_date=stage_data.planned_end_date or project.estimated_end_date,
                 value=stage_data.value or 0,
-                payment_status=stage_data.payment_status or "pending",
                 progress_percentage=stage_data.progress_percentage or 0,
                 notes=stage_data.notes,
                 project_id=project.id,
@@ -269,6 +267,9 @@ class ProjectService:
         if not project:
             raise HTTPException(status_code=404, detail="Projeto não foi encontrado")
 
+        if not project_data.stages or len(project_data.stages) == 0:
+            raise ValueError("O projeto deve conter pelo menos uma etapa (stage).")
+
         try:
             updated_fields = project_data.model_dump(exclude_unset=True, exclude={"stages", "clients"})
 
@@ -397,7 +398,6 @@ class ProjectService:
             planned_end_date=stage_data.planned_end_date,
             actual_end_date=getattr(stage_data, "actual_end_date", None),
             value=stage_data.value or 0,
-            payment_status=stage_data.payment_status or "pending",
             progress_percentage=stage_data.progress_percentage or 0,
             notes=stage_data.notes,
             assigned_to_id=getattr(stage_data, "assigned_to_id", None),
@@ -458,3 +458,34 @@ class ProjectService:
 
         if not project_data.clients:
             raise HTTPException(status_code=400, detail="Pelo menos um cliente deve ser vinculado ao projeto.")
+
+    def get_projects_by_client(self, client_id, actor, limit, offset, order_by, order_dir, name, status, start_date, search, client_resource_permission=None):
+        self.logger.info(f"[DB] get_projects_by_client: client_id={client_id}, actor={actor}, limit={limit}, offset={offset}, order_by={order_by}, order_dir={order_dir}, name={name}, status={status}, start_date={start_date}, search={search}")
+        query = self.db.query(Project)
+        query = query.join(Project.clients).filter(Client.id == client_id)
+        if name:
+            query = query.filter(Project.name.ilike(f"%{name}%"))
+        if status:
+            query = query.filter(Project.status == status)
+        if start_date:
+            query = query.filter(Project.start_date >= start_date)
+        if search:
+            query = query.filter(Project.name.ilike(f"%{search}%"))
+        if hasattr(Project, order_by):
+            order_col = getattr(Project, order_by)
+            if order_dir == "desc":
+                order_col = order_col.desc()
+            else:
+                order_col = order_col.asc()
+            query = query.order_by(order_col)
+        total = query.count()
+        items = query.offset(offset).limit(limit).all()
+        if client_resource_permission and actor:
+            client_resource_permission([client_id], actor)
+        return PaginatedProjects(
+            total=total,
+            count=len(items),
+            offset=offset,
+            limit=limit,
+            items=[ProjectRead.model_validate(p, from_attributes=True) for p in items]
+        )

@@ -46,7 +46,7 @@
       </div>
       <div class="info-row">
         <span class="info-label">Data de Cadastro:</span>
-        <span class="info-value">{{ client?.created_at | date:'shortDate' }}</span>
+        <span class="info-value">{{ client?.created_at | clientTimezoneDate:'shortDate' }}</span>
       </div>
       <div class="info-actions">
         <button class="edit-btn" (click)="enableEdit()">
@@ -78,7 +78,7 @@
             Status:
             <span [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
           </span>
-          <span class="project-date">Criado em: {{ project.created_at | date:'shortDate' }}</span>
+          <span class="project-date">Criado em: {{ project.created_at | clientTimezoneDate:'shortDate' }}</span>
           <button class="view-btn" (click)="navigateToProject(project.id)">
             <span class="material-icons">visibility</span> Ver Projeto
           </button>

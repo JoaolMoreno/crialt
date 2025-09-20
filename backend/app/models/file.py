@@ -35,4 +35,3 @@ class File(Base):
     client = relationship("Client", back_populates="documents")
     stage = relationship("Stage", back_populates="files")
     uploaded_by = relationship("User", back_populates="uploaded_files")
-

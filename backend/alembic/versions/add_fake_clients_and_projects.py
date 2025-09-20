@@ -159,12 +159,6 @@ def upgrade():
             else:
                 stage_status = "pending"
 
-            # Status de pagamento
-            if stage_status == "completed":
-                payment_status = fake.random_element(["paid", "partial"])
-            else:
-                payment_status = "pending"
-
             # Progresso baseado no status
             if stage_status == "completed":
                 progress = 100
@@ -200,7 +194,6 @@ def upgrade():
                 "planned_end_date": stage_end,
                 "actual_end_date": stage_end if stage_status == "completed" else None,
                 "value": stage_value,
-                "payment_status": payment_status,
                 "specific_data": json.dumps(specific_data) if specific_data else None,
                 "progress_percentage": progress,
                 "notes": fake.sentence(),
@@ -216,12 +209,12 @@ def upgrade():
                 text("""
                 INSERT INTO stages (
                     id, name, description, "order", status, planned_start_date, actual_start_date,
-                    planned_end_date, actual_end_date, value, payment_status, specific_data,
+                    planned_end_date, actual_end_date, value, specific_data,
                     progress_percentage, notes, created_at, updated_at, project_id, stage_type_id,
                     created_by_id, assigned_to_id
                 ) VALUES (
                     :id, :name, :description, :order, :status, :planned_start_date, :actual_start_date,
-                    :planned_end_date, :actual_end_date, :value, :payment_status, :specific_data,
+                    :planned_end_date, :actual_end_date, :value, :specific_data,
                     :progress_percentage, :notes, :created_at, :updated_at, :project_id, :stage_type_id,
                     :created_by_id, :assigned_to_id
                 )

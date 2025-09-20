@@ -304,7 +304,6 @@ export class ProjectFormComponent {
           planned_start_date: stage.planned_start_date,
           planned_end_date: stage.planned_end_date,
           value: stage.value || 0,
-          payment_status: stage.payment_status || 'pending',
           progress_percentage: stage.progress_percentage || 0,
           notes: stage.notes || ''
         };
@@ -413,7 +412,6 @@ export class ProjectFormComponent {
         planned_end_date: this.form.get('endDate')?.value || new Date().toISOString().split('T')[0],
         actual_end_date: undefined,
         value: 0,
-        payment_status: 'pending',
         specific_data: undefined,
         progress_percentage: 0,
         notes: '',

@@ -64,7 +64,7 @@
               {{ stageType.is_active ? 'Ativo' : 'Inativo' }}
             </span>
           </td>
-          <td>{{ stageType.created_at | date:'dd/MM/yyyy' }}</td>
+          <td>{{ stageType.created_at | clientTimezoneDate:'dd/MM/yyyy' }}</td>
           <td class="actions">
             <button (click)="navigateToDetail(stageType.id)" class="action-btn" title="Ver detalhes">
               <span class="material-icons">visibility</span>

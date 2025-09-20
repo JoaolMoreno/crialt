@@ -5,8 +5,6 @@ import { User } from './user.model';
 import { StageStatus } from './status.model';
 import {StageType} from "./stage-type.model";
 
-export type PaymentStatus = 'pending' | 'partial' | 'paid';
-
 export interface StageSpecificData {
   // Tipos específicos podem ser detalhados depois
   [key: string]: any;
@@ -23,7 +21,6 @@ export interface Stage {
   planned_end_date: string;
   actual_end_date?: string;
   value: number;
-  payment_status: PaymentStatus;
   specific_data?: StageSpecificData;
   progress_percentage: number;
   notes?: string;

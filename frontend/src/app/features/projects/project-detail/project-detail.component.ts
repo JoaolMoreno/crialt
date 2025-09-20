@@ -2,20 +2,21 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
-import {PaymentStatus, Stage} from '../../../core/models/stage.model';
+import { Stage } from '../../../core/models/stage.model';
 import { ProjectTimelineComponent } from "../project-timeline/project-timeline.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { ProgressBarComponent } from "../project-progress-bar/progress-bar.component";
 import {FileCategory, FileService, FileUpload} from '../../../core/services/file.service';
 import { Location } from '@angular/common';
 import {getStatusBadge} from "../../../core/models/status.model";
+import {FileUploadComponent} from "../../../shared/components/file-upload/file-upload.component";
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss'],
-    imports: [SharedModule, ProgressBarComponent, ProjectTimelineComponent]
+    imports: [SharedModule, ProgressBarComponent, ProjectTimelineComponent, FileUploadComponent]
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -99,65 +100,5 @@ export class ProjectDetailComponent implements OnInit {
   }
   statusBadgeClass(status: string): string {
     return 'status-badge ' + getStatusBadge(status).color;
-  }
-
-  getPaymentStatusLabel(status: PaymentStatus): string {
-    const labels = {
-      pending: 'Pendente',
-      partial: 'Parcial',
-      paid: 'Pago'
-    };
-    return labels[status] || status;
-  }
-
-  formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  getCategoryLabel(category: FileCategory): string {
-    const labels = {
-      [FileCategory.DOCUMENT]: 'Documento',
-      [FileCategory.IMAGE]: 'Imagem',
-      [FileCategory.PLAN]: 'Planta',
-      [FileCategory.RENDER]: 'Render',
-      [FileCategory.CONTRACT]: 'Contrato'
-    };
-    return labels[category] || category;
-  }
-
-  getFileIcon(category: FileCategory, mimeType: string): string {
-    if (category === FileCategory.IMAGE || mimeType.startsWith('image/')) {
-      return 'image';
-    }
-
-    if (category === FileCategory.PLAN) {
-      return 'architecture';
-    }
-
-    if (category === FileCategory.RENDER) {
-      return 'view_in_ar';
-    }
-
-    if (category === FileCategory.CONTRACT) {
-      return 'description';
-    }
-
-    if (mimeType === 'application/pdf') {
-      return 'picture_as_pdf';
-    }
-
-    if (mimeType.includes('word') || mimeType.includes('document')) {
-      return 'description';
-    }
-
-    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) {
-      return 'table_chart';
-    }
-
-    return 'insert_drive_file';
   }
 }

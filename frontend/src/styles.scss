@@ -1,3 +1,5 @@
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
 @font-face {
   font-family: 'Diore';
   src: url('assets/fonts/Diore Bonneg.otf') format('opentype'),
@@ -818,6 +820,17 @@ button.cta {
     padding: 2px 6px;
     border-radius: 4px;
     font-family: 'Montserrat', Arial, sans-serif;
+  }
+
+  input,
+  select {
+    background-color: var(--color-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Montserrat', Arial, sans-serif;
+    border: none;
+    height: auto;
   }
 }
 

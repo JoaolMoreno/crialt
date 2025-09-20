@@ -1,14 +1,17 @@
 from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Query, HTTPException, Form
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Query, HTTPException, Form, Body
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 import os
+from io import BytesIO
+import zipfile
 
 from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
 from ..models.user import User
 from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles, FileCategory
 from ..services.file_service import FileService
+from ..models.project import Project
 
 router = APIRouter()
 
@@ -72,7 +75,7 @@ async def get_file(
 @router.post("", response_model=FileRead)
 async def upload_file(
     file: UploadFile = FastAPIFile(...),
-    category: str = Form(...),
+    category: str = Form(None),
     project_id: str = Form(None),
     client_id: str = Form(None),
     stage_id: str = Form(None),
@@ -82,14 +85,28 @@ async def upload_file(
 ):
     from uuid import UUID
 
-    # Criar FileCreate object
+    detected_category = None
+    if category:
+        try:
+            detected_category = FileCategory(category)
+        except Exception:
+            detected_category = FileCategory.document
+    else:
+        mime = file.content_type or "application/octet-stream"
+        if mime.startswith("image/"):
+            detected_category = FileCategory.image
+        elif mime.startswith("video/"):
+            detected_category = FileCategory.video
+        else:
+            detected_category = FileCategory.document
+
     file_data = FileCreate(
         original_name=file.filename or "unnamed",
-        stored_name="",  # Será definido pelo service
-        path="",  # Será definido pelo service
-        size=0,  # Será definido pelo service
+        stored_name="",
+        path="",
+        size=0,
         mime_type=file.content_type or "application/octet-stream",
-        category=FileCategory(category),
+        category=detected_category,
         description=description,
         project_id=UUID(project_id) if project_id else None,
         client_id=UUID(client_id) if client_id else None,
@@ -123,4 +140,61 @@ async def download_file(file_id: str, db: Session = Depends(get_db), actor = Dep
         path=file_path,
         filename=file_data.original_name,
         media_type=file_data.mime_type
+    )
+
+@router.get("/project/{project_id}/download")
+async def download_project_files(
+    project_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    # Busca arquivos do projeto
+    files = await run_in_threadpool(service.get_files_by_project, project_id, client_resource_permission, actor)
+    if not files:
+        raise HTTPException(status_code=404, detail="Nenhum arquivo encontrado para este projeto.")
+    # Busca nome do projeto
+    project = db.query(Project).filter(Project.id == project_id).first()
+    project_name = project.name if project else f"projeto_{project_id}"
+    # Cria ZIP em memória
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for file in files:
+            if not file.path or not os.path.exists(file.path):
+                continue
+            arcname = file.original_name
+            zipf.write(file.path, arcname=arcname)
+    zip_buffer.seek(0)
+    zip_filename = f"{project_name}.zip"
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'}
+    )
+
+@router.post("/download")
+async def download_selected_files(
+    file_ids: list = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    files = []
+    for file_id in file_ids:
+        file = await run_in_threadpool(service.get_file, file_id, client_resource_permission, actor)
+        if file and file.path and os.path.exists(file.path):
+            files.append(file)
+    if not files:
+        raise HTTPException(status_code=404, detail="Nenhum arquivo encontrado.")
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for file in files:
+            arcname = file.original_name
+            zipf.write(file.path, arcname=arcname)
+    zip_buffer.seek(0)
+    zip_filename = "arquivos.zip"
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'}
     )

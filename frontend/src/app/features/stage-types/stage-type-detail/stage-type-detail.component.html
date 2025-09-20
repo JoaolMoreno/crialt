@@ -31,11 +31,11 @@
       </div>
       <div class="info-row">
         <span class="info-label">Data de Criação:</span>
-        <span class="info-value">{{ stageType.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="info-value">{{ stageType.created_at | clientTimezoneDate:'dd/MM/yyyy HH:mm' }}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Última Atualização:</span>
-        <span class="info-value">{{ stageType.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="info-value">{{ stageType.updated_at | clientTimezoneDate:'dd/MM/yyyy HH:mm' }}</span>
       </div>
       <div class="info-actions">
         <button class="action-btn" (click)="navigateToEdit()">

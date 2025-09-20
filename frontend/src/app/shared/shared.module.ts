@@ -6,6 +6,9 @@ import { LoadingSpinnerComponent } from './components/loading-spinner/loading-sp
 import { BaseChartDirective } from 'ng2-charts';
 import { CeilPipe } from 'src/app/shared/utils/ceil.pipe';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
 
 @NgModule({
   imports: [
@@ -20,6 +23,10 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     CeilPipe,
     FormsModule,
     MatSnackBarModule,
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    ClientTimezoneDatePipe
   ],
   exports: [
     CommonModule,
@@ -33,6 +40,10 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     LoadingSpinnerComponent,
     CeilPipe,
     MatSnackBarModule,
+    CeilPipe,
+    MatButtonModule,
+    MatIconModule,
+    ClientTimezoneDatePipe
   ]
 })
 export class SharedModule {}

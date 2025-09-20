@@ -12,11 +12,6 @@ class StageStatus(str, enum.Enum):
     cancelled = 'cancelled'
     on_hold = 'on_hold'
 
-class PaymentStatus(str, enum.Enum):
-    pending = 'pending'
-    partial = 'partial'
-    paid = 'paid'
-
 class StageBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -27,7 +22,6 @@ class StageBase(BaseModel):
     planned_end_date: date
     actual_end_date: Optional[date] = None
     value: float
-    payment_status: PaymentStatus = PaymentStatus.pending
     specific_data: Optional[dict] = None
     progress_percentage: int = 0
     notes: Optional[str] = None
@@ -48,7 +42,6 @@ class StageUpdate(BaseModel):
     planned_end_date: Optional[date] = None
     actual_end_date: Optional[date] = None
     value: Optional[float] = None
-    payment_status: Optional[PaymentStatus] = None
     specific_data: Optional[dict] = None
     progress_percentage: Optional[int] = None
     notes: Optional[str] = None

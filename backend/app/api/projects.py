@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
@@ -80,22 +80,42 @@ async def get_project(project_id: str, db: Session = Depends(get_db), actor = De
 @router.post("", response_model=ProjectRead)
 async def create_project(project_data: ProjectCreate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     service = ProjectService(db)
-    return await run_in_threadpool(service.create_project, project_data, admin_user.id)
+    try:
+        return await run_in_threadpool(service.create_project, project_data, admin_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{project_id}", response_model=ProjectRead)
 async def update_project(project_id: str, project_data: ProjectUpdate, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     service = ProjectService(db)
-    return await run_in_threadpool(service.update_project, project_id, project_data)
+    try:
+        return await run_in_threadpool(service.update_project, project_id, project_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{project_id}")
 async def delete_project(project_id: str, db: Session = Depends(get_db), admin_user: User = Depends(get_current_actor_factory(["admin"]))):
     service = ProjectService(db)
-    return await run_in_threadpool(service.delete_project, project_id)
+    try:
+        return await run_in_threadpool(service.delete_project, project_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{project_id}/progress")
 async def get_project_progress(project_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     service = ProjectService(db)
-    return await run_in_threadpool(service.get_project_progress, project_id, actor, client_resource_permission)
+    try:
+        return await run_in_threadpool(service.get_project_progress, project_id, actor, client_resource_permission)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{project_id}/current-stage/{stage_id}")
 async def update_current_stage(
@@ -105,4 +125,9 @@ async def update_current_stage(
     admin_user: User = Depends(get_current_actor_factory(["admin"]))
 ):
     service = ProjectService(db)
-    return await run_in_threadpool(service.update_current_stage, project_id, stage_id)
+    try:
+        return await run_in_threadpool(service.update_current_stage, project_id, stage_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
