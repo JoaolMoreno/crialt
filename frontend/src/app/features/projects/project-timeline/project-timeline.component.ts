@@ -16,6 +16,18 @@ export class ProjectTimelineComponent {
 
   selectedStage: Stage | null = null;
   selectedStageIndex: number = 0;
+  isMobile = false;
+
+  constructor() {
+    this.updateIsMobile();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.updateIsMobile.bind(this));
+    }
+  }
+
+  updateIsMobile() {
+    this.isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  }
 
   statusLabel(status: string): string {
     return getStatusBadge(status).label;

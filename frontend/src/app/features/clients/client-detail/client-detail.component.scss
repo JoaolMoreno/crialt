@@ -249,7 +249,7 @@
   .client-projects-card,
   .client-documents-card,
   .client-password-card {
-    padding: 16px 6px;
+    padding: 20px;
   }
   .info-row {
     flex-direction: column;
@@ -267,7 +267,7 @@
   .client-projects-card,
   .client-documents-card,
   .client-password-card {
-    padding: 8px 2px;
+    padding: 20px;
   }
   .info-label, .info-value {
     font-size: 14px;
@@ -276,5 +276,51 @@
     font-size: 14px;
     gap: 8px;
     padding: 8px 0;
+  }
+  .projects-list li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .project-main-info {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .project-name {
+    font-size: 16px;
+    word-break: break-word;
+  }
+  .project-meta {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  .projects-list li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 0;
+  }
+  .project-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .project-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font-size: 13px;
+  }
+  .project-name {
+    font-size: 15px;
   }
 }

@@ -80,3 +80,64 @@
   box-shadow: 0 1px 6px rgba(53,39,28,0.04);
   padding: 24px;
 }
+
+@media (max-width: 600px) {
+  .section-container {
+    padding: 12px 4vw 12px 4vw;
+  }
+  .form-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .actions {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-secundario {
+    min-width: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .btn-secundario .material-icons {
+    font-size: 22px;
+  }
+  .btn-secundario .btn-label {
+    display: none;
+  }
+  .info h1 {
+    font-size: 20px;
+    word-break: break-word;
+  }
+  .info {
+    gap: 4px;
+  }
+  .progress-bar-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .current-stage-widget {
+    padding: 12px;
+    font-size: 14px;
+  }
+  .tabs {
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+  .tabs button {
+    width: 100%;
+    font-size: 15px;
+    padding: 10px 0;
+  }
+}

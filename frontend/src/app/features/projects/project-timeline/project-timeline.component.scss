@@ -1,4 +1,3 @@
-// Timeline horizontal minimalista baseada no exemplo
 .project-timeline-container {
   font-family: "Arial", sans-serif;
   background: #f7f7f7;
@@ -12,7 +11,6 @@
   overflow-x: auto;
 }
 
-// Header da timeline
 .timeline-header {
   text-align: center;
   margin-bottom: 40px;
@@ -31,7 +29,6 @@
   }
 }
 
-// Wrapper principal da timeline
 .timeline-wrapper {
   position: relative;
   width: 100%;
@@ -39,7 +36,6 @@
   padding: 40px 0;
 }
 
-// Linha principal horizontal
 .timeline-main-line {
   position: absolute;
   top: 50%;
@@ -51,7 +47,6 @@
   z-index: 1;
 }
 
-// Container das etapas
 .stages-timeline {
   display: flex;
   justify-content: space-between;
@@ -61,7 +56,6 @@
   padding: 0 50px;
 }
 
-// Item individual da etapa
 .stage-timeline-item {
   display: flex;
   flex-direction: column;
@@ -69,11 +63,10 @@
   width: calc(100% / 5);
   max-width: 200px;
   position: relative;
-  height: 200px; // Altura fixa para manter consistência
-  justify-content: center; // Centraliza o conteúdo verticalmente
+  height: 200px;
+  justify-content: flex-start;
 }
 
-// Labels dos nomes das etapas - posicionamento fixo
 .stage-name-label {
   position: absolute;
   font-size: 16px;
@@ -85,15 +78,18 @@
   width: 100%;
 
   &.above {
-    top: 20px; // Posição fixa acima da linha
+    bottom: 80%;
+    margin-bottom: 8px;
+    top: auto;
   }
 
   &.below {
-    bottom: 20px; // Posição fixa abaixo da linha
+    top: 80%;
+    margin-top: 8px;
+    bottom: auto;
   }
 }
 
-// Marcador vertical da etapa - centralizado
 .stage-marker {
   display: flex;
   flex-direction: column;
@@ -101,25 +97,10 @@
   z-index: 3;
   cursor: pointer;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%); // Sempre centralizado verticalmente
+  left: 50%;
+  top: 50px;
+  transform: translateX(-50%);
 
-  .stage-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #000;
-    transition: all 0.3s ease;
-  }
-
-  .stage-connector-line {
-    width: 2px;
-    height: 40px;
-    background: #000;
-    margin-top: 4px;
-  }
-
-  // Estados dos marcadores - cores mais sutis
   &.stage-completed {
     .stage-dot {
       background: #28a745;
@@ -128,7 +109,6 @@
       background: #28a745;
     }
   }
-
   &.stage-in-progress {
     .stage-dot {
       background: #007bff;
@@ -137,7 +117,6 @@
       background: #007bff;
     }
   }
-
   &.stage-pending {
     .stage-dot {
       background: #ffc107;
@@ -146,7 +125,6 @@
       background: #ffc107;
     }
   }
-
   &.stage-cancelled {
     .stage-dot {
       background: #dc3545;
@@ -155,7 +133,6 @@
       background: #dc3545;
     }
   }
-
   &.stage-on-hold {
     .stage-dot {
       background: #6c757d;
@@ -166,7 +143,21 @@
   }
 }
 
-// Card da etapa - simplificado
+.stage-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #000;
+  transition: all 0.3s ease;
+}
+
+.stage-connector-line {
+  width: 2px;
+  height: 100px;
+  background: #000;
+  margin-top: 4px;
+}
+
 .stage-card-timeline {
   background: white;
   border-radius: 12px;
@@ -177,7 +168,7 @@
   position: relative;
   transition: all 0.3s ease;
   cursor: pointer;
-  display: none; // Inicialmente oculto como no exemplo
+  display: none;
 
   &:hover {
     transform: translateY(-2px);
@@ -190,12 +181,14 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
+    width: 90vw;
+    max-width: 340px;
+    margin: 0;
     z-index: 1000;
+    box-sizing: border-box;
   }
 }
 
-// Número da etapa - estilo mais simples
 .stage-number {
   position: absolute;
   top: -10px;
@@ -212,7 +205,6 @@
   font-weight: bold;
 }
 
-// Conteúdo da etapa - tipografia mais clean
 .stage-content {
   text-align: left;
 
@@ -231,7 +223,6 @@
   }
 }
 
-// Status badge - mais simples
 .stage-status {
   margin-bottom: 15px;
 
@@ -245,7 +236,6 @@
   }
 }
 
-// Barra de progresso - mais sutil
 .stage-progress {
   margin-bottom: 15px;
 
@@ -271,7 +261,6 @@
   }
 }
 
-// Datas da etapa - mais compacto
 .stage-dates {
   font-size: 0.8rem;
   color: #666;
@@ -290,7 +279,6 @@
   }
 }
 
-// Botão fechar - estilo do exemplo
 .close-btn {
   margin-top: 10px;
   padding: 6px 12px;
@@ -306,7 +294,6 @@
   }
 }
 
-// Labels sobre a linha principal - estilo do exemplo
 .stage-label {
   position: absolute;
   font-size: 16px;
@@ -325,7 +312,6 @@
   }
 }
 
-// Legenda simplificada
 .timeline-legend {
   display: flex;
   justify-content: center;
@@ -367,7 +353,6 @@
   }
 }
 
-// Brand no canto inferior direito - mais discreto
 .timeline-brand {
   position: absolute;
   bottom: 10px;
@@ -380,7 +365,6 @@
   }
 }
 
-// Overlay para modal
 .timeline-overlay {
   position: fixed;
   top: 0;
@@ -396,12 +380,10 @@
   }
 }
 
-// Remove tooltip detalhado - substituído pelo card modal
 .stage-tooltip-timeline {
   display: none;
 }
 
-// Responsividade simplificada
 @media (max-width: 768px) {
   .project-timeline-container {
     padding: 15px;
@@ -412,11 +394,145 @@
   }
 
   .timeline-wrapper {
-    min-width: 600px;
+    min-width: unset;
+    max-width: 100%;
+    padding: 0 0 0 32px;
+    position: relative;
+  }
+
+  .timeline-main-line {
+    display: none;
+  }
+
+  .stages-timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 0;
+    margin: 0;
+  }
+  .stages-timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #000;
+    border-radius: 2px;
+    z-index: 0;
+  }
+  .stage-timeline-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    max-width: unset;
+    min-height: 40px;
+    height: auto;
+    position: relative;
+    margin-bottom: 18px;
+    background: none;
+    z-index: 1;
+    padding-left: 0;
+  }
+  .stage-marker-mobile {
+    position: relative;
+    z-index: 2;
+    margin-right: 10px;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+  }
+  .stage-marker-mobile .stage-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #000;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #0002;
+    display: block;
+    margin: 0 auto;
+  }
+  .stage-marker-mobile.stage-completed .stage-dot {
+    background: #28a745;
+  }
+  .stage-marker-mobile.stage-in-progress .stage-dot {
+    background: #007bff;
+  }
+  .stage-marker-mobile.stage-pending .stage-dot {
+    background: #ffc107;
+  }
+  .stage-marker-mobile.stage-cancelled .stage-dot {
+    background: #dc3545;
+  }
+  .stage-marker-mobile.stage-on-hold .stage-dot {
+    background: #6c757d;
+  }
+  .stage-label-mobile {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: #000;
+    text-align: left;
+    white-space: normal;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Arial", sans-serif;
+    gap: 6px;
+  }
+  .stage-status-label {
+    font-size: 0.95em;
+    color: #666;
+    margin-left: 4px;
+    font-weight: normal;
+    white-space: nowrap;
+  }
+  .stage-name-label,
+  .stage-marker {
+    display: none !important;
+  }
+
+  .timeline-legend {
+    flex-wrap: wrap;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100vw;
+    overflow: hidden;
+    padding: 0 8px;
+    box-sizing: border-box;
   }
 
   .stage-card-timeline.show {
-    width: 280px;
-    margin: 20px;
+    width: 90vw;
+    max-width: 340px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    position: fixed;
+    z-index: 1000;
+    box-sizing: border-box;
+  }
+
+  .project-timeline-container,
+  .timeline-wrapper,
+  .stages-timeline,
+  .stage-timeline-item,
+  .stage-label-mobile {
+    overflow: visible !important;
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
+    white-space: normal;
+  }
+  html, body {
+    overflow-x: hidden !important;
   }
 }

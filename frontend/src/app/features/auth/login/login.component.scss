@@ -154,6 +154,9 @@ input:focus {
   cursor: not-allowed;
   opacity: 0.6;
 }
+.login-btn span {
+  color: #fff;
+}
 .error-message {
   color: #d32f2f;
   font-size: 14px;
@@ -180,4 +183,15 @@ input:focus {
 form.loading {
   opacity: 0.7;
   pointer-events: none;
+}
+.btn-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid #e0e0e0;
+  border-top: 2.5px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
 }

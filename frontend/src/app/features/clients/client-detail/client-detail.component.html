@@ -72,16 +72,20 @@
     <div class="client-projects-card">
       <h2>Projetos do Cliente</h2>
       <ul class="projects-list">
-        <li *ngFor="let project of projects">
-          <span class="project-name">{{ project.name }}</span>
-          <span class="project-status">
-            Status:
-            <span [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
-          </span>
-          <span class="project-date">Criado em: {{ project.created_at | clientTimezoneDate:'shortDate' }}</span>
-          <button class="view-btn" (click)="navigateToProject(project.id)">
-            <span class="material-icons">visibility</span> Ver Projeto
-          </button>
+        <li *ngFor="let project of projects" class="project-item">
+          <div class="project-main-info">
+            <span class="project-name">{{ project.name }}</span>
+            <button class="view-btn" (click)="navigateToProject(project.id)">
+              <span class="material-icons">visibility</span> Ver Projeto
+            </button>
+          </div>
+          <div class="project-meta">
+            <span class="project-status">
+              Status:
+              <span [ngClass]="statusBadgeClass(project.status)">{{ statusLabel(project.status) }}</span>
+            </span>
+            <span class="project-date">Criado em: {{ project.created_at | clientTimezoneDate:'shortDate' }}</span>
+          </div>
         </li>
       </ul>
       <div *ngIf="!projects.length" class="empty-state">Nenhum projeto encontrado.</div>

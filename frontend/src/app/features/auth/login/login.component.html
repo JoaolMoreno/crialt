@@ -24,9 +24,12 @@
             </button>
           </div>
         </div>
-        <button type="submit" class="login-btn" [disabled]="loading">Entrar</button>
+        <button type="submit" class="login-btn" [disabled]="loading">
+          <span *ngIf="loading" class="btn-spinner"></span>
+          <span *ngIf="!loading">Entrar</span>
+          <span *ngIf="loading">Entrando...</span>
+        </button>
         <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-        <app-loading-spinner *ngIf="loading" size="small"></app-loading-spinner>
       </form>
       <div class="login-footer">
         <a routerLink="/auth/register" class="register-link">Solicitar acesso</a>

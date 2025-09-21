@@ -10,37 +10,58 @@
 
     <!-- Container das etapas -->
     <div class="stages-timeline">
-      <div
-        *ngFor="let stage of getSortedStages(); let i = index; trackBy: trackByStageId"
-        class="stage-timeline-item"
-        [attr.data-stage]="i + 1"
-        [attr.data-total]="getSortedStages().length"
-      >
-        <!-- Nome acima da linha (apenas para índices ímpares) -->
-        <div class="stage-name-label above"
-             *ngIf="i % 2 !== 0"
-             (click)="openStageCard(stage, i)">
-          {{ i + 1 }}. {{ stage.name }}
+      <ng-container *ngIf="!isMobile; else mobileTimeline">
+        <div
+          *ngFor="let stage of getSortedStages(); let i = index; trackBy: trackByStageId"
+          class="stage-timeline-item"
+          [attr.data-stage]="i + 1"
+          [attr.data-total]="getSortedStages().length"
+        >
+          <div class="stage-name-label above"
+               *ngIf="i % 2 === 0"
+               (click)="openStageCard(stage, i)">
+            {{ i + 1 }}. {{ stage.name }}
+          </div>
+          <div class="stage-marker"
+               [class.stage-completed]="stage.status === 'completed'"
+               [class.stage-in-progress]="stage.status === 'in_progress'"
+               [class.stage-pending]="stage.status === 'pending'"
+               [class.stage-cancelled]="stage.status === 'cancelled'"
+               [class.stage-on-hold]="stage.status === 'on_hold'"
+               (click)="openStageCard(stage, i)">
+<!--            <div class="stage-dot"></div>-->
+            <div class="stage-connector-line"></div>
+          </div>
+          <div class="stage-name-label below"
+               *ngIf="i % 2 !== 0"
+               (click)="openStageCard(stage, i)">
+            {{ i + 1 }}. {{ stage.name }}
+          </div>
         </div>
-
-        <!-- Marcador vertical da etapa - sempre centralizado -->
-        <div class="stage-marker"
-             [class.stage-completed]="stage.status === 'completed'"
-             [class.stage-in-progress]="stage.status === 'in_progress'"
-             [class.stage-pending]="stage.status === 'pending'"
-             [class.stage-cancelled]="stage.status === 'cancelled'"
-             [class.stage-on-hold]="stage.status === 'on_hold'"
-             (click)="openStageCard(stage, i)">
-          <div class="stage-connector-line"></div>
+      </ng-container>
+      <ng-template #mobileTimeline>
+        <div
+          *ngFor="let stage of getSortedStages(); let i = index; trackBy: trackByStageId"
+          class="stage-timeline-item"
+          [attr.data-stage]="i + 1"
+          [attr.data-total]="getSortedStages().length"
+        >
+          <div class="stage-marker-mobile"
+            [ngClass]="{
+              'stage-completed': stage.status === 'completed',
+              'stage-in-progress': stage.status === 'in_progress',
+              'stage-pending': stage.status === 'pending',
+              'stage-cancelled': stage.status === 'cancelled',
+              'stage-on-hold': stage.status === 'on_hold'
+            }"
+          >
+            <div class="stage-dot"></div>
+          </div>
+          <div class="stage-label-mobile" (click)="openStageCard(stage, i)">
+            {{ i + 1 }}. {{ stage.name }}
+          </div>
         </div>
-
-        <!-- Nome abaixo da linha (apenas para índices pares) -->
-        <div class="stage-name-label below"
-             *ngIf="i % 2 === 0"
-             (click)="openStageCard(stage, i)">
-          {{ i + 1 }}. {{ stage.name }}
-        </div>
-      </div>
+      </ng-template>
     </div>
   </div>
 
@@ -89,14 +110,6 @@
           <span class="date-value">{{ selectedStage.value | currency:'BRL':'symbol':'1.0-0' }}</span>
         </div>
       </div>
-
-      <div class="stage-dates" *ngIf="selectedStage.payment_status">
-        <div class="date-item">
-          <span class="date-label">Pagamento:</span>
-          <span class="date-value">{{ getPaymentStatusLabel(selectedStage.payment_status) }}</span>
-        </div>
-      </div>
-
       <div class="stage-dates" *ngIf="selectedStage.notes">
         <div class="date-item">
           <span class="date-label">Notas:</span>

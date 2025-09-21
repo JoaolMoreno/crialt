@@ -5,9 +5,21 @@
         <span class="material-icons">arrow_back</span> Voltar
       </button>
       <div class="actions">
-        <button class="btn-secundario" (click)="onEditProject()"><span class="material-icons">edit</span> Editar</button>
-        <button class="btn-secundario" (click)="onPauseProject()"><span class="material-icons">pause_circle</span> Pausar</button>
-        <button class="btn-secundario" (click)="onFinishProject()"><span class="material-icons">check_circle</span> Finalizar</button>
+        <button class="btn-secundario btn-edit"
+                (click)="onEditProject()">
+          <span class="material-icons">edit</span>
+          <span class="btn-label">Editar</span>
+        </button>
+        <button class="btn-secundario btn-pause"
+                (click)="onPauseProject()">
+          <span class="material-icons">pause_circle</span>
+          <span class="btn-label">Pausar</span>
+        </button>
+        <button class="btn-secundario btn-finish"
+                (click)="onFinishProject()">
+          <span class="material-icons">check_circle</span>
+          <span class="btn-label">Finalizar</span>
+        </button>
       </div>
     </div>
     <div class="info">
