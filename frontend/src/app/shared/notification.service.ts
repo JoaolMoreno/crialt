@@ -11,7 +11,7 @@ export class NotificationService {
     this.snackBar.open(message, 'Fechar', {
       duration,
       panelClass: ['snackbar-success'],
-      horizontalPosition: 'right',
+      horizontalPosition: 'center',
       verticalPosition: 'top',
     });
   }
@@ -20,7 +20,7 @@ export class NotificationService {
     this.snackBar.open(message, 'Fechar', {
       duration,
       panelClass: ['snackbar-info'],
-      horizontalPosition: 'right',
+      horizontalPosition: 'center',
       verticalPosition: 'top',
     });
   }

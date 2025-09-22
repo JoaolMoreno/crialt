@@ -33,6 +33,8 @@ export class ClientFormComponent implements OnInit {
 
   documents: File[] = [];
   generatedPassword: string = '';
+  showChangePassword = false;
+  newPassword = '';
 
   ngOnInit(): void {
     this.clientId = this.route.snapshot.paramMap.get('id');
@@ -102,6 +104,8 @@ export class ClientFormComponent implements OnInit {
       this.setDocumentValidator(type);
       this.form.get('document')?.updateValueAndValidity();
     });
+
+    this.notification.success('Cliente criado com sucesso!');
   }
 
   buscarCepAutomatico(cep: string): void {
@@ -135,10 +139,57 @@ export class ClientFormComponent implements OnInit {
     }
   }
 
-  onResetPassword(): void {
-    // Mock: redefinir senha
-    this.generatedPassword = Math.random().toString(36).slice(-8);
-    alert('Senha redefinida: ' + this.generatedPassword);
+  async onResetPassword(): Promise<void> {
+    if (!this.isEdit || !this.clientId) {
+      this.notification.error('Só é possível redefinir senha ao editar um cliente existente.');
+      return;
+    }
+    this.loading = true;
+    this.clientService.resetPassword(this.clientId).subscribe({
+      next: (res) => {
+        this.loading = false;
+        this.generatedPassword = res?.new_password || '';
+        if (this.generatedPassword) {
+          this.notification.success('Nova senha do cliente: ' + this.generatedPassword);
+        } else {
+          this.notification.error('Senha redefinida, mas não foi possível obter a nova senha.');
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.notification.error('Erro ao redefinir senha: ' + (err?.error?.detail || err.message || err));
+      }
+    });
+  }
+
+  onShowChangePassword(): void {
+    this.showChangePassword = true;
+    this.newPassword = '';
+  }
+
+  onCancelChangePassword(): void {
+    this.showChangePassword = false;
+    this.newPassword = '';
+  }
+
+  onConfirmChangePassword(): void {
+    if (!this.newPassword || !this.clientId) {
+      this.notification.error('Digite a nova senha.');
+      return;
+    }
+    this.loading = true;
+    this.clientService.setPassword(this.clientId, this.newPassword).subscribe({
+      next: () => {
+        this.loading = false;
+        this.notification.success('Senha alterada com sucesso!');
+        this.showChangePassword = false;
+        this.newPassword = '';
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.notification.error('Erro ao alterar senha: ' + (err?.error?.detail || err.message || err));
+      }
+    });
   }
 
   onSubmit(): void {

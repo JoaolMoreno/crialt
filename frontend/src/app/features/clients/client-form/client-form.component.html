@@ -92,9 +92,18 @@
 <!--        <app-file-upload formControlName="documents" [multiple]="true" [acceptedTypes]="['application/pdf','image/*']"></app-file-upload>-->
 <!--      </div>-->
       <div class="form-group" *ngIf="isEdit">
-        <label>Senha</label>
-        <input type="text" [value]="generatedPassword" readonly />
-        <button type="button" class="btn-padrao" (click)="onResetPassword()">Redefinir senha</button>
+        <label>Ações de Senha</label>
+        <div class="password-actions">
+          <button type="button" class="btn-padrao" (click)="onResetPassword()" [disabled]="loading">Redefinir senha</button>
+          <button type="button" class="btn-padrao" (click)="onShowChangePassword()" [disabled]="loading || showChangePassword">Trocar senha</button>
+        </div>
+        <div *ngIf="showChangePassword" class="change-password-box">
+          <div class="change-password-actions">
+            <input type="password" [(ngModel)]="newPassword" placeholder="Nova senha" [disabled]="loading" [ngModelOptions]="{standalone: true}" />
+            <button type="button" class="btn-padrao" (click)="onConfirmChangePassword()" [disabled]="loading || !newPassword">OK</button>
+            <button type="button" class="btn-vermelho" (click)="onCancelChangePassword()" [disabled]="loading">Cancelar</button>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label>

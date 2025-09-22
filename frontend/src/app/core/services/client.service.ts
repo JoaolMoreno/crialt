@@ -43,4 +43,8 @@ export class ClientService {
   resetPassword(id: string, newPassword?: string): Observable<{ new_password?: string }> {
     return this.http.post<{ new_password?: string }>(`${this.apiUrl}/${id}/reset-password`, newPassword ? { new_password: newPassword } : {}, { withCredentials: true });
   }
+
+  setPassword(id: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/${id}/set-password`, { password }, { withCredentials: true });
+  }
 }
