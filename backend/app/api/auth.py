@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordRequestForm
 import logging
 
 from ..api.dependencies import get_db, get_current_user, get_token
 from ..core.security import create_access_token, decode_jwt_token
 from ..models import User
-from ..schemas.client import ClientRead
+from ..schemas.client import ClientBasicRead
 from ..schemas.user import UserRead
 from ..services.auth_service import AuthService
 from ..core.config import settings
@@ -18,7 +17,6 @@ router = APIRouter()
 
 class LoginRequest(BaseModel):
     username: str | None = None
-    email: str | None = None
     password: str
 
 class ChangePasswordRequest(BaseModel):
@@ -26,28 +24,33 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 @router.post("/login")
-def login(
-    login_data: LoginRequest = None,
-    form_data: OAuth2PasswordRequestForm = Depends(),
+async def login(
+    request: Request,
     db: Session = Depends(get_db),
     response: Response = None
 ):
     auth = AuthService(db)
-    # Prioriza dados do formulário se presentes
-    username = form_data.username if form_data and form_data.username else (login_data.username if login_data else None)
-    email = None
-    password = form_data.password if form_data and form_data.password else (login_data.password if login_data else None)
-    # Se username for email, trata como email
-    if username and "@" in username:
-        email = username
-        username = None
-    elif login_data and login_data.email:
-        email = login_data.email
+    username = None
+    password = None
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        data = await request.json()
+        username = data.get("username")
+        password = data.get("password")
+    elif "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        username = form.get("username")
+        password = form.get("password")
+    else:
+        raise HTTPException(status_code=400, detail="Dados de login não fornecidos")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="username e password são obrigatórios")
     user = None
-    if username:
+    # Usuário: username pode ser e-mail ou username
+    if "@" in username:
+        user = auth.authenticate_user_by_email(username, password)
+    else:
         user = auth.authenticate_user_by_username(username, password)
-    if not user and email:
-        user = auth.authenticate_user_by_email(email, password)
     if user:
         token = create_access_token(
             subject=str(user.id),
@@ -67,8 +70,11 @@ def login(
             logger.info(f"Cookie 'access_token' setado para usuário {user.id}")
         return {"access_token": token, "token_type": "bearer", "user": UserRead.model_validate(user, from_attributes=True)}
     client = None
-    if email:
-        client = auth.authenticate_client(email, password)
+    if "@" in username:
+        client = auth.authenticate_client_by_email(username, password)
+    else:
+        doc = ''.join(filter(str.isdigit, username))
+        client = auth.authenticate_client(doc, password)
     if client:
         token = create_access_token(subject=str(client.id))
         logger.info(f"Login bem-sucedido para cliente {client.id}. Token gerado: {token}")
@@ -77,13 +83,13 @@ def login(
                 key="access_token",
                 value=token,
                 httponly=True,
-                secure=True, # Em produção, use True. Para dev, pode ser False.
+                secure=False,
                 samesite="lax",
                 max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                 path="/"
             )
             logger.info(f"Cookie 'access_token' setado para cliente {client.id}")
-        return {"access_token": token, "token_type": "bearer", "client": ClientRead.model_validate(client, from_attributes=True)}
+        return {"access_token": token, "token_type": "bearer", "client": ClientBasicRead.model_validate(client, from_attributes=True)}
     raise HTTPException(status_code=401, detail="Credenciais inválidas")
 
 

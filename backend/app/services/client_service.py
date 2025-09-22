@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any
 from ..models.client import Client
-from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients
+from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients, ClientBasicRead
 from ..schemas.project import ProjectRead, serialize_project
 from ..core.security import get_password_hash
 from ..services.auth_service import AuthService
@@ -66,6 +66,14 @@ class ClientService:
         )
         cache.set("clients", cache_params, paginated)
         return paginated
+
+    def get_me(self, actor: Any) -> ClientBasicRead:
+        if not hasattr(actor, "id"):
+            raise HTTPException(status_code=400, detail="Ator inválido.")
+        client = self.db.get(Client, actor.id)
+        if not client:
+            raise HTTPException(status_code=404, detail="Cliente não foi encontrado.")
+        return ClientBasicRead.model_validate(client)
 
     def get_client(self, client_id: str, actor: Any) -> ClientRead:
         client = self.db.get(Client, client_id)

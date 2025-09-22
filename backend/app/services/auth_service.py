@@ -16,7 +16,13 @@ class AuthService:
             return user
         return None
 
-    def authenticate_client(self, email: str, password: str) -> Optional[Client]:
+    def authenticate_client(self, username: str, password: str) -> Optional[Client]:
+        client = self.db.query(Client).filter(Client.document == username).first()
+        if client and verify_password(password, client.password_hash):
+            return client
+        return None
+
+    def authenticate_client_by_email(self, email: str, password: str) -> Optional[Client]:
         client = self.db.query(Client).filter(Client.email == email).first()
         if client and verify_password(password, client.password_hash):
             return client

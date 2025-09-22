@@ -31,7 +31,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
             status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
         )
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/auth/login")
 
 
 def get_db() -> Generator:

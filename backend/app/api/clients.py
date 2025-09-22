@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from ..api.dependencies import get_db, get_current_actor_factory
-from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients
+from ..schemas.client import ClientCreate, ClientUpdate, ClientRead, PaginatedClients, ClientBasicRead
 from ..services.client_service import ClientService
 
 router = APIRouter()
@@ -25,6 +25,14 @@ async def get_clients(
         service.get_clients,
         limit, offset, order_by, order_dir, search, is_active
     )
+
+@router.get("/me", response_model=ClientBasicRead)
+async def get_me(
+    client = Depends(get_current_actor_factory(["client"])),
+    db: Session = Depends(get_db)
+):
+    service = ClientService(db)
+    return await run_in_threadpool(service.get_me, client)
 
 @router.get("/{client_id}", response_model=ClientRead)
 async def get_client(client_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
