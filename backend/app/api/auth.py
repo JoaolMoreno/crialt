@@ -76,7 +76,10 @@ async def login(
         doc = ''.join(filter(str.isdigit, username))
         client = auth.authenticate_client(doc, password)
     if client:
-        token = create_access_token(subject=str(client.id))
+        token = create_access_token(
+            subject=str(client.id),
+            additional_claims={"role": "client", "name": client.name}
+        )
         logger.info(f"Login bem-sucedido para cliente {client.id}. Token gerado: {token}")
         if response:
             response.set_cookie(
@@ -95,7 +98,20 @@ async def login(
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
+    response.delete_cookie(
+        key="accessToken",
+        path="/",
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
     return {"msg": "Logout realizado com sucesso"}
 
 
