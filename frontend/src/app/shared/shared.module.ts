@@ -28,6 +28,7 @@ import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
     MatIconModule,
     ClientTimezoneDatePipe
   ],
+  declarations: [],
   exports: [
     CommonModule,
     ReactiveFormsModule,

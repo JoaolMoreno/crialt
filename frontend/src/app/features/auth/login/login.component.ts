@@ -36,9 +36,9 @@ export class LoginComponent {
         username: this.username,
         password: this.password
     }).subscribe({
-      next: (user) => {
+      next: (response) => {
         this.loading = false;
-        this.authService.setCurrentUser(user.user);
+        this.authService.handleLoginResponse(response);
         this.router.navigate(['/home']);
       },
       error: (err) => {

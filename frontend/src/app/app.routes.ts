@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { HomeRedirectComponent } from './shared/components/home-redirect/home-redirect.component';
 
 export const appRoutes: Routes = [
     {
@@ -11,7 +12,7 @@ export const appRoutes: Routes = [
         children: [
             {
                 path: 'home',
-                loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.dashboardRoutes)
+                component: HomeRedirectComponent
             },
             {
                 path: 'clients',

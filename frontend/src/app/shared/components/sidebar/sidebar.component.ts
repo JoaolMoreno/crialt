@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { SharedModule } from '../../shared.module';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface SidebarMenuItem {
   label: string;
@@ -57,7 +58,7 @@ export class SidebarComponent {
     }
   ];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService: AuthService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.updateFavorite(event.urlAfterRedirects);
@@ -66,6 +67,24 @@ export class SidebarComponent {
     this.updateFavorite(this.router.url);
     this.checkMobile();
     window.addEventListener('resize', this.checkMobile.bind(this));
+
+    // Ajusta menu para cliente
+    if (this.authService.isClientLogged()) {
+      this.menuItems = [
+        {
+          label: 'Home',
+          icon: 'dashboard',
+          route: '/home',
+          favorite: true
+        },
+        {
+          label: 'Projetos',
+          icon: 'folder_special',
+          route: '/projects',
+          notificationCount: 0,
+        }
+      ];
+    }
   }
 
   checkMobile() {
