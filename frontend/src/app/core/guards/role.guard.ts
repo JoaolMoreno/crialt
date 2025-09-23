@@ -10,14 +10,16 @@ export class RoleGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     const allowedRoles = route.data['allowedRoles'] as string[] || [];
+
     return this.authService.checkToken().pipe(
       map(payload => {
         const normalizedAllowedRoles = allowedRoles.map(r => r.trim().toLowerCase());
         const normalizedRole = (payload?.role || '').trim().toLowerCase();
+
         if (payload && normalizedAllowedRoles.includes(normalizedRole)) {
           return true;
         }
-        console.warn('[RoleGuard] canActivate: permissão negada. Redirecionando para login. Payload:', payload);
+
         this.router.navigate(['/auth/login']);
         return false;
       })

@@ -148,6 +148,29 @@ def upgrade() -> None:
         sa.Column('assigned_to_id', UUID(as_uuid=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('chunked_uploads',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('upload_id', sa.String(length=255), nullable=False),
+                    sa.Column('filename', sa.String(length=255), nullable=False),
+                    sa.Column('total_chunks', sa.Integer(), nullable=False),
+                    sa.Column('chunk_size', sa.Integer(), nullable=False),
+                    sa.Column('total_size', sa.Integer(), nullable=False),
+                    sa.Column('file_checksum', sa.String(length=64), nullable=True),
+                    sa.Column('mime_type', sa.String(length=255), nullable=True),
+                    sa.Column('category', sa.String(length=50), nullable=True),
+                    sa.Column('project_id', sa.UUID(), nullable=True),
+                    sa.Column('client_id', sa.UUID(), nullable=True),
+                    sa.Column('stage_id', sa.UUID(), nullable=True),
+                    sa.Column('description', sa.Text(), nullable=True),
+                    sa.Column('uploaded_by_id', sa.UUID(), nullable=False),
+                    sa.Column('uploaded_chunks', sa.Text(), nullable=True),
+                    sa.Column('is_completed', sa.Boolean(), nullable=True),
+                    sa.Column('final_file_id', sa.UUID(), nullable=True),
+                    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
+                    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+                    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     # 2. Adição das constraints de chave estrangeira e índices
     op.create_foreign_key('fk_stages_assigned_to_id_users', 'stages', 'users', ['assigned_to_id'], ['id'])
     op.create_foreign_key('fk_stages_created_by_id_users', 'stages', 'users', ['created_by_id'], ['id'])
@@ -176,6 +199,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_stages_name'), 'stages', ['name'], unique=False)
     op.create_index(op.f('ix_stages_stage_type_id'), 'stages', ['stage_type_id'], unique=False)
     op.create_index(op.f('ix_stage_types_name'), 'stage_types', ['name'], unique=False)
+    op.create_index(op.f('ix_chunked_uploads_upload_id'), 'chunked_uploads', ['upload_id'], unique=True)
     # ### end Alembic commands ###
 
     # Inserir dados padrão para tipos de etapa
@@ -301,4 +325,5 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_clients_document'), table_name='clients')
     op.drop_index(op.f('ix_clients_created_at'), table_name='clients')
     op.drop_table('clients')
+    op.drop_table('chunked_uploads')
     # ### end Alembic commands ###

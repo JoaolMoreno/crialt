@@ -267,78 +267,62 @@ export class ProjectFormComponent {
     this.form.get('value')?.setValue(input.value);
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) return;
-    this.loading = true;
+  get isEditMode(): boolean {
+    return this.isEdit && !!this.projectId;
+  }
+
+  private prepareFormData(): any {
     const formValue = this.form.value;
 
-    let work_address = undefined;
-    if (typeof formValue.address === 'string' && formValue.address.trim()) {
-      const [street, number] = formValue.address.split(',').map((v: string) => v.trim());
-      work_address = { street: street || '', number: number || '' };
-    } else if (formValue.address && typeof formValue.address === 'object') {
-      work_address = formValue.address;
-    }
+    // Converter valor monetário brasileiro para float
+    const valueFloat = moedaBrToFloat(formValue.value);
 
-    let scope = undefined;
-    if (formValue.scope) {
-      scope = {
-        total_area: formValue.scope.total_area ? Number(formValue.scope.total_area) : undefined,
-        rooms_included: formValue.scope.rooms_included
-          ? (typeof formValue.scope.rooms_included === 'string'
-              ? formValue.scope.rooms_included.split(',').map((r: string) => r.trim()).filter((r: string) => r)
-              : formValue.scope.rooms_included)
-          : [],
-        technical_notes: formValue.scope.technical_notes || ''
-      };
-    }
+    // Preparar endereço
+    const addressParts = formValue.address ? formValue.address.split(',') : [];
+    const workAddress = addressParts.length >= 2 ? {
+      street: addressParts[0].trim(),
+      number: addressParts[1].trim(),
+      city: '',
+      state: '',
+      zip_code: ''
+    } : null;
 
-    let stages = undefined;
-    if (this.etapasProjeto.length > 0) {
-      stages = this.etapasProjeto.map((stage) => {
-        const stageData: any = {
-          stage_type_id: stage.stage_type_id,
-          name: stage.name,
-          description: stage.description,
-          order: stage.order,
-          planned_start_date: stage.planned_start_date,
-          planned_end_date: stage.planned_end_date,
-          value: stage.value || 0,
-          progress_percentage: stage.progress_percentage || 0,
-          notes: stage.notes || ''
-        };
-
-        if (this.isEdit && stage.id && !stage.id.startsWith('temp_')) {
-          stageData.id = stage.id;
-          stageData.status = stage.status;
-          stageData.actual_start_date = stage.actual_start_date;
-          stageData.actual_end_date = stage.actual_end_date;
-          stageData.assigned_to_id = stage.assigned_to_id;
-        }
-
-        return stageData;
-      });
-    }
-
-    const data: any = {
-      name: formValue.name,
-      description: formValue.description,
-      total_value: moedaBrToFloat(formValue.value),
-      currency: 'BRL',
-      start_date: formValue.startDate,
-      estimated_end_date: formValue.endDate,
-      clients: this.selectedClients.map(c => c.id),
-      work_address,
-      scope,
-      status: formValue.status,
+    // Preparar escopo
+    const scope = {
+      total_area: formValue.scope?.total_area || null,
+      rooms_included: formValue.scope?.rooms_included ?
+        formValue.scope.rooms_included.split(',').map((room: string) => room.trim()).filter((room: string) => room) : [],
+      technical_notes: formValue.scope?.technical_notes || null
     };
 
-    if (stages) {
-      data.stages = stages;
-    }
+    // Preparar etapas ativas
+    const activeStages = this.etapasAtivas().map((stage, index) => ({
+      ...stage,
+      order: index + 1
+    }));
 
-    if (this.isEdit && this.projectId) {
-      this.projectService.updateProject(this.projectId, data).subscribe({
+    return {
+      name: formValue.name,
+      description: formValue.description || null,
+      total_value: valueFloat,
+      start_date: formValue.startDate,
+      estimated_end_date: formValue.endDate,
+      work_address: workAddress,
+      scope: scope,
+      client_ids: formValue.clientId,
+      stages: activeStages,
+      status: formValue.status
+    };
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    this.loading = true;
+    const data = this.prepareFormData();
+
+    if (this.isEditMode) {
+      this.projectService.updateProject(this.projectId!, data).subscribe({
         next: () => {
           this.router.navigate(['/projects']);
         },
@@ -363,7 +347,6 @@ export class ProjectFormComponent {
   onBack(): void {
     this.router.navigate(['/projects']);
   }
-
   adicionarEtapa(): void {
     this.openEtapaModal();
   }

@@ -14,13 +14,11 @@ export class AuthGuard implements CanActivate {
         if (!!user) {
           return true;
         } else {
-          console.warn('[AuthGuard] canActivate: usuário não autenticado, redirecionando para login');
           this.router.navigate(['/auth/login']);
           return false;
         }
       }),
       catchError((err) => {
-        console.error('[AuthGuard] canActivate: erro ao buscar usuário', err);
         this.router.navigate(['/auth/login']);
         return of(false);
       })

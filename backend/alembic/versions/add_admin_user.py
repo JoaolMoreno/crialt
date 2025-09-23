@@ -55,4 +55,63 @@ def upgrade():
     )
 
 def downgrade():
-    op.execute("DELETE FROM users WHERE username = 'admin'")
+    """
+    Remove admin user. This will only work if no data is referenced by the admin user.
+    In production, you might want to reassign ownership before deletion.
+    """
+    conn = op.get_bind()
+
+    # Check if admin user exists
+    result = conn.execute(
+        text("SELECT id FROM users WHERE username = 'admin'")
+    )
+    admin_user = result.fetchone()
+
+    if not admin_user:
+        # Admin user doesn't exist, nothing to do
+        return
+
+    admin_id = admin_user[0]
+
+    # Check if admin user is referenced by other tables
+    # Check stages
+    stages_count = conn.execute(
+        text("SELECT COUNT(*) FROM stages WHERE created_by_id = :admin_id OR assigned_to_id = :admin_id"),
+        {"admin_id": admin_id}
+    ).fetchone()[0]
+
+    # Check tasks
+    tasks_count = conn.execute(
+        text("SELECT COUNT(*) FROM tasks WHERE created_by_id = :admin_id OR assigned_to_id = :admin_id"),
+        {"admin_id": admin_id}
+    ).fetchone()[0]
+
+    # Check projects
+    projects_count = conn.execute(
+        text("SELECT COUNT(*) FROM projects WHERE created_by_id = :admin_id"),
+        {"admin_id": admin_id}
+    ).fetchone()[0]
+
+    # Check files
+    files_count = conn.execute(
+        text("SELECT COUNT(*) FROM files WHERE uploaded_by_id = :admin_id"),
+        {"admin_id": admin_id}
+    ).fetchone()[0]
+
+    if stages_count > 0 or tasks_count > 0 or projects_count > 0 or files_count > 0:
+        print(f"Warning: Cannot delete admin user as it is referenced by:")
+        if stages_count > 0:
+            print(f"  - {stages_count} stage(s)")
+        if tasks_count > 0:
+            print(f"  - {tasks_count} task(s)")
+        if projects_count > 0:
+            print(f"  - {projects_count} project(s)")
+        if files_count > 0:
+            print(f"  - {files_count} file(s)")
+        print("Skipping admin user deletion to maintain data integrity.")
+        return
+
+    # If no references exist, safe to delete
+    conn.execute(
+        text("DELETE FROM users WHERE username = 'admin'")
+    )

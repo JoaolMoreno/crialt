@@ -46,9 +46,13 @@ class Settings(BaseSettings):
         env = (data.get('ENVIRONMENT') or os.getenv('ENVIRONMENT') or 'development').strip().lower()
         return env in ("prod", "production")
 
-    # File Storage
+    # Upload/Storage
     UPLOAD_DIR: str = "app/storage/uploads"
     MAX_FILE_SIZE: int = 1 * 1024 * 1024 * 1024  # 1GB
+    CHUNK_UPLOAD_TIMEOUT: int = 300  # 5 minutos timeout para chunks
+    MAX_CHUNK_SIZE: int = 50 * 1024 * 1024  # 50MB por chunk
+    CHUNKED_UPLOAD_EXPIRY_HOURS: int = 24  # Expiração de uploads chunked
+
     ALLOWED_EXTENSIONS: List[str] = [
         ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".dxf", ".txt", ".zip", ".rar",
         # Vídeo

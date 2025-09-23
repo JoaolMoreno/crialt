@@ -9,6 +9,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
+import {MatCheckbox} from "@angular/material/checkbox";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatCardModule} from "@angular/material/card";
 
 @NgModule({
   imports: [
@@ -26,7 +29,10 @@ import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
     FormsModule,
     MatButtonModule,
     MatIconModule,
-    ClientTimezoneDatePipe
+    ClientTimezoneDatePipe,
+    MatCheckbox,
+    MatProgressBarModule,
+    MatCardModule,
   ],
   declarations: [],
   exports: [
@@ -44,7 +50,10 @@ import { ClientTimezoneDatePipe } from './pipes/client-timezone-date.pipe';
     CeilPipe,
     MatButtonModule,
     MatIconModule,
-    ClientTimezoneDatePipe
+    ClientTimezoneDatePipe,
+    MatCheckbox,
+    MatProgressBarModule,
+    MatCardModule,
   ]
 })
 export class SharedModule {}

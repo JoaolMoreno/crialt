@@ -13,6 +13,10 @@ from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles, Fil
 from ..services.file_service import FileService
 from ..models.project import Project
 from ..core.config import settings
+from ..schemas.chunked_upload import (
+    ChunkedUploadInitiate, ChunkedUploadResponse, ChunkUploadResponse,
+    ChunkedUploadStatus, ChunkedUploadComplete
+)
 
 router = APIRouter()
 
@@ -220,3 +224,70 @@ async def download_selected_files(
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'}
     )
+
+# Rotas de upload chunked
+@router.post("/chunked/initiate", response_model=ChunkedUploadResponse)
+async def initiate_chunked_upload(
+    upload_data: ChunkedUploadInitiate,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    return await run_in_threadpool(service.initiate_upload, upload_data, actor)
+
+@router.post("/chunked/{upload_id}/chunk/{chunk_number}", response_model=ChunkUploadResponse)
+async def upload_chunk(
+    upload_id: str,
+    chunk_number: int,
+    chunk: UploadFile = FastAPIFile(...),
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    return await run_in_threadpool(service.upload_chunk, upload_id, chunk_number, chunk)
+
+@router.get("/chunked/{upload_id}/status", response_model=ChunkedUploadStatus)
+async def get_upload_status(
+    upload_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    return await run_in_threadpool(service.get_upload_status, upload_id)
+
+@router.post("/chunked/{upload_id}/complete", response_model=ChunkedUploadComplete)
+async def complete_upload(
+    upload_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    return await run_in_threadpool(service.complete_upload, upload_id, actor, client_resource_permission)
+
+@router.get("/chunked/{upload_id}/retry", response_model=ChunkedUploadStatus)
+async def retry_missing_chunks(
+    upload_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    """Verifica chunks faltando e retorna lista para retry no frontend"""
+    service = FileService(db)
+    return await run_in_threadpool(service.retry_missing_chunks, upload_id)
+
+@router.post("/chunked/cleanup")
+async def cleanup_expired_uploads(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_actor_factory(["admin"]))
+):
+    """Limpa uploads expirados - apenas para admins"""
+    service = FileService(db)
+    return await run_in_threadpool(service.cleanup_expired_uploads)
+
+@router.delete("/chunked/{upload_id}")
+async def cancel_upload(
+    upload_id: str,
+    db: Session = Depends(get_db),
+    actor = Depends(get_current_actor_factory())
+):
+    service = FileService(db)
+    return await run_in_threadpool(service.cancel_upload, upload_id)

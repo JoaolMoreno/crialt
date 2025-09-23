@@ -1011,3 +1011,192 @@ Essa abordagem garante alta performance nas consultas e consistência dos dados 
 
 ---
 
+## 📁 Sistema de Upload Chunked
+
+### Visão Geral
+O sistema implementa upload chunked robusto para arquivos grandes com retry automático, verificação de integridade e gerenciamento inteligente de falhas.
+
+### Características Principais
+- ✅ **Retry automático** com backoff exponencial
+- ✅ **Verificação de integridade** de chunks (MD5) e arquivo final (SHA-256)
+- ✅ **Controle de transações** para evitar race conditions
+- ✅ **Logging detalhado** para debugging
+- ✅ **Timeouts configuráveis** (5 minutos por chunk)
+- ✅ **Limpeza automática** de uploads expirados (24h)
+- ✅ **Endpoint de retry** para chunks faltando
+
+### Configurações
+```python
+# Em config.py
+UPLOAD_DIR = "app/storage/uploads"
+MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024  # 1GB
+MAX_CHUNK_SIZE = 50 * 1024 * 1024  # 50MB por chunk
+CHUNK_UPLOAD_TIMEOUT = 300  # 5 minutos
+CHUNKED_UPLOAD_EXPIRY_HOURS = 24  # Expiração em 24h
+```
+
+### Endpoints da API
+
+#### 1. Iniciar Upload
+```
+POST /api/files/chunked/initiate
+```
+**Body:**
+```json
+{
+  "filename": "video.mp4",
+  "total_chunks": 36,
+  "chunk_size": 1048576,
+  "total_size": 37748736,
+  "file_checksum": "a1b2c3d4e5f6...",
+  "mime_type": "video/mp4",
+  "category": "video",
+  "project_id": "uuid-here",
+  "description": "Descrição opcional"
+}
+```
+
+#### 2. Enviar Chunk
+```
+POST /api/files/chunked/{upload_id}/chunk/{chunk_number}
+Content-Type: multipart/form-data
+```
+
+#### 3. Verificar Status
+```
+GET /api/files/chunked/{upload_id}/status
+```
+**Response:**
+```json
+{
+  "upload_id": "abc123_1703276400",
+  "filename": "video.mp4",
+  "total_chunks": 36,
+  "uploaded_chunks": [1, 2, 3, 6, 7, 8, 9],
+  "missing_chunks": [4, 5, 10, 11, 12, 13],
+  "progress": 19.44,
+  "is_completed": false,
+  "expires_at": "2024-01-23T10:00:00Z"
+}
+```
+
+#### 4. Retry de Chunks Faltando
+```
+GET /api/files/chunked/{upload_id}/retry
+```
+
+#### 5. Finalizar Upload
+```
+POST /api/files/chunked/{upload_id}/complete
+```
+
+#### 6. Cancelar Upload
+```
+DELETE /api/files/chunked/{upload_id}
+```
+
+#### 7. Limpeza de Uploads Expirados (Admin)
+```
+POST /api/files/chunked/cleanup
+```
+
+### Implementação Frontend Recomendada
+
+```typescript
+class ChunkedUploadService {
+  private maxRetries = 3;
+  private retryDelay = 1000;
+
+  async uploadFileWithRetry(file: File, metadata: UploadMetadata): Promise<string> {
+    // 1. Iniciar upload
+    const uploadResponse = await this.initiateUpload({
+      filename: file.name,
+      total_size: file.size,
+      total_chunks: Math.ceil(file.size / this.chunkSize),
+      chunk_size: this.chunkSize,
+      file_checksum: await this.calculateSHA256(file),
+      ...metadata
+    });
+
+    const uploadId = uploadResponse.upload_id;
+    const chunks = this.splitFileIntoChunks(file);
+
+    // 2. Upload chunks com retry individual
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkNumber = i + 1;
+      await this.uploadChunkWithRetry(uploadId, chunkNumber, chunks[i]);
+    }
+
+    // 3. Finalizar com retry para chunks faltando
+    return await this.completeUploadWithRetry(uploadId);
+  }
+
+  private async completeUploadWithRetry(uploadId: string): Promise<string> {
+    try {
+      const result = await this.completeUpload(uploadId);
+      return result.final_file_id;
+    } catch (error) {
+      if (error.response?.status === 400 && 
+          error.response?.data?.detail?.includes('Chunks faltando')) {
+        
+        // Obter lista de chunks faltando
+        const status = await this.getUploadStatus(uploadId);
+        const missingChunks = status.missing_chunks;
+        
+        if (missingChunks && missingChunks.length > 0) {
+          console.log(`Retrying ${missingChunks.length} missing chunks:`, missingChunks);
+          
+          // Reenviar apenas chunks faltando
+          for (const chunkNumber of missingChunks) {
+            const chunk = this.getChunkFromFile(chunkNumber);
+            await this.uploadChunkWithRetry(uploadId, chunkNumber, chunk);
+          }
+          
+          // Tentar finalizar novamente
+          return await this.completeUpload(uploadId).then(r => r.final_file_id);
+        }
+      }
+      throw error;
+    }
+  }
+}
+```
+
+### Monitoramento e Troubleshooting
+
+#### Logs Importantes
+```
+INFO - Iniciando upload chunked: video.mp4, 36 chunks
+DEBUG - Chunk 1 enviado com sucesso (tentativa 1)
+WARNING - Tentativa 1 falhou para chunk 5: Timeout
+DEBUG - Chunk 5 enviado com sucesso (tentativa 2)
+WARNING - Upload abc123 com chunks faltando: [4, 5, 10]
+INFO - Upload abc123 completado com sucesso
+```
+
+#### Problemas Resolvidos
+1. **"Chunks faltando" após upload completo**
+   - ✅ Verificação tripla (BD + disco + integridade)
+   - ✅ Retry automático implementado
+
+2. **Race conditions em uploads paralelos**
+   - ✅ Lock de transação com `nowait=True`
+   - ✅ Arquivos temporários únicos por tentativa
+
+3. **Uploads ficando órfãos**
+   - ✅ Expiração automática em 24h
+   - ✅ Limpeza agendada disponível
+
+4. **Chunks corrompidos**
+   - ✅ Verificação MD5 por chunk
+   - ✅ Checksum SHA-256 do arquivo final
+
+### Performance e Configurações Recomendadas
+- **Chunk size**: 5-10MB para conexões normais, até 50MB para rápidas
+- **Paralelo**: Máximo 3-5 chunks simultâneos
+- **Timeout**: 5 minutos por chunk
+- **Retry**: Máximo 3 tentativas com backoff exponencial
+
+---
+
+## 🔧 Setup e Desenvolvimento

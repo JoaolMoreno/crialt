@@ -104,8 +104,6 @@ export class ClientFormComponent implements OnInit {
       this.setDocumentValidator(type);
       this.form.get('document')?.updateValueAndValidity();
     });
-
-    this.notification.success('Cliente criado com sucesso!');
   }
 
   buscarCepAutomatico(cep: string): void {

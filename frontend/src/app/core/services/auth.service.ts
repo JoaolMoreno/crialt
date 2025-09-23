@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { Client } from '../models/client.model';
 import { environment } from '../../environments/environment';
@@ -45,13 +46,14 @@ export class AuthService {
   fetchCurrentUser(): Observable<UserOrClient | null> {
     return new Observable<UserOrClient | null>(observer => {
       const endpoint = this.isClient ? '/clients/me' : '/users/me';
-      this.http.get<UserOrClient>(`${environment.apiUrl}${endpoint}`, { withCredentials: true }).subscribe({
+      const fullUrl = `${environment.apiUrl}${endpoint}`;
+
+      this.http.get<UserOrClient>(fullUrl, { withCredentials: true }).subscribe({
         next: (data) => {
           this.userSubject.next(data);
           observer.next(data);
         },
         error: (err) => {
-          console.error('[AuthService] fetchCurrentUser: erro', err);
           this.userSubject.next(null);
           observer.next(null);
         },
@@ -78,7 +80,6 @@ export class AuthService {
       this.isClient = false;
       localStorage.setItem('isClient', 'false');
       this.userSubject.next(null);
-      console.warn('[AuthService] handleLoginResponse: resposta inesperada, limpando estado');
     }
   }
 
@@ -93,7 +94,6 @@ export class AuthService {
         this.userSubject.next(null);
         this.isClient = false;
         localStorage.removeItem('isClient');
-        console.error('[AuthService] logout: erro ao fazer logout, estado limpo mesmo assim', err);
       }
     });
   }
@@ -101,8 +101,10 @@ export class AuthService {
   checkToken(): Observable<{ role: string; name: string; sub: string } | null> {
     return this.http.get<{ role: string; name: string; sub: string }>(`${this.apiUrl}/check-token`, { withCredentials: true })
       .pipe(
+        map(result => {
+          return result;
+        }),
         catchError(err => {
-          console.error('[AuthService] checkToken: token inválido ou erro', err);
           this.logout();
           return of(null);
         })

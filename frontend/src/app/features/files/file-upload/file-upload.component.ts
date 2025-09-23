@@ -1,18 +1,23 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
-import { FileService, FileCategory, FileUpload } from '../../../core/services/file.service';
+import { Component, Input, Output, EventEmitter, inject, OnInit, OnDestroy } from '@angular/core';
+import { FileService, FileCategory, FileUpload, UploadProgress } from '../../../core/services/file.service';
 import { SharedModule } from '../../../shared/shared.module';
-import {MatCheckbox} from "@angular/material/checkbox";
-
+import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-    imports: [SharedModule, MatCheckbox],
+  imports: [
+    SharedModule,
+    CommonModule
+  ],
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.scss']
 })
-export class FileUploadComponent implements OnInit {
+export class FileUploadComponent implements OnInit, OnDestroy {
   @Input() projectId: string | null = null;
+  @Input() clientId?: string;
+  @Input() stageId?: string;
   @Input() allowedCategories: FileCategory[] = Object.values(FileCategory);
   @Input() multiple = true;
   @Input() maxFileSize = 1 * 1024 * 1024 * 1024;
@@ -22,7 +27,6 @@ export class FileUploadComponent implements OnInit {
   private readonly fileService = inject(FileService);
 
   files: FileUpload[] = [];
-  uploading = false;
   dragOver = false;
   error = '';
 
@@ -33,10 +37,28 @@ export class FileUploadComponent implements OnInit {
 
   selectedFiles = new Set<string>();
 
+  activeUploads: UploadProgress[] = [];
+  private subscriptions: Subscription[] = [];
+
   ngOnInit(): void {
     if (this.projectId) {
       this.loadFiles();
     }
+    this.activeUploads = this.fileService.getActiveUploads();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  get hasActiveUploads(): boolean {
+    return this.activeUploads.some(upload =>
+      upload.status === 'uploading' || upload.status === 'error'
+    );
+  }
+
+  get uploading(): boolean {
+    return this.hasActiveUploads;
   }
 
   loadFiles(): void {
@@ -94,19 +116,104 @@ export class FileUploadComponent implements OnInit {
     this.error = '';
 
     // Validar arquivos
-    for (const file of files) {
+    const validFiles = files.filter(file => {
       if (file.size > this.maxFileSize) {
         this.error = `Arquivo "${file.name}" excede o tamanho máximo de ${this.maxFileSize / 1024 / 1024 / 1024}GB.`;
-        return;
+        return false;
       }
-    }
+      return true;
+    });
 
-    if (!this.multiple && files.length > 1) {
+    if (validFiles.length === 0) return;
+
+    if (!this.multiple && validFiles.length > 1) {
       this.error = 'Apenas um arquivo é permitido.';
       return;
     }
 
-    this.uploadFiles(files);
+    // Usar upload chunked para todos os arquivos
+    validFiles.forEach(file => this.startChunkedUpload(file));
+  }
+
+  private startChunkedUpload(file: File): void {
+    const category = this.detectCategory(file);
+
+    const uploadSub = this.fileService.uploadLargeFile(
+      file,
+      this.projectId!,
+      this.clientId,
+      this.stageId,
+      category
+    ).subscribe({
+      next: (progress) => {
+        this.updateUploadProgress(progress);
+
+        if (progress.status === 'completed') {
+          this.handleUploadCompleted(progress);
+        }
+      },
+      error: (error) => {
+        console.error('Erro no upload:', error);
+        this.error = `Erro no upload do arquivo "${file.name}".`;
+      }
+    });
+
+    this.subscriptions.push(uploadSub);
+  }
+
+  private updateUploadProgress(progress: UploadProgress): void {
+    const index = this.activeUploads.findIndex(u => u.uploadId === progress.uploadId);
+
+    if (index >= 0) {
+      this.activeUploads[index] = progress;
+    } else {
+      this.activeUploads.push(progress);
+    }
+
+    // Remover uploads completados após um tempo
+    if (progress.status === 'completed') {
+      setTimeout(() => {
+        this.removeUpload(progress.uploadId);
+      }, 3000);
+    }
+  }
+
+  private async handleUploadCompleted(progress: UploadProgress): Promise<void> {
+    try {
+      // Recarregar lista de arquivos para pegar o novo arquivo
+      await this.loadFiles();
+
+      // Verificar se todos os uploads terminaram
+      const allCompleted = this.activeUploads.every(u =>
+        u.status === 'completed' || u.status === 'error' || u.status === 'cancelled'
+      );
+
+      if (allCompleted) {
+        // Limpar uploads após todos terminarem
+        setTimeout(() => {
+          this.activeUploads = this.activeUploads.filter(u =>
+            u.status === 'uploading' || u.status === 'error'
+          );
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar arquivo completado:', error);
+    }
+  }
+
+  cancelUpload(uploadId: string): void {
+    this.fileService.cancelUpload(uploadId).subscribe({
+      next: () => {
+        this.removeUpload(uploadId);
+      },
+      error: (error) => {
+        console.error('Erro ao cancelar upload:', error);
+      }
+    });
+  }
+
+  private removeUpload(uploadId: string): void {
+    this.activeUploads = this.activeUploads.filter(u => u.uploadId !== uploadId);
   }
 
   private detectCategory(file: File): FileCategory {
@@ -116,34 +223,71 @@ export class FileUploadComponent implements OnInit {
     return FileCategory.DOCUMENT;
   }
 
-  private uploadFiles(files: File[]): void {
-    this.uploading = true;
-    let uploadedCount = 0;
-    const totalFiles = files.length;
+  trackUpload(index: number, upload: UploadProgress): string {
+    return upload.uploadId;
+  }
 
-    files.forEach((file) => {
-      const category = this.detectCategory(file);
-      this.fileService.uploadFile(file, this.projectId!, category).subscribe({
-        next: (uploadedFile) => {
-          this.files.push(uploadedFile);
-          uploadedCount++;
+  getStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      'uploading': 'status-uploading',
+      'completed': 'status-completed',
+      'error': 'status-error',
+      'cancelled': 'status-cancelled'
+    };
+    return classes[status] || '';
+  }
 
-          if (uploadedCount === totalFiles) {
-            this.uploading = false;
-            this.filesChanged.emit(this.files);
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao fazer upload:', error);
-          this.error = `Erro ao fazer upload do arquivo "${file.name}".`;
-          uploadedCount++;
+  getStatusText(status: string): string {
+    const texts: Record<string, string> = {
+      'uploading': 'Enviando...',
+      'completed': 'Concluído',
+      'error': 'Erro',
+      'cancelled': 'Cancelado'
+    };
+    return texts[status] || status;
+  }
 
-          if (uploadedCount === totalFiles) {
-            this.uploading = false;
-          }
-        }
-      });
-    });
+  getProgressColor(status: string): 'primary' | 'accent' | 'warn' {
+    switch (status) {
+      case 'completed': return 'accent';
+      case 'error': return 'warn';
+      default: return 'primary';
+    }
+  }
+
+  formatSpeed(bytesPerSecond: number): string {
+    const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+    let value = bytesPerSecond;
+    let unitIndex = 0;
+
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value /= 1024;
+      unitIndex++;
+    }
+
+    return `${value.toFixed(1)} ${units[unitIndex]}`;
+  }
+
+  formatTime(seconds: number): string {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+    return `${Math.round(seconds / 3600)}h`;
+  }
+
+  getOverallProgress(): number {
+    if (this.activeUploads.length === 0) return 0;
+    const total = this.activeUploads.reduce((sum, upload) => sum + upload.progress, 0);
+    return total / this.activeUploads.length;
+  }
+
+  getCompletedCount(): number {
+    return this.activeUploads.filter(u => u.status === 'completed').length;
+  }
+
+  getPendingCount(): number {
+    return this.activeUploads.filter(u =>
+      u.status === 'uploading' || u.status === 'error'
+    ).length;
   }
 
   downloadFile(file: FileUpload): void {
@@ -160,11 +304,26 @@ export class FileUploadComponent implements OnInit {
     this.fileService.deleteFile(file.id).subscribe({
       next: () => {
         this.files = this.files.filter(f => f.id !== file.id);
+        this.selectedFiles.delete(file.id);
         this.filesChanged.emit(this.files);
+
+        this.error = '';
       },
       error: (error) => {
         console.error('Erro ao excluir arquivo:', error);
-        this.error = 'Erro ao excluir arquivo.';
+
+        if (error.status === 401 || error.status === 403) {
+          this.error = 'Você não tem permissão para excluir este arquivo.';
+        } else if (error.status === 404) {
+          this.error = 'Arquivo não encontrado.';
+          this.files = this.files.filter(f => f.id !== file.id);
+          this.selectedFiles.delete(file.id);
+          this.filesChanged.emit(this.files);
+        } else {
+          this.error = 'Erro ao excluir arquivo. Tente novamente.';
+        }
+
+        return;
       }
     });
   }
