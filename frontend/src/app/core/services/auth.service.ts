@@ -18,7 +18,6 @@ export class AuthService {
   constructor() {
     const storedIsClient = localStorage.getItem('isClient');
     this.isClient = storedIsClient === 'true';
-    console.log('[AuthService] Constructor: isClient from localStorage =', this.isClient);
   }
 
   /**
@@ -44,13 +43,10 @@ export class AuthService {
    * Busca o usuário ou cliente logado, dependendo do tipo de login.
    */
   fetchCurrentUser(): Observable<UserOrClient | null> {
-    console.log('[AuthService] fetchCurrentUser: isClient =', this.isClient);
     return new Observable<UserOrClient | null>(observer => {
       const endpoint = this.isClient ? '/clients/me' : '/users/me';
-      console.log('[AuthService] fetchCurrentUser: endpoint =', endpoint);
       this.http.get<UserOrClient>(`${environment.apiUrl}${endpoint}`, { withCredentials: true }).subscribe({
         next: (data) => {
-          console.log('[AuthService] fetchCurrentUser: sucesso', data);
           this.userSubject.next(data);
           observer.next(data);
         },
@@ -60,7 +56,6 @@ export class AuthService {
           observer.next(null);
         },
         complete: () => {
-          console.log('[AuthService] fetchCurrentUser: complete');
           observer.complete();
         }
       });
@@ -71,17 +66,14 @@ export class AuthService {
    * Chamada para ser feita após login, para armazenar o tipo correto e atualizar o estado.
    */
   handleLoginResponse(response: any): void {
-    console.log('[AuthService] handleLoginResponse: response =', response);
     if (response && response.client) {
       this.isClient = true;
       localStorage.setItem('isClient', 'true');
       this.userSubject.next(response.client);
-      console.log('[AuthService] handleLoginResponse: logado como CLIENTE', response.client);
     } else if (response && response.user) {
       this.isClient = false;
       localStorage.setItem('isClient', 'false');
       this.userSubject.next(response.user);
-      console.log('[AuthService] handleLoginResponse: logado como USUARIO', response.user);
     } else {
       this.isClient = false;
       localStorage.setItem('isClient', 'false');
@@ -91,13 +83,11 @@ export class AuthService {
   }
 
   logout(): void {
-    console.log('[AuthService] logout: iniciando logout');
     this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
       complete: () => {
         this.userSubject.next(null);
         this.isClient = false;
         localStorage.setItem('isClient', 'false');
-        console.log('[AuthService] logout: logout concluído, estado limpo');
       },
       error: (err) => {
         this.userSubject.next(null);
@@ -109,7 +99,6 @@ export class AuthService {
   }
 
   checkToken(): Observable<{ role: string; name: string; sub: string } | null> {
-    console.log('[AuthService] checkToken: verificando token');
     return this.http.get<{ role: string; name: string; sub: string }>(`${this.apiUrl}/check-token`, { withCredentials: true })
       .pipe(
         catchError(err => {

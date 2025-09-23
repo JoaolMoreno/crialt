@@ -454,7 +454,6 @@ export class ProjectFormComponent {
 
   onFilesChanged(files: FileUpload[]): void {
     // Pode ser usado para atualizar a UI ou validar arquivos
-    console.log('Arquivos atualizados:', files);
   }
 }
 
