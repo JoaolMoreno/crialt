@@ -44,6 +44,20 @@ class FileRead(FileBase):
     class Config:
         from_attributes = True
 
+class FileReadPublic(BaseModel):
+    id: UUID
+    original_name: str
+    size: int
+    mime_type: str
+    category: FileCategory
+    description: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    project_id: Optional[UUID] = None
+    client_id: Optional[UUID] = None
+    stage_id: Optional[UUID] = None
+    uploaded_by_id: UUID
+
 class PaginatedFiles(BaseModel):
     total: int
     count: int

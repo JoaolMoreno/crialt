@@ -52,13 +52,14 @@ async def get_token(request: Request) -> str | None:
     scheme, param = get_authorization_scheme_param(auth_header)
     token = None
     if scheme.lower() == "bearer" and param:
-        token = param
-        logger.debug(f"Token lido do header Authorization: {token}")
+      token = param
+      logger.debug("Token lido do header Authorization (não exibido por segurança)")
     else:
-        token = request.cookies.get("access_token")
-        logger.debug(f"Token lido do cookie: {token}")
+      token = request.cookies.get("access_token")
+      if token:
+        logger.debug("Token lido do cookie (não exibido por segurança)")
     if not token:
-        logger.warning("Nenhum token encontrado no header ou cookie")
+      logger.warning("Nenhum token encontrado no header ou cookie")
     return token
 
 

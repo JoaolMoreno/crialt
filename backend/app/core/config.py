@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
@@ -10,11 +11,18 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     ALGORITHM: str = "HS256"
 
+    # Ambiente
+    ENVIRONMENT: str = "development"
+
     # Database
     DATABASE_URL: str
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+    BACKEND_CORS_ORIGINS: List[str] = []
+
+    # Cookies/Sessão
+    COOKIE_SECURE: bool | None = None
+    COOKIE_SAMESITE: str = "lax"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -26,6 +34,17 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         raise ValueError(v)
+
+    @field_validator("COOKIE_SECURE", mode="before")
+    @classmethod
+    def default_cookie_secure_from_env(cls, v, info):
+        # Se COOKIE_SECURE vier definido explicitamente, respeita
+        if v is not None:
+            return v
+        # Caso contrário, deriva de ENVIRONMENT (ou variável de ambiente ENVIRONMENT)
+        data = getattr(info, 'data', {}) or {}
+        env = (data.get('ENVIRONMENT') or os.getenv('ENVIRONMENT') or 'development').strip().lower()
+        return env in ("prod", "production")
 
     # File Storage
     UPLOAD_DIR: str = "app/storage/uploads"

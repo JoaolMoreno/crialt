@@ -9,9 +9,10 @@ import zipfile
 
 from ..api.dependencies import get_db, get_current_actor_factory, client_resource_permission
 from ..models.user import User
-from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles, FileCategory
+from ..schemas.file import FileRead, FileCreate, FileUpdate, PaginatedFiles, FileCategory, FileReadPublic
 from ..services.file_service import FileService
 from ..models.project import Project
+from ..core.config import settings
 
 router = APIRouter()
 
@@ -36,7 +37,7 @@ async def get_files(
         limit, offset, order_by, order_dir, original_name, category, project_id, client_id, stage_id, uploaded_by_id
     )
 
-@router.get("/project/{project_id}", response_model=List[FileRead])
+@router.get("/project/{project_id}", response_model=List[FileReadPublic])
 async def get_files_by_project(
     project_id: str,
     db: Session = Depends(get_db),
@@ -45,7 +46,7 @@ async def get_files_by_project(
     service = FileService(db)
     return await run_in_threadpool(service.get_files_by_project, project_id, client_resource_permission, actor)
 
-@router.get("/client/{client_id}", response_model=List[FileRead])
+@router.get("/client/{client_id}", response_model=List[FileReadPublic])
 async def get_files_by_client(
     client_id: str,
     db: Session = Depends(get_db),
@@ -54,7 +55,7 @@ async def get_files_by_client(
     service = FileService(db)
     return await run_in_threadpool(service.get_files_by_client, client_id, client_resource_permission, actor)
 
-@router.get("/stage/{stage_id}", response_model=List[FileRead])
+@router.get("/stage/{stage_id}", response_model=List[FileReadPublic])
 async def get_files_by_stage(
     stage_id: str,
     db: Session = Depends(get_db),
@@ -63,7 +64,7 @@ async def get_files_by_stage(
     service = FileService(db)
     return await run_in_threadpool(service.get_files_by_stage, stage_id, client_resource_permission, actor)
 
-@router.get("/{file_id}", response_model=FileRead)
+@router.get("/{file_id}", response_model=FileReadPublic|FileRead)
 async def get_file(
     file_id: str,
     db: Session = Depends(get_db),
@@ -130,16 +131,21 @@ async def delete_file(file_id: str, db: Session = Depends(get_db), admin_user: U
 @router.get("/{file_id}/download")
 async def download_file(file_id: str, db: Session = Depends(get_db), actor = Depends(get_current_actor_factory())):
     service = FileService(db)
-    file_data = await run_in_threadpool(service.get_file, file_id, client_resource_permission, actor)
-    file_path = file_data.path
-
-    if not os.path.exists(file_path):
+    file_model = await run_in_threadpool(service.get_file_internal, file_id, actor, client_resource_permission)
+    file_path = file_model.path
+    # valida path dentro do diretório de upload
+    root = os.path.realpath(settings.UPLOAD_DIR)
+    real = os.path.realpath(file_path)
+    if not real.startswith(root + os.sep) and real != root:
+        raise HTTPException(status_code=400, detail="Caminho de arquivo inválido")
+    if not os.path.exists(real):
         raise HTTPException(status_code=404, detail="Arquivo não encontrado no sistema de arquivos")
 
+    safe_name = FileService.sanitize_filename(file_model.original_name)
     return FileResponse(
-        path=file_path,
-        filename=file_data.original_name,
-        media_type=file_data.mime_type
+        path=real,
+        filename=safe_name,
+        media_type=file_model.mime_type
     )
 
 @router.get("/project/{project_id}/download")
@@ -149,23 +155,29 @@ async def download_project_files(
     actor = Depends(get_current_actor_factory())
 ):
     service = FileService(db)
-    # Busca arquivos do projeto
     files = await run_in_threadpool(service.get_files_by_project, project_id, client_resource_permission, actor)
     if not files:
         raise HTTPException(status_code=404, detail="Nenhum arquivo encontrado para este projeto.")
-    # Busca nome do projeto
     project = db.query(Project).filter(Project.id == project_id).first()
     project_name = project.name if project else f"projeto_{project_id}"
-    # Cria ZIP em memória
+    safe_project_name = FileService.sanitize_filename(project_name)
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
         for file in files:
-            if not file.path or not os.path.exists(file.path):
+            # precisamos obter o modelo interno para pegar o path real
+            file_model = await run_in_threadpool(service.get_file_internal, str(file.id), actor, client_resource_permission)
+            if not file_model.path:
                 continue
-            arcname = file.original_name
-            zipf.write(file.path, arcname=arcname)
+            real = os.path.realpath(file_model.path)
+            root = os.path.realpath(settings.UPLOAD_DIR)
+            if not real.startswith(root + os.sep) and real != root:
+                continue
+            if not os.path.exists(real):
+                continue
+            arcname = FileService.sanitize_filename(file_model.original_name)
+            zipf.write(real, arcname=arcname)
     zip_buffer.seek(0)
-    zip_filename = f"{project_name}.zip"
+    zip_filename = f"{safe_project_name}.zip"
     return StreamingResponse(
         zip_buffer,
         media_type="application/zip",
@@ -181,16 +193,26 @@ async def download_selected_files(
     service = FileService(db)
     files = []
     for file_id in file_ids:
-        file = await run_in_threadpool(service.get_file, file_id, client_resource_permission, actor)
-        if file and file.path and os.path.exists(file.path):
-            files.append(file)
+        try:
+            file_model = await run_in_threadpool(service.get_file_internal, str(file_id), actor, client_resource_permission)
+            files.append(file_model)
+        except Exception:
+            continue
     if not files:
         raise HTTPException(status_code=404, detail="Nenhum arquivo encontrado.")
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for file in files:
-            arcname = file.original_name
-            zipf.write(file.path, arcname=arcname)
+        root = os.path.realpath(settings.UPLOAD_DIR)
+        for file_model in files:
+            if not file_model.path:
+                continue
+            real = os.path.realpath(file_model.path)
+            if not real.startswith(root + os.sep) and real != root:
+                continue
+            if not os.path.exists(real):
+                continue
+            arcname = FileService.sanitize_filename(file_model.original_name)
+            zipf.write(real, arcname=arcname)
     zip_buffer.seek(0)
     zip_filename = "arquivos.zip"
     return StreamingResponse(

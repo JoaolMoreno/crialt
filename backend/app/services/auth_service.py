@@ -1,5 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
+import secrets
+import string
 
 from ..core.security import verify_password, get_password_hash
 from ..models import User, Client
@@ -52,7 +54,8 @@ class AuthService:
 
     def reset_client_password(self, client: Client, new_password: Optional[str] = None) -> str:
         if not new_password:
-            new_password = "crialt" + str(client.id)[-4:]  # simples, pode ser melhorado
+            alphabet = string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{}"
+            new_password = ''.join(secrets.choice(alphabet) for _ in range(20))
         client.password_hash = get_password_hash(new_password)
         client.first_access = True
         self.db.commit()

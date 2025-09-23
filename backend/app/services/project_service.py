@@ -235,6 +235,8 @@ class ProjectService:
         query = self.db.query(Project)
         if hasattr(actor, "id"):
             query = query.join(Project.clients).filter(Client.id == actor.id)
+        else:
+            raise HTTPException(status_code=401, detail="Acesso não autorizado")
         if name:
             query = query.filter(Project.name.ilike(f"%{name}%"))
         if status:
@@ -461,6 +463,9 @@ class ProjectService:
 
     def get_projects_by_client(self, client_id, actor, limit, offset, order_by, order_dir, name, status, start_date, search, client_resource_permission=None):
         self.logger.info(f"[DB] get_projects_by_client: client_id={client_id}, actor={actor}, limit={limit}, offset={offset}, order_by={order_by}, order_dir={order_dir}, name={name}, status={status}, start_date={start_date}, search={search}")
+        # Verifica permissão antes de executar a consulta
+        if client_resource_permission and actor:
+            client_resource_permission([client_id], actor)
         query = self.db.query(Project)
         query = query.join(Project.clients).filter(Client.id == client_id)
         if name:
@@ -480,8 +485,6 @@ class ProjectService:
             query = query.order_by(order_col)
         total = query.count()
         items = query.offset(offset).limit(limit).all()
-        if client_resource_permission and actor:
-            client_resource_permission([client_id], actor)
         return PaginatedProjects(
             total=total,
             count=len(items),

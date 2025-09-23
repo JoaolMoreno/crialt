@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import logging
+from time import time
+from typing import Dict, Tuple
 
 from ..api.dependencies import get_db, get_current_user, get_token
 from ..core.security import create_access_token, decode_jwt_token
@@ -12,6 +14,11 @@ from ..services.auth_service import AuthService
 from ..core.config import settings
 
 logger = logging.getLogger("auth")
+
+# Rate limiting simples por IP (memória): máx. 10 tentativas em 10 minutos
+_RATE_LIMIT_WINDOW_SEC = 10 * 60
+_RATE_LIMIT_MAX_ATTEMPTS = 10
+_failed_attempts: Dict[str, Tuple[int, float]] = {}
 
 router = APIRouter()
 
@@ -30,6 +37,14 @@ async def login(
     response: Response = None
 ):
     auth = AuthService(db)
+    client_ip = request.client.host if request.client else "unknown"
+    now = time()
+
+    attempts, start_ts = _failed_attempts.get(client_ip, (0, now))
+    if now - start_ts > _RATE_LIMIT_WINDOW_SEC:
+        attempts, start_ts = 0, now
+    if attempts >= _RATE_LIMIT_MAX_ATTEMPTS:
+        raise HTTPException(status_code=429, detail="Muitas tentativas de login. Tente novamente mais tarde.")
     username = None
     password = None
     content_type = request.headers.get("content-type", "")
@@ -45,54 +60,61 @@ async def login(
         raise HTTPException(status_code=400, detail="Dados de login não fornecidos")
     if not username or not password:
         raise HTTPException(status_code=400, detail="username e password são obrigatórios")
+
     user = None
     # Usuário: username pode ser e-mail ou username
     if "@" in username:
         user = auth.authenticate_user_by_email(username, password)
     else:
         user = auth.authenticate_user_by_username(username, password)
+
     if user:
+        _failed_attempts.pop(client_ip, None)
         token = create_access_token(
             subject=str(user.id),
             additional_claims={"role": user.role, "name": user.name}
         )
-        logger.info(f"Login bem-sucedido para usuário {user.id}. Token gerado: {token}")
+        logger.info(f"Login bem-sucedido para usuário {user.id}.")
         if response:
             response.set_cookie(
                 key="access_token",
                 value=token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
+                secure=settings.COOKIE_SECURE,
+                samesite=settings.COOKIE_SAMESITE,
                 max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                 path="/"
             )
-            logger.info(f"Cookie 'access_token' setado para usuário {user.id}")
-        return {"access_token": token, "token_type": "bearer", "user": UserRead.model_validate(user, from_attributes=True)}
+        return {"user": UserRead.model_validate(user, from_attributes=True)}
+
     client = None
     if "@" in username:
         client = auth.authenticate_client_by_email(username, password)
     else:
-        doc = ''.join(filter(str.isdigit, username))
+        doc = ''.join(ch for ch in username if isinstance(ch, str) and ch.isdigit())
         client = auth.authenticate_client(doc, password)
+
     if client:
+        _failed_attempts.pop(client_ip, None)
         token = create_access_token(
             subject=str(client.id),
             additional_claims={"role": "client", "name": client.name}
         )
-        logger.info(f"Login bem-sucedido para cliente {client.id}. Token gerado: {token}")
+        logger.info(f"Login bem-sucedido para cliente {client.id}.")
         if response:
             response.set_cookie(
                 key="access_token",
                 value=token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
+                secure=settings.COOKIE_SECURE,
+                samesite=settings.COOKIE_SAMESITE,
                 max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                 path="/"
             )
-            logger.info(f"Cookie 'access_token' setado para cliente {client.id}")
-        return {"access_token": token, "token_type": "bearer", "client": ClientBasicRead.model_validate(client, from_attributes=True)}
+        return {"client": ClientBasicRead.model_validate(client, from_attributes=True)}
+
+    attempts = attempts + 1
+    _failed_attempts[client_ip] = (attempts, start_ts)
     raise HTTPException(status_code=401, detail="Credenciais inválidas")
 
 
@@ -102,15 +124,15 @@ def logout(response: Response):
         key="access_token",
         path="/",
         httponly=True,
-        secure=False,
-        samesite="lax"
+        secure=settings.COOKIE_SECURE,
+        samesite=settings.COOKIE_SAMESITE
     )
     response.delete_cookie(
         key="accessToken",
         path="/",
         httponly=True,
-        secure=False,
-        samesite="lax"
+        secure=settings.COOKIE_SECURE,
+        samesite=settings.COOKIE_SAMESITE
     )
     return {"msg": "Logout realizado com sucesso"}
 
