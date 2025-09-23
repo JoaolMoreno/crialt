@@ -121,7 +121,6 @@ export class AuthService {
   }
 
   isClientLogged(): boolean {
-    console.log('[AuthService] isClientLogged:', this.isClient);
     return this.isClient;
   }
 }

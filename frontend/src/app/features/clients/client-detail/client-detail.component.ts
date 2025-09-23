@@ -65,7 +65,7 @@ export class ClientDetailComponent implements OnInit {
   }
 
   loadProjects(clientId: string): void {
-    this.projectService.getProjects({ client_id: clientId }).subscribe({
+    this.projectService.getProjects({ client_id: clientId }, false).subscribe({
       next: (projects: PaginatedProject) => {
         this.projects = projects.items;
       },

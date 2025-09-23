@@ -1,7 +1,7 @@
 <section class="section-container">
   <h1>Projetos</h1>
   <fieldset [disabled]="loading" style="border:0;padding:0;margin:0;min-width:0;">
-    <div class="list-actions">
+    <div class="list-actions" *ngIf="!isClient && total > pageSize">
       <button class="list-btn" (click)="onNewProject()">
         <span class="material-icons">add_circle</span> Novo Projeto
       </button>
@@ -41,6 +41,7 @@
         *ngFor="let project of projects"
         [project]="project"
         [progress]="getProjectProgress(project)"
+        [isClient]="isClient"
         (edit)="onEditProject(project)"
         (view)="onViewProject(project)"
       ></app-project-card>
@@ -49,13 +50,13 @@
     <div class="batch-actions" *ngIf="selectedProjects.length">
       <button class="btn-padrao" (click)="export('pdf')"><span class="material-icons">download</span> Exportar Selecionados (PDF)</button>
       <button class="btn-padrao" (click)="export('excel')"><span class="material-icons">download</span> Exportar Selecionados (Excel)</button>
-      <select [(ngModel)]="batchStatus" class="filter-select">
+      <select [(ngModel)]="batchStatus" class="filter-select" *ngIf="!isClient">
         <option value="">Alterar status para...</option>
         <option value="in_progress">Em andamento</option>
         <option value="paused">Pausado</option>
         <option value="completed">Concluído</option>
       </select>
-      <button class="btn-padrao" (click)="updateSelectedProjectsStatus(batchStatus)" [disabled]="!batchStatus"><span class="material-icons">sync</span> Atualizar Status</button>
+      <button class="btn-padrao" (click)="updateSelectedProjectsStatus(batchStatus)" [disabled]="!batchStatus" *ngIf="!isClient"><span class="material-icons">sync</span> Atualizar Status</button>
     </div>
     <table class="list-table" *ngIf="viewMode==='list' && !loading && projects.length">
       <thead>
@@ -84,7 +85,7 @@
           <td data-label="Valor">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
           <td data-label="Data de Criação">{{ project.created_at | clientTimezoneDate:'shortDate' }}</td>
           <td data-label="Ações">
-            <button class="action-btn" (click)="onEditProject(project)"><span class="material-icons">edit</span></button>
+            <button class="action-btn" *ngIf="!isClient" (click)="onEditProject(project)"><span class="material-icons">edit</span></button>
             <button class="action-btn" (click)="onViewProject(project)"><span class="material-icons">visibility</span></button>
           </td>
         </tr>

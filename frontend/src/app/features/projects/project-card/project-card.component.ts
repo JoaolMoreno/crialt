@@ -14,6 +14,7 @@ import { getStatusBadge } from '../../../core/models/status.model';
 export class ProjectCardComponent {
     @Input() project!: Project;
     @Input() progress: number = 0;
+    @Input() isClient: boolean = false;
     @Output() edit = new EventEmitter<Project>();
     @Output() view = new EventEmitter<Project>();
 

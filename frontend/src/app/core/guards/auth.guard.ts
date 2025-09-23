@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
       catchError((err) => {
         console.error('[AuthGuard] canActivate: erro ao buscar usuário', err);
         this.router.navigate(['/auth/login']);
-        return [false];
+        return of(false);
       })
     );
   }

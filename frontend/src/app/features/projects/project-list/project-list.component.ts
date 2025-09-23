@@ -8,9 +8,9 @@ import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { getStatusBadge } from '../../../core/models/status.model';
 import {ProjectCardComponent} from "../project-card/project-card.component";
-import { PaginatedProject } from '../../../core/models/paginated-project.model';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-project-list',
@@ -23,6 +23,7 @@ export class ProjectListComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly stageTypeService = inject(StageTypeService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   projects: Project[] = [];
   stages: StageType[] = [];
@@ -43,8 +44,10 @@ export class ProjectListComponent implements OnInit {
   viewMode: 'list' | 'grid' = 'list';
   searchLoading = false;
   private searchSubject = new Subject<string>();
+  isClient = false;
 
   ngOnInit(): void {
+    this.isClient = this.authService.isClientLogged();
     this.loadProjects();
     this.loadStages();
     this.searchSubject.pipe(debounceTime(3000)).subscribe((value) => {
@@ -69,15 +72,15 @@ export class ProjectListComponent implements OnInit {
       search: this.searchQuery || undefined,
       period: this.selectedPeriod || undefined
     };
-    this.projectService.getProjects(params).subscribe({
-      next: (res: PaginatedProject) => {
+    this.projectService.getProjects(params, this.isClient).subscribe({
+      next: (res) => {
         this.projects = res.items;
         this.total = res.total;
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'Erro ao carregar projetos';
         this.loading = false;
-        this.error = 'Erro ao buscar projetos.';
       }
     });
   }

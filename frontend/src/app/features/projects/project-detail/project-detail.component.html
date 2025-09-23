@@ -4,7 +4,7 @@
       <button class="btn-padrao" (click)="onBack()" style="margin-right: 16px; align-self: flex-start;">
         <span class="material-icons">arrow_back</span> Voltar
       </button>
-      <div class="actions">
+      <div class="actions" *ngIf="!isClient">
         <button class="btn-secundario btn-edit"
                 (click)="onEditProject()">
           <span class="material-icons">edit</span>
@@ -60,7 +60,6 @@
     <button [class.active]="activeTab==='timeline'" (click)="setTab('timeline')">Timeline</button>
     <button [class.active]="activeTab==='files'" (click)="setTab('files')">Arquivos</button>
     <button [class.active]="activeTab==='finance'" (click)="setTab('finance')">Financeiro</button>
-    <button [class.active]="activeTab==='history'" (click)="setTab('history')">Histórico</button>
   </nav>
   <div class="tab-content">
     <div *ngIf="activeTab==='overview'">
@@ -105,13 +104,8 @@
             <td class="price">{{ project.total_value | currency:project.currency:'symbol':'1.0-0' }}</td>
             <td>{{ project.status === 'completed' ? 'Pago' : 'Em aberto' }}</td>
           </tr>
-          <!-- Adicionar pagamentos/orçamentos reais -->
         </tbody>
       </table>
-    </div>
-    <div *ngIf="activeTab==='history'">
-      <h2>Histórico de Alterações</h2>
-      <span>Nenhum histórico disponível.</span>
     </div>
   </div>
 </section>

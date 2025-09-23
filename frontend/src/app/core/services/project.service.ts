@@ -18,10 +18,11 @@ export class ProjectService {
     );
   }
 
-  getProjects(params: Record<string, any> = {}): Observable<PaginatedProject> {
+  getProjects(params: Record<string, any> = {}, isClient: boolean): Observable<PaginatedProject> {
     const filteredParams = this.filterParams(params);
     const query = new URLSearchParams(filteredParams).toString();
-    return this.http.get<PaginatedProject>(`${this.apiUrl}${query ? '?' + query : ''}`, { withCredentials: true });
+    const clientSegment = isClient ? '/my' : '';
+    return this.http.get<PaginatedProject>(`${this.apiUrl}${clientSegment}${query ? '?' + query : ''}`, { withCredentials: true });
   }
 
   getProjectById(id: string): Observable<Project> {

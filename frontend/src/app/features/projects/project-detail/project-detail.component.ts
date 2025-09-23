@@ -10,6 +10,7 @@ import {FileCategory, FileService, FileUpload} from '../../../core/services/file
 import { Location } from '@angular/common';
 import {getStatusBadge} from "../../../core/models/status.model";
 import {FileUploadComponent} from "../../../shared/components/file-upload/file-upload.component";
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-project-detail',
@@ -24,6 +25,7 @@ export class ProjectDetailComponent implements OnInit {
   private readonly fileService = inject(FileService);
   private readonly projectService = inject(ProjectService);
   private readonly location = inject(Location);
+  private readonly authService = inject(AuthService);
 
   projectFiles: FileUpload[] = [];
   project: Project | null = null;
@@ -31,9 +33,11 @@ export class ProjectDetailComponent implements OnInit {
   error = '';
   progress = 0;
   currentStage: Stage | null = null;
-  activeTab: 'overview' | 'timeline' | 'files' | 'finance' | 'history' = 'overview';
+  activeTab: 'overview' | 'timeline' | 'files' | 'finance' = 'overview';
+  isClient = false;
 
   ngOnInit(): void {
+    this.isClient = this.authService.isClientLogged();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) this.loadProject(id);
   }
@@ -78,7 +82,7 @@ export class ProjectDetailComponent implements OnInit {
     return project.stages.find(s => s.id === project.current_stage_id) || null;
   }
 
-  setTab(tab: 'overview' | 'timeline' | 'files' | 'finance' | 'history') {
+  setTab(tab: 'overview' | 'timeline' | 'files' | 'finance') {
     this.activeTab = tab;
   }
 
