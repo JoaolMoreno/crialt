@@ -117,51 +117,50 @@
 
   <!-- Lista de Arquivos Salvos -->
   <div class="files-list" *ngIf="files.length > 0">
-    <div *ngIf="files.length > 1" class="files-list-toolbar">
+    <div *ngIf="files.length > 1" class="batch-actions">
       <mat-checkbox [checked]="allFilesSelected" (change)="selectAllFiles($event.checked)">
         Selecionar todos
       </mat-checkbox>
-      <button mat-button color="primary" (click)="downloadSelectedFiles()" [disabled]="!anyFileSelected">
+      <button *ngIf="anyFileSelected" class="btn-padrao" (click)="downloadSelectedFiles()">
+        <span class="material-icons">download</span>
         BAIXAR SELECIONADOS
       </button>
       <span *ngIf="anyFileSelected">({{ selectedFiles.size }} selecionado{{ selectedFiles.size > 1 ? 's' : '' }})</span>
     </div>
 
     <div class="file-item" *ngFor="let file of files">
-      <div class="file-main">
-        <div *ngIf="files.length > 1" class="file-checkbox">
-          <mat-checkbox [checked]="isFileSelected(file)" (change)="toggleFileSelection(file, $event.checked)"></mat-checkbox>
+      <div *ngIf="files.length > 1">
+        <mat-checkbox [checked]="isFileSelected(file)" (change)="toggleFileSelection(file, $event.checked)"></mat-checkbox>
+      </div>
+
+      <div class="file-info">
+        <div class="file-icon">
+          <mat-icon>{{ getFileIcon(file.category, file.mime_type) }}</mat-icon>
         </div>
 
-        <div class="file-info">
-          <div class="file-icon">
-            <mat-icon>{{ getFileIcon(file.category, file.mime_type) }}</mat-icon>
+        <div class="file-details">
+          <div class="file-name">
+            <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileName">
+              <input [(ngModel)]="editFileName" name="editFileName" required class="edit-filename-input" />
+            </ng-container>
+            <ng-template #showFileName>{{ file.original_name }}</ng-template>
           </div>
 
-          <div class="file-details">
-            <div class="file-name">
-              <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileName">
-                <input [(ngModel)]="editFileName" name="editFileName" required class="edit-filename-input" />
-              </ng-container>
-              <ng-template #showFileName>{{ file.original_name }}</ng-template>
-            </div>
+          <div class="file-meta">
+            <span class="file-size">{{ formatFileSize(file.size) }}</span>
+            <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileCategory">
+              <select [(ngModel)]="editFileCategory" name="editFileCategory" required class="edit-category-select">
+                <option *ngFor="let cat of FileCategory | keyvalue" [value]="cat.value">{{ getCategoryLabel(cat.value) }}</option>
+              </select>
+            </ng-container>
+            <ng-template #showFileCategory>
+              <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
+            </ng-template>
+            <span class="file-date">{{ file.created_at | clientTimezoneDate:'short' }}</span>
+          </div>
 
-            <div class="file-meta">
-              <span class="file-size">{{ formatFileSize(file.size) }}</span>
-              <ng-container *ngIf="editingFile && editingFile.id === file.id && !readonly; else showFileCategory">
-                <select [(ngModel)]="editFileCategory" name="editFileCategory" required class="edit-category-select">
-                  <option *ngFor="let cat of FileCategory | keyvalue" [value]="cat.value">{{ getCategoryLabel(cat.value) }}</option>
-                </select>
-              </ng-container>
-              <ng-template #showFileCategory>
-                <span class="file-category">{{ getCategoryLabel(file.category) }}</span>
-              </ng-template>
-              <span class="file-date">{{ file.created_at | clientTimezoneDate:'short' }}</span>
-            </div>
-
-            <div class="file-description" *ngIf="file.description">
-              {{ file.description }}
-            </div>
+          <div class="file-description" *ngIf="file.description">
+            {{ file.description }}
           </div>
         </div>
       </div>

@@ -90,6 +90,12 @@ async def upload_file(
 ):
     from uuid import UUID
 
+    filename = file.filename or "unnamed"
+    mime_type = file.content_type or "application/octet-stream"
+
+    temp_service = FileService(db)
+    temp_service._validate_file_type(filename, mime_type)
+
     detected_category = None
     if category:
         try:

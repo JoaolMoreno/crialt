@@ -43,6 +43,32 @@ class FileService:
             base = (root[:keep] if keep > 0 else root[:max_length]) + ext
         return base or "arquivo"
 
+    def _validate_file_type(self, filename: str, mime_type: str) -> None:
+        """Valida o tipo de arquivo baseado na extensão e MIME type"""
+        if not filename:
+            raise HTTPException(status_code=400, detail="Nome do arquivo é obrigatório")
+
+        ext = os.path.splitext(filename)[1].lower()
+        if not ext:
+            raise HTTPException(status_code=400, detail="Arquivo deve ter uma extensão")
+
+        if ext not in settings.ALLOWED_EXTENSIONS:
+            allowed_list = ", ".join(settings.ALLOWED_EXTENSIONS)
+            raise HTTPException(
+                status_code=400,
+                detail=f"Tipo de arquivo não permitido. Extensões permitidas: {allowed_list}"
+            )
+
+        if mime_type:
+            dangerous_mimes = [
+                "application/x-executable", "application/x-msdownload",
+                "application/x-msdos-program", "application/x-dosexec",
+                "text/x-shellscript", "application/x-sh"
+            ]
+
+            if mime_type in dangerous_mimes:
+                raise HTTPException(status_code=400, detail="Tipo de arquivo não permitido")
+
     @staticmethod
     def _ensure_within_upload_dir(path: str) -> str:
         root = os.path.realpath(settings.UPLOAD_DIR)
@@ -93,6 +119,10 @@ class FileService:
         return file
 
     def upload_file(self, file: UploadFile, file_data: FileCreate, actor, client_resource_permission) -> FileRead:
+        filename = file.filename or "unnamed"
+        mime_type = file.content_type or "application/octet-stream"
+        self._validate_file_type(filename, mime_type)
+
         if file_data.project_id:
             project = self.db.get(Project, file_data.project_id)
             if not project:
@@ -105,9 +135,9 @@ class FileService:
         if hasattr(actor, "id"):
             file_data.uploaded_by_id = actor.id
 
-        safe_original = self.sanitize_filename(file.filename or "unnamed")
+        safe_original = self.sanitize_filename(filename)
         file_data.original_name = safe_original
-        file_data.mime_type = file.content_type or "application/octet-stream"
+        file_data.mime_type = mime_type
 
         stored_name, dest_path = self._build_storage_path(safe_original, file_data.category)
 
@@ -318,6 +348,8 @@ class FileService:
 
     def initiate_upload(self, upload_data: ChunkedUploadInitiate, actor) -> ChunkedUploadResponse:
         self.logger.info(f"Iniciando upload chunked: {upload_data.filename}, {upload_data.total_chunks} chunks")
+
+        self._validate_file_type(upload_data.filename, upload_data.mime_type)
 
         if upload_data.total_size > settings.MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail=f"Arquivo muito grande. Máximo: {settings.MAX_FILE_SIZE} bytes")
