@@ -24,14 +24,14 @@ class FileService:
         # remove caracteres de controle e separadores
         base = base.replace("\\", "_").replace("/", "_")
         # somente caracteres seguros
-        base = re.sub(r"[^A-Za-z0-9._ -]", "_", base)
-        # colapsa espaços
-        base = re.sub(r"\s+", " ", base).strip()
+        base = re.sub(r"[^A-Za-z0-9._-]", "_", base)
+        # remove espaços
+        base = re.sub(r"\s+", "", base)
         if len(base) > max_length:
             root, ext = os.path.splitext(base)
             keep = max_length - len(ext)
             base = (root[:keep] if keep > 0 else root[:max_length]) + ext
-        # evita nomes vazios
+
         return base or "arquivo"
 
     @staticmethod
@@ -56,7 +56,6 @@ class FileService:
         return stored_name, real
 
     def save_file(self, file_data: FileCreate, file_bytes: bytes) -> File:
-        # Mantém compatibilidade, mas passa pelo mesmo funil de validação
         if file_data.category not in FileCategory:
             raise HTTPException(status_code=400, detail="Categoria de arquivo não é válida.")
         if file_data.size > settings.MAX_FILE_SIZE:
@@ -85,7 +84,6 @@ class FileService:
         return file
 
     def upload_file(self, file: UploadFile, file_data: FileCreate, actor, client_resource_permission) -> FileRead:
-        # Autorização por recurso
         if file_data.project_id:
             project = self.db.get(Project, file_data.project_id)
             if not project:
