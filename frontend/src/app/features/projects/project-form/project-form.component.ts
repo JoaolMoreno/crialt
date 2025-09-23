@@ -11,7 +11,7 @@ import { SharedModule } from "../../../shared/shared.module";
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Stage } from "../../../core/models/stage.model";
-import { FileUploadComponent } from "../../../shared/components/file-upload/file-upload.component";
+import { FileUploadComponent } from "../../files/file-upload/file-upload.component";
 import { FileUpload } from '../../../core/services/file.service';
 import { NotificationService } from '../../../shared/notification.service';
 

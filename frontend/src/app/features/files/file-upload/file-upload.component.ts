@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { FileService, FileCategory, FileUpload } from '../../../core/services/file.service';
-import { SharedModule } from '../../shared.module';
+import { SharedModule } from '../../../shared/shared.module';
 import {MatCheckbox} from "@angular/material/checkbox";
 
 

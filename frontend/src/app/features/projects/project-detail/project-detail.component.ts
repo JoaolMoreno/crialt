@@ -9,7 +9,7 @@ import { ProgressBarComponent } from "../project-progress-bar/progress-bar.compo
 import {FileCategory, FileService, FileUpload} from '../../../core/services/file.service';
 import { Location } from '@angular/common';
 import {getStatusBadge} from "../../../core/models/status.model";
-import {FileUploadComponent} from "../../../shared/components/file-upload/file-upload.component";
+import {FileUploadComponent} from "../../files/file-upload/file-upload.component";
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
